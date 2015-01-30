@@ -1,0 +1,68 @@
+﻿@model DavesMusic.Controllers.ArtistsResponse
+
+@if (String.IsNullOrEmpty(@Request["artist"])) {
+    <h2>Artist Search</h2>
+}
+else {
+    <h2>Artist: @Request["artist"]</h2>
+}
+
+<form action="/Home/Search">
+    <input id="artist" name="artist" type="text" value="@ViewBag.InitialArtist" />
+    <input type=hidden name=offset value=0>
+    <input type="submit" value="Search" />
+</form>
+
+@if (Model != null) {
+    <p>
+        Total: @Model.Total
+    </p>
+    <p>
+        Href: @Model.Href
+    </p>
+    <p>
+        API Call: @ViewBag.APITime ms
+    </p>
+    <p>
+        @if (ViewBag.ShowPrevious == true) {
+            <a href="/Home/SpotifyArtistSearch?artist=@ViewBag.ArtistSearchedFor&offset=@ViewBag.OffsetPrevious">Previous</a>
+        }
+        @if (ViewBag.ShowNext == true) {
+            <a href="/Home/SpotifyArtistSearch?artist=@ViewBag.ArtistSearchedFor&offset=@ViewBag.OffsetNext">Next</a>
+        }
+    </p>
+
+    <table class="table">
+        @foreach (var item in Model.Items) {
+            <tr>
+                <td>
+                    <a href="/Artist/Details/@item.Id">@item.Name</a>
+                    <br />
+                    <a href="@item.External_urls.Spotify">Open in Web Spotify</a>
+                    <br />
+                    Popularity: @item.Popularity
+                    <br />
+                    <a href="@item.Uri">Open directly</a>
+
+                </td>
+                @if (item.Images.Count == 4) {
+                    <td>
+                        <a href="/Artist/Details/@item.Id">
+                            <img src="@item.Images[2].Url" />
+                        </a>
+                    </td>
+                }
+
+                @if (item.Images.Count == 3) {
+                    <td>
+                        <a href="/Artist/Details/@item.Id">
+                            <img width="200" src="@item.Images[1].Url" />
+                        </a>
+                    </td>
+                }
+            </tr>
+        }
+    </table>
+}
+
+

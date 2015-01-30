@@ -1,0 +1,43 @@
+﻿@model DavesMusic.Controllers.AlbumDetailsViewModel
+
+<h2>@Model.AlbumDetails.name</h2>
+<table>
+    <td>
+        @if (@Model.AlbumDetails.images.Count > 0) {
+            <img src="@Model.AlbumDetails.images[1].url" />
+        }
+    </td>
+    <td>
+        <a href="/Home/Search">Search</a>
+        @foreach (var item in Model.APIDebugList) {
+            <p>@item.APITime : @item.APIURL</p>
+        }
+
+        <p><a href="@Model.AlbumDetails.uri">Open direct</a></p>
+        <p>Popularity: @Model.AlbumDetails.popularity</p>
+        <p>Release: @Model.AlbumDetails.release_date</p>
+    </td>
+
+</table>
+
+<h3>Tracks</h3>
+<table class="table">
+    @foreach (var item in Model.AlbumDetails.tracks.items) {
+        <tr>
+            <td>@item.name</td>
+            <td>
+                <audio controls="controls" style="width: 150px; display: block;">
+                    <source src="@item.preview_url" type="audio/mpeg">
+                    <p>Ooops - please use a more up to date browser so you can preview songs</p>
+                </audio>
+            </td>
+            <td><a href="@item.uri">Direct</a></td>
+        </tr>
+    }
+</table>
+
+@if (@Model.AlbumDetails.images.Count > 0) {
+    <img src="@Model.AlbumDetails.images[0].url" />
+}
+
+
