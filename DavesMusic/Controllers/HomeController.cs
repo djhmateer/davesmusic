@@ -4,6 +4,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading;
 using System.Web;
 using System.Web.Mvc;
@@ -12,10 +14,7 @@ using Newtonsoft.Json.Linq;
 
 namespace DavesMusic.Controllers {
     public class HomeController : Controller {
-        public ActionResult Index() {
-            return View();
-        }
-
+       
         public ActionResult Search(string artist = "", int offset = 0) {
             // First call with no parameters
             if (artist == "") {
@@ -47,6 +46,83 @@ namespace DavesMusic.Controllers {
 
             return View(result);
         }
+
+        public ActionResult SpotifyTest() {
+            return View();
+        }
+
+        string redirect_uri = "http://dmusic.azurewebsites.net/Home/SpotifyCallback";
+        //string redirect_uri = "http://localhost:64550/Home/SpotifyCallback";
+
+        public ActionResult SpotifyAuthenticate() {
+            var client_id = "0fd1718f5ef14cb291ef114a13382d15";
+            var response_type = "code";
+            var scope = "user-read-private user-read-email";
+
+            var url = String.Format("https://accounts.spotify.com/authorize/?client_id={0}&response_type={1}&scope={3}&redirect_uri={2}",
+                    client_id, response_type, redirect_uri, scope);
+
+            return Redirect(url);
+        }
+
+        public ActionResult SpotifyCallback(string code) {
+            // Have now code authorization code (which can be exchanged for an access token)
+            var client_id = "0fd1718f5ef14cb291ef114a13382d15";
+            var client_secret = "ea47c397921c42ffbd04c53d33685205";
+
+            var url = "https://accounts.spotify.com/api/token";
+
+            // Request access and refresh tokens
+            var postData = new Dictionary<string, string>{
+                {"grant_type", "authorization_code"},
+                {"code", code},
+                {"redirect_uri", redirect_uri},
+                {"client_id", client_id},
+                {"client_secret", client_secret}
+            };
+
+            HttpContent content = new FormUrlEncodedContent(postData.ToArray());
+
+            var client = new HttpClient();
+            var httpResponse = client.PostAsync(url, content);
+            var result = httpResponse.Result;
+            var resultContent = result.Content.ReadAsStringAsync().Result;
+
+
+            var obj = JsonConvert.DeserializeObject<accesstoken>(resultContent, new JsonSerializerSettings {
+                TypeNameHandling = TypeNameHandling.All,
+                TypeNameAssemblyFormat = System.Runtime.Serialization.Formatters.FormatterAssemblyStyle.Simple
+            });
+            var access_token = obj.access_token;
+
+            url = "https://api.spotify.com/v1/me";
+            var result2 = CallSpotifyAPIPassingToken(access_token, url);
+
+            var meReponse = JsonConvert.DeserializeObject<MeResponse>(result2);
+            meReponse.access_token = access_token;
+            return View(meReponse);
+        }
+
+
+        public ActionResult NewReleases(string access_token) {
+            // needs oAuth
+            var url = "https://api.spotify.com/v1/browse/new-releases";
+            var result = CallSpotifyAPIPassingToken(access_token, url);
+
+            //var meReponse = JsonConvert.DeserializeObject<MeResponse>(result2);
+            var newReleases = JsonConvert.DeserializeObject(result);
+
+            return View(newReleases);
+        }
+
+        private string CallSpotifyAPIPassingToken(string access_token, string url) {
+            var client = new HttpClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", access_token);
+            var httpResponse = client.GetAsync(url);
+            var result = httpResponse.Result.Content.ReadAsStringAsync().Result;
+            return result;
+        }
+
 
         public ActionResult About() {
             ViewBag.Message = "Your application description page.";
