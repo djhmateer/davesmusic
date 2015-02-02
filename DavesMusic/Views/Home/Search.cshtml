@@ -13,7 +13,7 @@ else {
     <input type="submit" value="Search" />
 </form>
 
-<p><a href="/Home/SpotifyAuthenticate">User Details (login)</a></p>
+<p><a href="/Me/Index">User Details (login)</a></p>
 
 @if (Model != null) {
     <p>
@@ -38,7 +38,7 @@ else {
         @foreach (var item in Model.Items) {
             <tr>
                 <td>
-                    <a href="/Artist/Details/@item.Id">@item.Name</a>
+                    <a href="/Artists/Details/@item.Id">@item.Name</a>
                     <br />
                     <a href="@item.External_urls.Spotify">Open in Web Spotify</a>
                     <br />
@@ -49,7 +49,7 @@ else {
                 </td>
                 @if (item.Images.Count == 4) {
                     <td>
-                        <a href="/Artist/Details/@item.Id">
+                        <a href="/Artists/Details/@item.Id">
                             <img src="@item.Images[2].Url" />
                         </a>
                     </td>
@@ -57,7 +57,7 @@ else {
 
                 @if (item.Images.Count == 3) {
                     <td>
-                        <a href="/Artist/Details/@item.Id">
+                        <a href="/Artists/Details/@item.Id">
                             <img width="200" src="@item.Images[1].Url" />
                         </a>
                     </td>

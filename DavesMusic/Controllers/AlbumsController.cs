@@ -5,7 +5,7 @@ using System.Web.Mvc;
 
 namespace DavesMusic.Controllers
 {
-    public class AlbumController : Controller {
+    public class AlbumsController : Controller {
         public ActionResult Details(string id) {
             var spotifyHelper = new SpotifyHelper();
             var stopWatchResult = new StopWatchResult();

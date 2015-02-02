@@ -6,6 +6,13 @@
             e.style.display = 'none';
         else
             e.style.display = 'block';
+
+        //reverse the other one
+        var e2 = document.getElementById('idOfElement2');
+        if (e2.style.display == 'block')
+            e2.style.display = 'none';
+        else
+            e2.style.display = 'block';
     }
 </script>
 
@@ -22,6 +29,7 @@
                 </td>
                 <td>
                     <a href="/Home/Search">Search</a>
+
                     <button id="button" onclick="toggle_visibility('debug');">Toggle</button>
                     <div id="debug" style="display: none">
                         @foreach (var item in Model.APIDebugList) {
@@ -39,26 +47,30 @@
         <td>
             <h3>Related Artists</h3>
             @foreach (var item in Model.ArtistRelated.artists) {
-                <a href="/Artist/Details/@item.id">@item.name</a><br />
+                <a href="/Artists/Details/@item.id">@item.name</a><br />
             }
         </td>
     </tr>
 </table>
 <h3>Biography</h3>
 
-<button id="button" onclick="toggle_visibility('idOfElement');">Toggle</button>
+
 @if (Model.ArtistBiography.response.biographies.Count > 0) {
     foreach (var item in Model.ArtistBiography.response.biographies) {
         if (item != null) {
-            <div id="idOfElement" style="display: none">
-                <span style="white-space: pre-line">
-                    @if (@item.text != null) {
-                        if (item.url != null) {
-                            <p>@item.text - <a href="@item.url">@item.url</a></p>
-                        }
-                    }
+            <button id="button" onclick="toggle_visibility('idOfElement');">Toggle</button>
+            <div>
+                @if (@item.text != null) {
+                    if (item.url != null) {
+                        <div id="idOfElement2" style="display: block; white-space: pre-line">
+                            @item.text.Substring(0, 500) ...
+                        </div>
 
-                </span>
+                        <div id="idOfElement" style="display: none; white-space: pre-line">
+                            @item.text - <a href="@item.url">@item.url</a>
+                        </div>
+                    }
+                }
             </div>
         }
     }
@@ -79,7 +91,7 @@
             <td><a href="@item.uri">Direct</a></td>
             <td>@item.popularity</td>
             <td>@item.album.name</td>
-            <td><a href="/Album/Details/@item.album.id"> <img src="@item.album.images[2].url" /> </a></td>
+            <td><a href="/Albums/Details/@item.album.id"> <img src="@item.album.images[2].url" /> </a></td>
         </tr>
     }
 </table>
@@ -91,7 +103,7 @@
             <td>@item.name</td>
             <td><a href="@item.uri">Direct</a></td>
             <td>
-                <a href="/Album/Details/@item.id">
+                <a href="/Albums/Details/@item.id">
                     @if (item.images.Count > 2) {
                         <img src="@item.images[2].url" />
                     }

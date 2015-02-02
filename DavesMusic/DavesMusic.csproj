@@ -160,8 +160,9 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="Controllers\AccountController.cs" />
-    <Compile Include="Controllers\AlbumController.cs" />
-    <Compile Include="Controllers\ArtistController.cs" />
+    <Compile Include="Controllers\AlbumsController.cs" />
+    <Compile Include="Controllers\ArtistsController.cs" />
+    <Compile Include="Controllers\BrowseController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
     <Compile Include="Controllers\MeController.cs" />
@@ -230,13 +231,14 @@
     <Content Include="Views\Shared\Lockout.cshtml" />
     <Content Include="Views\Shared\_LoginPartial.cshtml" />
     <Content Include="Views\Home\Search.cshtml" />
-    <Content Include="Views\Artist\Details.cshtml" />
-    <Content Include="Views\Album\Details.cshtml" />
+    <Content Include="Views\Artists\Details.cshtml" />
+    <Content Include="Views\Albums\Details.cshtml" />
     <Content Include="Views\Home\SpotifyTest.cshtml" />
-    <Content Include="Views\Home\SpotifyAuthenticate.cshtml" />
     <Content Include="Views\Home\SpotifyCallback.cshtml" />
     <Content Include="Views\Home\NewReleases.cshtml" />
     <Content Include="Views\Me\Index.cshtml" />
+    <Content Include="Views\Me\SpotifyCallback.cshtml" />
+    <Content Include="Views\Browse\NewReleases.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -6,7 +6,7 @@ using System.Web.Mvc;
 
 namespace DavesMusic.Controllers
 {
-    public class ArtistController : Controller {
+    public class ArtistsController : Controller {
         public ActionResult Details(string id) {
             var apiHelper = new SpotifyHelper();
             var stopWatchResult = new StopWatchResult();
