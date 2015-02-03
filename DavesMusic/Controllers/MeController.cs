@@ -3,20 +3,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Web.Mvc;
 
 namespace DavesMusic.Controllers
 {
     public class MeController : Controller
     {
-        string redirect_uri = "http://dmusic.azurewebsites.net/Me/SpotifyCallback";
-        //string redirect_uri = "http://localhost:64550/Me/SpotifyCallback";
-
         // Me/Index - should get the details of the currently logged in user
         public ActionResult Index()
         {
             // if not authenticated then redirect 
+            // stepping through in debug mode it doesn't get the access token
             if (Session["AccessToken"] == null){
                 var client_id = "0fd1718f5ef14cb291ef114a13382d15";
                 var response_type = "code";
@@ -25,7 +22,7 @@ namespace DavesMusic.Controllers
                 var url =
                     String.Format(
                         "https://accounts.spotify.com/authorize/?client_id={0}&response_type={1}&scope={3}&redirect_uri={2}",
-                        client_id, response_type, redirect_uri, scope);
+                        client_id, response_type, GetRedirectUriWithServerName(), scope);
 
                 Session["ReturnURL"] = "/Me/Index";
                 return Redirect(url);
@@ -41,6 +38,10 @@ namespace DavesMusic.Controllers
             return View(meReponse);
         }
 
+        string GetRedirectUriWithServerName() {
+            return "http://" + Request.Url.Authority + "/Me/SpotifyCallback";
+        }
+
         public ActionResult SpotifyCallback(string code) {
             // Have now code authorization code (which can be exchanged for an access token)
             var client_id = "0fd1718f5ef14cb291ef114a13382d15";
@@ -52,7 +53,7 @@ namespace DavesMusic.Controllers
             var postData = new Dictionary<string, string>{
                 {"grant_type", "authorization_code"},
                 {"code", code},
-                {"redirect_uri", redirect_uri},
+                {"redirect_uri", GetRedirectUriWithServerName()},
                 {"client_id", client_id},
                 {"client_secret", client_secret}
             };

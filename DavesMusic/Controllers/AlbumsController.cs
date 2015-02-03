@@ -127,5 +127,7 @@ namespace DavesMusic.Controllers
         public Tracks tracks { get; set; }
         public string type { get; set; }
         public string uri { get; set; }
+        // dave added
+        public string access_token { get; set; }
     }
 }

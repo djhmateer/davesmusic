@@ -6,9 +6,6 @@ namespace DavesMusic.Controllers
 {
     public class BrowseController : Controller
     {
-        string redirect_uri = "http://dmusic.azurewebsites.net/Me/SpotifyCallback";
-        //string redirect_uri = "http://localhost:64550/Me/SpotifyCallback";
-
         // Browse/NewReleases
         public ActionResult NewReleases()
         {
@@ -21,20 +18,25 @@ namespace DavesMusic.Controllers
                 var url =
                     String.Format(
                         "https://accounts.spotify.com/authorize/?client_id={0}&response_type={1}&scope={3}&redirect_uri={2}",
-                        client_id, response_type, redirect_uri, scope);
+                        client_id, response_type, GetRedirectUriWithServerName(), scope);
 
-                Session["ReturnURL"] = "/Me/Index";
+                Session["ReturnURL"] = "/Browse/NewReleases";
                 return Redirect(url);
             }
 
             var access_token = Session["AccessToken"].ToString();
-            var url2 = "https://api.spotify.com/v1/me";
+            var url2 = "https://api.spotify.com/v1/browse/new-releases";
             var sh = new SpotifyHelper();
             var result2 = sh.CallSpotifyAPIPassingToken(access_token, url2);
 
-            var meReponse = JsonConvert.DeserializeObject<MeResponse>(result2);
+            // Album details didn't work here...!!!
+            var meReponse = JsonConvert.DeserializeObject<AlbumDetails>(result2);
             meReponse.access_token = access_token;
             return View(meReponse);
+        }
+
+        string GetRedirectUriWithServerName() {
+            return "http://" + Request.Url.Authority + "/Me/SpotifyCallback";
         }
     }
 }
