@@ -8,6 +8,8 @@
         }
     </td>
     <td>
+        <p><a href="/Artists/Details/@Model.AlbumDetails.artists[0].id">@Model.AlbumDetails.artists[0].name</a></p>
+
         <a href="/Home/Search">Search</a>
         @foreach (var item in Model.APIDebugList) {
             <p>@item.APITime : @item.APIURL</p>

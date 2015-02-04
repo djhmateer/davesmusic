@@ -5,16 +5,13 @@ using System.Linq;
 using System.Net.Http;
 using System.Web.Mvc;
 
-namespace DavesMusic.Controllers
-{
-    public class MeController : Controller
-    {
+namespace DavesMusic.Controllers {
+    public class MeController : Controller {
         // Me/Index - should get the details of the currently logged in user
-        public ActionResult Index()
-        {
+        public ActionResult Index() {
             // if not authenticated then redirect 
             // stepping through in debug mode it doesn't get the access token
-            if (Session["AccessToken"] == null){
+            if (Session["AccessToken"] == null) {
                 var client_id = "0fd1718f5ef14cb291ef114a13382d15";
                 var response_type = "code";
                 var scope = "user-read-private user-read-email";
@@ -38,33 +35,41 @@ namespace DavesMusic.Controllers
             return View(meReponse);
         }
 
-        string GetRedirectUriWithServerName() {
+        private string GetRedirectUriWithServerName() {
             return "http://" + Request.Url.Authority + "/Me/SpotifyCallback";
         }
 
         public ActionResult SpotifyCallback(string code) {
-            // Have now code authorization code (which can be exchanged for an access token)
-            var client_id = "0fd1718f5ef14cb291ef114a13382d15";
-            var client_secret = "ea47c397921c42ffbd04c53d33685205";
+            bool keepTrying = true;
+            string resultContent = "";
+            while (keepTrying) {
+                // Have now code authorization code (which can be exchanged for an access token)
+                var client_id = "0fd1718f5ef14cb291ef114a13382d15";
+                var client_secret = "ea47c397921c42ffbd04c53d33685205";
 
-            var url = "https://accounts.spotify.com/api/token";
+                var url = "https://accounts.spotify.com/api/token";
 
-            // Request access and refresh tokens
-            var postData = new Dictionary<string, string>{
-                {"grant_type", "authorization_code"},
-                {"code", code},
-                {"redirect_uri", GetRedirectUriWithServerName()},
-                {"client_id", client_id},
-                {"client_secret", client_secret}
-            };
+                // Request access and refresh tokens
+                var postData = new Dictionary<string, string>{
+                    {"grant_type", "authorization_code"},
+                    {"code", code},
+                    {"redirect_uri", GetRedirectUriWithServerName()},
+                    {"client_id", client_id},
+                    {"client_secret", client_secret}
+                };
 
-            HttpContent content = new FormUrlEncodedContent(postData.ToArray());
+                HttpContent content = new FormUrlEncodedContent(postData.ToArray());
 
-            var client = new HttpClient();
-            var httpResponse = client.PostAsync(url, content);
-            var result = httpResponse.Result;
-            var resultContent = result.Content.ReadAsStringAsync().Result;
+                var client = new HttpClient();
+                var httpResponse = client.PostAsync(url, content);
+                var result = httpResponse.Result;
+                resultContent = result.Content.ReadAsStringAsync().Result;
 
+                // Catching gateway timeouts or strange stuff from Spotify
+                if (result.IsSuccessStatusCode) {
+                    keepTrying = false;
+                }
+            }
 
             var obj = JsonConvert.DeserializeObject<accesstoken>(resultContent, new JsonSerializerSettings {
                 TypeNameHandling = TypeNameHandling.All,
@@ -78,10 +83,6 @@ namespace DavesMusic.Controllers
             var returnURL = Session["ReturnURL"].ToString();
 
             return Redirect(returnURL);
-           
         }
-
-       
-
     }
 }

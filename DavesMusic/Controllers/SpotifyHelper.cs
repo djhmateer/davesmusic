@@ -85,6 +85,7 @@ namespace DavesMusic.Controllers{
 
         public static string CallAPI(StopWatchResult stopWatchResult, string url) {
             var stopWatch = new Stopwatch();
+            int errorCount = 0;
             stopWatch.Start();
             string text = null;
             bool done = false;
@@ -104,6 +105,9 @@ namespace DavesMusic.Controllers{
                 catch (WebException ex) {
                     Debug.WriteLine("Exception: " + ex.Message);
                     Thread.Sleep(100);
+                    errorCount ++;
+                    if (errorCount == 10)
+                        throw;
                 }
             }
 

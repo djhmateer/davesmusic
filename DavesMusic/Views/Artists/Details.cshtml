@@ -63,7 +63,12 @@
                 @if (@item.text != null) {
                     if (item.url != null) {
                         <div id="idOfElement2" style="display: block; white-space: pre-line">
-                            @item.text.Substring(0, 500) ...
+                            @if (@item.text.Length > 500){
+                                @item.text.Substring(0, 500) 
+                            }
+                            else{
+                                @item.text
+                            }
                         </div>
 
                         <div id="idOfElement" style="display: none; white-space: pre-line">

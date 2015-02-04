@@ -240,6 +240,7 @@
     <Content Include="Views\Me\Index.cshtml" />
     <Content Include="Views\Me\SpotifyCallback.cshtml" />
     <Content Include="Views\Browse\NewReleases.cshtml" />
+    <Content Include="Views\Browse\FeaturedPlaylists.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
