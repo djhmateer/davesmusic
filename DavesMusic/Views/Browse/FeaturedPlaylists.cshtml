@@ -7,28 +7,20 @@
     <p>
         API Call: @ViewBag.APITime ms
     </p>
-    @*<p>
-            @if (ViewBag.ShowPrevious == true) {
-                <a href="/Home/SpotifyArtistSearch?artist=@ViewBag.ArtistSearchedFor&offset=@ViewBag.OffsetPrevious">Previous</a>
-            }
-            @if (ViewBag.ShowNext == true) {
-                <a href="/Home/SpotifyArtistSearch?artist=@ViewBag.ArtistSearchedFor&offset=@ViewBag.OffsetNext">Next</a>
-            }
-        </p>*@
 
     <table class="table">
         @foreach (var item in Model.playlists.items) {
             <tr>
                 <td>
-                    <a href="/Albums/Details/@item.id">@item.name</a>
+                    <a href="/Playlists/Details/@item.id/@item.owner.id">@item.name</a>
                     <br />
                     <a href="@item.uri">Open directly</a>
 
                 </td>
                 @if (item.images.Count == 1) {
                     <td>
-                        <a href="/Albums/Details/@item.id">
-                            <img src="@item.images[0].url" width="200" />
+                        <a href="/Playlists/Details/@item.id/@item.owner.id">
+                            <img src="@item.images[0].url" width="150" />
                         </a>
                     </td>
                 }

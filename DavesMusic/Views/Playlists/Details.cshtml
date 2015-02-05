@@ -1,0 +1,25 @@
+﻿@model DavesMusic.Controllers.PlaylistDetails
+
+<h2>@Model.name</h2>
+
+<img src="@Model.images[0].url">
+
+<a href="@Model.uri">direct</a>
+<h3>Tracks</h3>
+<table class="table">
+    @foreach (var item in Model.tracks.items) {
+        <tr>
+            <td>@item.track.name</td>
+            <td><a href="/Artists/Details/@item.track.artists[0].id">@item.track.artists[0].name</a></td>
+            <td>@item.track.popularity</td>
+            <td>
+                <audio controls="controls" style="width: 150px; display: block;">
+                    <source src="@item.track.preview_url" type="audio/mpeg">
+                    <p>Ooops - please use a more up to date browser so you can preview songs</p>
+                </audio>
+            </td>
+            <td><a href="@item.track.uri">Direct</a></td>
+        </tr>
+    }
+</table>
+
