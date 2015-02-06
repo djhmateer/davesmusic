@@ -1,0 +1,13 @@
+﻿@model DavesMusic.Controllers.UserDetails
+
+<h2>@Model.display_name</h2>
+<p><a href="/Users/Playlists/@Model.id">Playlists</a></p>
+<p><a href="@Model.external_urls.spotify">@Model.external_urls.spotify</a></p>
+
+<p>Id: @Model.id</p>
+@if (Model.images.Count > 0) {
+    <img src="@Model.images[0].url" />
+}
+
+<p>Type: @Model.type</p>
+<p>Uri: @Model.uri</p>

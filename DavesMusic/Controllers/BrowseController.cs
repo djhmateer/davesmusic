@@ -11,7 +11,7 @@ namespace DavesMusic.Controllers {
                 var response_type = "code";
                 var scope = "user-read-private user-read-email";
 
-                var xx = "http://" + controller.Request.Url.Authority + "/Me/SpotifyCallback";
+                var xx = "http://" + controller.Request.Url.Authority + "/Profiles/SpotifyCallback";
                 var url =
                     String.Format(
                         "https://accounts.spotify.com/authorize/?client_id={0}&response_type={1}&scope={3}&redirect_uri={2}",

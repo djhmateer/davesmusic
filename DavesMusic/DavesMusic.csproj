@@ -161,12 +161,13 @@
     <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\AlbumsController.cs" />
+    <Compile Include="Controllers\UsersController.cs" />
     <Compile Include="Controllers\PlaylistsController.cs" />
     <Compile Include="Controllers\ArtistsController.cs" />
     <Compile Include="Controllers\BrowseController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
-    <Compile Include="Controllers\MeController.cs" />
+    <Compile Include="Controllers\ProfilesController.cs" />
     <Compile Include="Controllers\SpotifyHelper.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -238,11 +239,13 @@
     <Content Include="Views\Home\SpotifyTest.cshtml" />
     <Content Include="Views\Home\SpotifyCallback.cshtml" />
     <Content Include="Views\Home\NewReleases.cshtml" />
-    <Content Include="Views\Me\Index.cshtml" />
-    <Content Include="Views\Me\SpotifyCallback.cshtml" />
+    <Content Include="Views\Profiles\Me.cshtml" />
+    <Content Include="Views\Profiles\SpotifyCallback.cshtml" />
     <Content Include="Views\Browse\NewReleases.cshtml" />
     <Content Include="Views\Browse\FeaturedPlaylists.cshtml" />
     <Content Include="Views\Playlists\Details.cshtml" />
+    <Content Include="Views\Profiles\User.cshtml" />
+    <Content Include="Views\Users\Playlists.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -1,10 +1,9 @@
 ﻿@model DavesMusic.Controllers.MeResponse
 
-<a href="/Browse/NewReleases">New Releases (auth)</a>
-
 <h2>Me</h2>
 @if (Model != null) {
     <p>Name: @Model.display_name</p>
+    <a href="/Users/Playlists/@Model.id">Playlists</a>
     <p>Email: @Model.email</p>
     <p>Country: @Model.country</p>
     <p>External urls spotify: <a href="@Model.external_urls.spotify">@Model.external_urls.spotify</a></p>

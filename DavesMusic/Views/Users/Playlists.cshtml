@@ -1,0 +1,15 @@
+﻿@model DavesMusic.Controllers.PlaylistDetails2
+
+<h2>Playlist - @Model.total</h2>
+
+<table class="table">
+    @foreach (var item in Model.items) {
+        <tr>
+            <td><a href="/Playlists/Details/@item.id/@item.owner.id">@item.name</td>
+            @if (@item.images != null){
+                <td><a href="/Playlists/Details/@item.id/@item.owner.id"><img src="@item.images[0].url" width="150" /></a></td>
+            }
+        </tr>
+    }
+</table>
+

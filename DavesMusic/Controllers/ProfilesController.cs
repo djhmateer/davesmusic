@@ -6,9 +6,8 @@ using System.Net.Http;
 using System.Web.Mvc;
 
 namespace DavesMusic.Controllers {
-    public class MeController : Controller {
-        // Me/Index - should get the details of the currently logged in user
-        public ActionResult Index() {
+    public class ProfilesController : Controller {
+        public ActionResult Me() {
             // if not authenticated then redirect 
             // stepping through in debug mode it doesn't get the access token
             if (Session["AccessToken"] == null) {
@@ -21,7 +20,7 @@ namespace DavesMusic.Controllers {
                         "https://accounts.spotify.com/authorize/?client_id={0}&response_type={1}&scope={3}&redirect_uri={2}",
                         client_id, response_type, GetRedirectUriWithServerName(), scope);
 
-                Session["ReturnURL"] = "/Me/Index";
+                Session["ReturnURL"] = "/Profiles/Me";
                 return Redirect(url);
             }
 
@@ -35,8 +34,26 @@ namespace DavesMusic.Controllers {
             return View(meReponse);
         }
 
+        ///v1/users/{user_id} 
+        public ActionResult User(string id) {
+            var returnURL = "/Profiles/User";
+            var ah = new AuthHelper();
+            var result = ah.DoAuth(returnURL, this);
+            if (result != null)
+                return Redirect(result);
+
+            var access_token = Session["AccessToken"].ToString();
+            var url2 = String.Format("https://api.spotify.com/v1/users/{0}", id);
+            var sh = new SpotifyHelper();
+            var result2 = sh.CallSpotifyAPIPassingToken(access_token, url2);
+
+            var response = JsonConvert.DeserializeObject<UserDetails>(result2);
+            response.access_token = access_token;
+            return View(response);
+        }
+
         private string GetRedirectUriWithServerName() {
-            return "http://" + Request.Url.Authority + "/Me/SpotifyCallback";
+            return "http://" + Request.Url.Authority + "/Profiles/SpotifyCallback";
         }
 
         public ActionResult SpotifyCallback(string code) {
@@ -84,5 +101,32 @@ namespace DavesMusic.Controllers {
 
             return Redirect(returnURL);
         }
+    }
+
+    public class UserDetails {
+        public class ExternalUrls {
+            public string spotify { get; set; }
+        }
+
+        public class Followers {
+            public object href { get; set; }
+            public int total { get; set; }
+        }
+
+        public class Image {
+            public object height { get; set; }
+            public string url { get; set; }
+            public object width { get; set; }
+        }
+
+        public string display_name { get; set; }
+        public ExternalUrls external_urls { get; set; }
+        public Followers followers { get; set; }
+        public string href { get; set; }
+        public string id { get; set; }
+        public List<Image> images { get; set; }
+        public string type { get; set; }
+        public string uri { get; set; }
+        public string access_token { get; set; }
     }
 }
