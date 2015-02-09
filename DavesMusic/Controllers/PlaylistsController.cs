@@ -6,7 +6,7 @@ using System.Web.Mvc;
 namespace DavesMusic.Controllers {
     public class PlaylistsController : Controller {
         public ActionResult Details(string id, string userId) {
-            var returnURL = "/Playlists/Details";
+            var returnURL = "/Playlists/Details/" + id + "/" + userId;
             var ah = new AuthHelper();
             var result = ah.DoAuth(returnURL, this);
             if (result != null)
@@ -21,6 +21,27 @@ namespace DavesMusic.Controllers {
             meReponse.access_token = access_token;
             return View(meReponse);
         }
+
+        ///v1/users/{owner_id}/playlists/{playlist_id}/followers
+        public ActionResult Follow(string ownerId, string playlistId) {
+            var returnURL = "/Playlists/Follow/" + ownerId + "/" + playlistId;
+            var ah = new AuthHelper();
+            var result = ah.DoAuth(returnURL, this);
+            if (result != null)
+                return Redirect(result);
+
+            var access_token = Session["AccessToken"].ToString();
+            var url2 = String.Format("https://api.spotify.com/v1/users/{0}/playlists/{1}/followers", ownerId, playlistId);
+            var sh = new SpotifyHelper();
+            var result2 = sh.CallSpotifyPutAPIPassingToken(access_token, url2);
+
+            var meReponse = JsonConvert.DeserializeObject<PlaylistDetails>(result2);
+            meReponse.access_token = access_token;
+            return View(meReponse);
+        }
+
+        
+
     }
 
     public class PlaylistDetails {

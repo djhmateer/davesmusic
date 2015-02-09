@@ -6,55 +6,38 @@ using System.Web.Mvc;
 
 namespace DavesMusic.Controllers {
     public class HomeController : Controller {
-       
-        public ActionResult Search(string artist = "", int offset = 0) {
-            // First call with no parameters
+
+        public ActionResult Search(string artist = "", int offset = 0, string playlist = "") {
+            // First time
             if (artist == "") {
                 ViewBag.InitialArtist = "muse";
                 return View();
             }
 
             var spotifyHelper = new SpotifyHelper();
-            var stopWatchResult = new StopWatchResult();
-            string json = spotifyHelper.CallSpotifyAPISearch(artist, offset, stopWatchResult);
-            ViewBag.APITime = stopWatchResult.TimeInMs;
+            var vm = new SearchViewModel();
+            // Searching for a playlist
+            if (playlist != "") {
+                string json2 = spotifyHelper.CallSpotifyAPISearchForPlaylist(playlist);
 
-            var jsonNoArtistsRootElement = JObject.Parse(json)["artists"].ToString();
-            var result = JsonConvert.DeserializeObject<ArtistsResponse>(jsonNoArtistsRootElement);
+                var result2 = JsonConvert.DeserializeObject<PlaylistsResponse>(json2);
+                vm.PlaylistsResponse = result2;
+                return View(vm);
+            }
 
+            // Searching for an Artist
+            string json = spotifyHelper.CallSpotifyAPISearch(artist, offset);
+
+            var result = JsonConvert.DeserializeObject<ArtistsResponse2>(json);
             ViewBag.ArtistSearchedFor = artist;
 
-            ViewBag.ShowPrevious = false;
-            if (offset >= 50) {
-                ViewBag.OffsetPrevious = offset - 50;
-                ViewBag.ShowPrevious = true;
-            }
-
-            ViewBag.ShowNext = false;
-            if (offset + 50 < result.Total) {
-                ViewBag.OffsetNext = offset + 50;
-                ViewBag.ShowNext = true;
-            }
-
-            return View(result);
+            vm.ArtistsResponse2 = result;
+            return View(vm);
         }
 
         public ActionResult SpotifyTest() {
             return View();
         }
-
-       
-
-        //public ActionResult NewReleases(string access_token) {
-        //    // needs oAuth
-        //    var url = "https://api.spotify.com/v1/browse/new-releases";
-        //    var result = CallSpotifyAPIPassingToken(access_token, url);
-
-        //    var newReleases = JsonConvert.DeserializeObject(result);
-
-        //    return View(newReleases);
-        //}
-
 
         public ActionResult About() {
             ViewBag.Message = "Your application description page.";
@@ -167,6 +150,108 @@ namespace DavesMusic.Controllers {
     public class APIResult {
         public string Json { get; set; }
         public string Url { get; set; }
+    }
+
+    public class SearchViewModel {
+        public PlaylistsResponse PlaylistsResponse { get; set; }
+        public ArtistsResponse2 ArtistsResponse2 { get; set; }
+    }
+
+    public class PlaylistsResponse {
+        public class ExternalUrls {
+            public string spotify { get; set; }
+        }
+
+        public class Image {
+            public int? height { get; set; }
+            public string url { get; set; }
+            public int? width { get; set; }
+        }
+
+        public class ExternalUrls2 {
+            public string spotify { get; set; }
+        }
+
+        public class Owner {
+            public ExternalUrls2 external_urls { get; set; }
+            public string href { get; set; }
+            public string id { get; set; }
+            public string type { get; set; }
+            public string uri { get; set; }
+        }
+
+        public class Tracks {
+            public string href { get; set; }
+            public int total { get; set; }
+        }
+
+        public class Item {
+            public bool collaborative { get; set; }
+            public ExternalUrls external_urls { get; set; }
+            public string href { get; set; }
+            public string id { get; set; }
+            public List<Image> images { get; set; }
+            public string name { get; set; }
+            public Owner owner { get; set; }
+            public object @public { get; set; }
+            public Tracks tracks { get; set; }
+            public string type { get; set; }
+            public string uri { get; set; }
+        }
+
+        public class Playlists {
+            public string href { get; set; }
+            public List<Item> items { get; set; }
+            public int limit { get; set; }
+            public string next { get; set; }
+            public int offset { get; set; }
+            public object previous { get; set; }
+            public int total { get; set; }
+        }
+
+        public Playlists playlists { get; set; }
+    }
+
+    public class ArtistsResponse2 {
+        public class ExternalUrls {
+            public string spotify { get; set; }
+        }
+
+        public class Followers {
+            public object href { get; set; }
+            public int total { get; set; }
+        }
+
+        public class Item {
+            public ExternalUrls external_urls { get; set; }
+            public Followers followers { get; set; }
+            public List<object> genres { get; set; }
+            public string href { get; set; }
+            public string id { get; set; }
+            public List<SpotifyImage> images { get; set; }
+            public string name { get; set; }
+            public int popularity { get; set; }
+            public string type { get; set; }
+            public string uri { get; set; }
+        }
+
+        public class SpotifyImage {
+            public int Height { get; set; }
+            public string Url { get; set; }
+            public int Width { get; set; }
+        }
+
+        public class Artists {
+            public string href { get; set; }
+            public List<Item> items { get; set; }
+            public int limit { get; set; }
+            public string next { get; set; }
+            public int offset { get; set; }
+            public object previous { get; set; }
+            public int total { get; set; }
+        }
+
+        public Artists artists { get; set; }
     }
 
     public class ArtistsResponse {

@@ -8,10 +8,7 @@ using System.Threading;
 using System.Web;
 
 namespace DavesMusic.Controllers{
-    public static class SpotHelper{
-       
-    }
-
+   
     public class SpotifyHelper {
 
         public string CallSpotifyAPIPassingToken(string access_token, string url) {
@@ -22,10 +19,27 @@ namespace DavesMusic.Controllers{
             return result;
         }
 
-        public string CallSpotifyAPISearch(string artistName, int offset, StopWatchResult stopWatchResult) {
+        public string CallSpotifyPutAPIPassingToken(string access_token, string url) {
+            var client = new HttpClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", access_token);
+            // **HERE** - getting doesn't seem to be working
+            var httpResponse = client.PutAsync(url,null);
+            var result = httpResponse.Result.Content.ReadAsStringAsync().Result;
+            return result;
+        }
+
+        public string CallSpotifyAPISearch(string artistName, int offset) {
             if (!String.IsNullOrWhiteSpace(artistName)) artistName = HttpUtility.UrlEncode(artistName);
             var url = String.Format("https://api.spotify.com/v1/search?q={0}&offset={1}&limit=50&type=artist", artistName, offset);
-            var text = CallAPI(stopWatchResult, url);
+            var text = CallAPI(null, url);
+            return text;
+        }
+
+
+        public string CallSpotifyAPISearchForPlaylist(string playlist) {
+            if (!String.IsNullOrWhiteSpace(playlist)) playlist = HttpUtility.UrlEncode(playlist);
+            var url = String.Format("https://api.spotify.com/v1/search?q={0}&limit=50&type=playlist", playlist);
+            var text = CallAPI(null, url);
             return text;
         }
 
@@ -83,10 +97,8 @@ namespace DavesMusic.Controllers{
             };
         }
 
-        public static string CallAPI(StopWatchResult stopWatchResult, string url) {
-            var stopWatch = new Stopwatch();
+        public static string CallAPI(StopWatchResult stopWatchResult = null, string url = "") {
             int errorCount = 0;
-            stopWatch.Start();
             string text = null;
             bool done = false;
             while (!done) {
@@ -112,11 +124,6 @@ namespace DavesMusic.Controllers{
             }
 
             if (String.IsNullOrEmpty(text)) throw new InvalidOperationException();
-            stopWatch.Stop();
-            TimeSpan ts = stopWatch.Elapsed;
-            stopWatchResult.ElapsedTime = ts;
-            string totalMilliseconds = String.Format("{0:0}", ts.TotalMilliseconds);
-            stopWatchResult.TimeInMs = totalMilliseconds;
             return text;
         }
     }
