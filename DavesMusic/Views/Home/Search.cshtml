@@ -1,20 +1,38 @@
 ﻿@model DavesMusic.Controllers.SearchViewModel
 
-@if (String.IsNullOrEmpty(@Request["artist"])) {
-    <h2>Artist Search</h2>
+@if (Model != null) {
+    if (Model.ArtistsResponse2 != null) {
+        <h2>@Model.ArtistsResponse2.term</h2>
+    }
+
+    if (Model.PlaylistsResponse != null) {
+        <h2>Playlists - @Model.PlaylistsResponse.term</h2>
+    }
 }
 else {
-    <h2>Artist: @Request["artist"]</h2>
+    <br />
+    <br />
+    <br />
 }
 
+
 <form action="/Home/Search">
-    <input id="artist" name="artist" type="text" value="@ViewBag.InitialArtist" />
-    <input type=hidden name=offset value=0>
+    @if (String.IsNullOrEmpty(@Request["artist"]) && (String.IsNullOrEmpty(@Request["playlist"]))) {
+        <input id="artist" name="artist" type="text" placeholder="Muse" />
+    }
+    else {
+        <input id="artist" name="artist" type="text" />
+    }
+
+    <input type="hidden" name="offset" value=0>
+    <input type="hidden" name="isAPost" value=true>
     <input type="submit" value="Search" />
 
     <input id="playlist" name="playlist" type="text" />
     <input type="submit" value="Search for Playlists" />
 </form>
+<br />
+<br />
 
 <p><a href="/Profiles/Me">User Details (login)</a></p>
 <p><a href="/Browse/NewReleases">New Releases (login)</a></p>

@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Web.Mvc;
@@ -7,12 +6,7 @@ using System.Web.Mvc;
 namespace DavesMusic.Controllers {
     public class HomeController : Controller {
 
-        public ActionResult Search(string artist = "", int offset = 0, string playlist = "") {
-            // First time
-            if (artist == "") {
-                ViewBag.InitialArtist = "muse";
-                return View();
-            }
+        public ActionResult Search(string artist = "", int offset = 0, string playlist = "", bool isAPost = false) {
 
             var spotifyHelper = new SpotifyHelper();
             var vm = new SearchViewModel();
@@ -21,15 +15,21 @@ namespace DavesMusic.Controllers {
                 string json2 = spotifyHelper.CallSpotifyAPISearchForPlaylist(playlist);
 
                 var result2 = JsonConvert.DeserializeObject<PlaylistsResponse>(json2);
+                result2.term = playlist;
                 vm.PlaylistsResponse = result2;
                 return View(vm);
             }
 
-            // Searching for an Artist
-            string json = spotifyHelper.CallSpotifyAPISearch(artist, offset);
+            if (isAPost && artist == "") artist = "Muse";
 
+
+            // Initial load of the page
+            if (artist == "") return View();
+
+            string json = spotifyHelper.CallSpotifyAPISearch(artist, offset);
             var result = JsonConvert.DeserializeObject<ArtistsResponse2>(json);
-            ViewBag.ArtistSearchedFor = artist;
+            result.term = artist;
+            //ViewBag.ArtistSearchedFor = artist;
 
             vm.ArtistsResponse2 = result;
             return View(vm);
@@ -210,6 +210,7 @@ namespace DavesMusic.Controllers {
         }
 
         public Playlists playlists { get; set; }
+        public string term { get; set; }
     }
 
     public class ArtistsResponse2 {
@@ -252,6 +253,7 @@ namespace DavesMusic.Controllers {
         }
 
         public Artists artists { get; set; }
+        public string term { get; set; }
     }
 
     public class ArtistsResponse {
