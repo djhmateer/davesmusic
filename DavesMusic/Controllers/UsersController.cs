@@ -6,7 +6,6 @@ using Newtonsoft.Json;
 namespace DavesMusic.Controllers {
     public class UsersController : Controller {
 
-        // Browse/NewReleases
         public ActionResult Playlists(string id) {
             var returnURL = "/Users/Playlists";
             var ah = new AuthHelper();

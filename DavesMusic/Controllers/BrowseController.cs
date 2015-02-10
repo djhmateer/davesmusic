@@ -9,7 +9,7 @@ namespace DavesMusic.Controllers {
             if (controller.Session["AccessToken"] == null) {
                 var client_id = "0fd1718f5ef14cb291ef114a13382d15";
                 var response_type = "code";
-                var scope = "user-read-private user-read-email";
+                var scope = "user-read-private user-read-email playlist-modify-public ";
 
                 var xx = "http://" + controller.Request.Url.Authority + "/Profiles/SpotifyCallback";
                 var url =

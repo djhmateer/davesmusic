@@ -35,13 +35,10 @@ namespace DavesMusic.Controllers {
             var sh = new SpotifyHelper();
             var result2 = sh.CallSpotifyPutAPIPassingToken(access_token, url2);
 
-            var meReponse = JsonConvert.DeserializeObject<PlaylistDetails>(result2);
-            meReponse.access_token = access_token;
-            return View(meReponse);
+            //var meReponse = JsonConvert.DeserializeObject<PlaylistDetails>(result2);
+            //meReponse.access_token = access_token;
+            return Redirect("/Profiles/Me");
         }
-
-        
-
     }
 
     public class PlaylistDetails {

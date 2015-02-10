@@ -7,10 +7,16 @@ namespace DavesMusic {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
             routes.MapRoute(
-    name: "Playlists",
-    url: "Playlists/Details/{id}/{userId}",
-    defaults: new { controller = "Playlists", action = "Details", id = UrlParameter.Optional, userId = UrlParameter.Optional }
-);
+                name: "Playlists",
+                url: "Playlists/Details/{id}/{userId}",
+                defaults: new { controller = "Playlists", action = "Details", id = UrlParameter.Optional, userId = UrlParameter.Optional }
+            );
+
+            routes.MapRoute(
+               name: "Playlists2",
+               url: "Playlists/Follow/{ownerId}/{playlistId}",
+               defaults: new { controller = "Playlists", action = "Follow" }
+           );
 
 
             routes.MapRoute(

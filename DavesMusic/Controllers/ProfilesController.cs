@@ -8,21 +8,11 @@ using System.Web.Mvc;
 namespace DavesMusic.Controllers {
     public class ProfilesController : Controller {
         public ActionResult Me() {
-            // if not authenticated then redirect 
-            // stepping through in debug mode it doesn't get the access token
-            if (Session["AccessToken"] == null) {
-                var client_id = "0fd1718f5ef14cb291ef114a13382d15";
-                var response_type = "code";
-                var scope = "user-read-private user-read-email";
-
-                var url =
-                    String.Format(
-                        "https://accounts.spotify.com/authorize/?client_id={0}&response_type={1}&scope={3}&redirect_uri={2}",
-                        client_id, response_type, GetRedirectUriWithServerName(), scope);
-
-                Session["ReturnURL"] = "/Profiles/Me";
-                return Redirect(url);
-            }
+            var returnURL = "/Profiles/Me";
+            var ah = new AuthHelper();
+            var result = ah.DoAuth(returnURL, this);
+            if (result != null)
+                return Redirect(result);
 
             var access_token = Session["AccessToken"].ToString();
             var url2 = "https://api.spotify.com/v1/me";
