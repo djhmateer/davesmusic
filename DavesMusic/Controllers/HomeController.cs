@@ -7,7 +7,6 @@ namespace DavesMusic.Controllers {
     public class HomeController : Controller {
 
         public ActionResult Search(string artist = "", int offset = 0, string playlist = "", bool isAPost = false) {
-
             var spotifyHelper = new SpotifyHelper();
             var vm = new SearchViewModel();
             // Searching for a playlist
@@ -29,7 +28,6 @@ namespace DavesMusic.Controllers {
             string json = spotifyHelper.CallSpotifyAPISearch(artist, offset);
             var result = JsonConvert.DeserializeObject<ArtistsResponse2>(json);
             result.term = artist;
-            //ViewBag.ArtistSearchedFor = artist;
 
             vm.ArtistsResponse2 = result;
             return View(vm);
