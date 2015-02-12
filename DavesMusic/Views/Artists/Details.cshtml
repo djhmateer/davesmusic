@@ -1,8 +1,6 @@
-﻿@*@model DavesMusic.Controllers.ArtistDetailsViewModel*@
-@model DavesMusic.Controllers.ArtistAlbums
+﻿@model DavesMusic.Controllers.ArtistDetailsViewModel
 
-
-@*<script type="text/javascript">
+<script type="text/javascript">
     function toggle_visibility(id) {
         var e = document.getElementById(id);
         if (e.style.display == 'block')
@@ -17,10 +15,10 @@
         else
             e2.style.display = 'block';
     }
-</script>*@
+</script>
 @using (Html.BeginForm()) {
 
-    @*<h2>@Model.ArtistDetails.Name</h2>
+    <h2>@Model.ArtistDetails.Name</h2>
 
     <table>
         <tr>
@@ -104,34 +102,54 @@
                 <td><a href="/Albums/Details/@item.album.id"> <img src="@item.album.images[2].url" /> </a></td>
             </tr>
         }
-    </table>*@
+    </table>
 
     <h3>Albums</h3>
+    <div class="action">
+        <button class="actionButton" type="submit">
+            <span>Add albums to DavesMusic playlist</span>
+        </button>
+    </div>
+    @Html.HiddenFor(x => x.ArtistAlbums.total)
+    <table class="table">
+        @*@foreach (var item in Model.ArtistAlbums.items) {
+                <tr>
+                    <td>@item.name</td>
 
-    <button type="submit">OK</button>
-    @Model.href
-    @Model.total
-    
-    @*<table class="table">
-        @foreach (var item in Model.ArtistAlbums.items) {
+                    <td>
+                        <input type="checkbox" name="albumToAdd" value="@item.id">Add
+                    </td>
+                    <td><a href="@item.uri">Direct</a></td>
+                    <td>
+                        <a href="/Albums/Details/@item.id">
+                            @if (item.images.Count > 2) {
+                                <img src="@item.images[2].url" />
+                            }
+
+                        </a>
+                    </td>
+                </tr>
+            }*@
+
+        @for (int i = 0; i < Model.ArtistAlbums.items.Count; i++) {
+            @Html.HiddenFor(model => Model.ArtistAlbums.items[i].id)
             <tr>
-                <td>@item.name</td>
-                <td><input type="checkbox" name="albumToAdd" value="@item.id">Add</td>
-                <td><a href="@item.uri">Direct</a></td>
+                <td>@Model.ArtistAlbums.items[i].name</td>
+                <td>@Html.EditorFor(model => Model.ArtistAlbums.items[i].Checked)</td>
+                <td><a href="@Model.ArtistAlbums.items[i].uri">Direct</a></td>
                 <td>
-                    <a href="/Albums/Details/@item.id">
-                        @if (item.images.Count > 2) {
-                            <img src="@item.images[2].url" />
+                    <a href="/Albums/Details/@Model.ArtistAlbums.items[i].id">
+                        @if (Model.ArtistAlbums.items[i].images.Count > 2) {
+                            <img src="@Model.ArtistAlbums.items[i].images[2].url" />
                         }
 
                     </a>
                 </td>
             </tr>
         }
-      
-    </table>*@
+    </table>
 
-    @*if (@Model.ArtistDetails.Images.Count > 0) {
+    if (@Model.ArtistDetails.Images.Count > 0) {
         <img src="@Model.ArtistDetails.Images[0].URL" />
-    }*@
+    }
 }

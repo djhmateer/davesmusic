@@ -4,14 +4,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 
-namespace DavesMusic.Controllers
-{
+namespace DavesMusic.Controllers {
     public class ArtistsController : Controller {
 
         [HttpPost]
-        public ActionResult Details(string id, ArtistAlbums vm) {
+        public ActionResult Details(ArtistDetailsViewModel vm, string id) {
 
-            //var x = vm.ArtistAlbums;
             return View();
         }
 
@@ -56,7 +54,7 @@ namespace DavesMusic.Controllers
 
             // Artist's related Artists - top 7
             apiResult = apiHelper.CallSpotifyAPIArtistRelated(stopWatchResult, id);
-            ArtistRelated artistRelated = JsonConvert.DeserializeObject<ArtistRelated>(apiResult.Json);
+            var artistRelated = JsonConvert.DeserializeObject<ArtistRelated>(apiResult.Json);
             var y = artistRelated.artists.Take(7).ToList();
             artistRelated.artists = y;
             apiDebug = new APIDebug {
@@ -67,7 +65,7 @@ namespace DavesMusic.Controllers
 
             // Biography (Echonest)
             apiResult = apiHelper.CallEchonestAPIArtistBiography(stopWatchResult, id);
-            ArtistBiography artistBiography = JsonConvert.DeserializeObject<ArtistBiography>(apiResult.Json);
+            var artistBiography = JsonConvert.DeserializeObject<ArtistBiography>(apiResult.Json);
             if (artistBiography != null) {
                 // Just get last.fm and Wikipedia entries
                 if (artistBiography.response.biographies != null) {
@@ -82,16 +80,16 @@ namespace DavesMusic.Controllers
             };
             apiDebugList.Add(apiDebug);
 
-            //var vm = new ArtistDetailsViewModel {
-            //    APIDebugList = apiDebugList,
-            //    ArtistDetails = artistDetails,
-            //    ArtistTopTracks = artistTopTracks,
-            //    ArtistAlbums = artistAlbums,
-            //    ArtistRelated = artistRelated,
-            //    ArtistBiography = artistBiography
-            //};
+            var vm = new ArtistDetailsViewModel {
+                APIDebugList = apiDebugList,
+                ArtistDetails = artistDetails,
+                ArtistTopTracks = artistTopTracks,
+                ArtistAlbums = artistAlbums,
+                ArtistRelated = artistRelated,
+                ArtistBiography = artistBiography
+            };
             //var vm = new ArtistDetailsViewModel{ArtistAlbums = artistAlbums};
-            var vm = artistAlbums;
+            //var vm = artistAlbums;
             return View(vm);
         }
     }
@@ -162,36 +160,36 @@ namespace DavesMusic.Controllers
     }
 
     public class ArtistAlbums {
-        //public class ExternalUrls {
-        //    public string spotify { get; set; }
-        //}
+        public class ExternalUrls {
+            public string spotify { get; set; }
+        }
 
-        //public class Image {
-        //    public int height { get; set; }
-        //    public string url { get; set; }
-        //    public int width { get; set; }
-        //}
+        public class Image {
+            public int height { get; set; }
+            public string url { get; set; }
+            public int width { get; set; }
+        }
 
-        //public class Item {
-        //    public string album_type { get; set; }
-        //    public List<string> available_markets { get; set; }
-        //    //public ExternalUrls external_urls { get; set; }
-        //    public string href { get; set; }
-        //    public string id { get; set; }
-        //    public List<Image> images { get; set; }
-        //    public string name { get; set; }
-        //    public string type { get; set; }
-        //    public string uri { get; set; }
+        public class Item {
+            public string album_type { get; set; }
+            public List<string> available_markets { get; set; }
+            public ExternalUrls external_urls { get; set; }
+            public string href { get; set; }
+            public string id { get; set; }
+            public List<Image> images { get; set; }
+            public string name { get; set; }
+            public string type { get; set; }
+            public string uri { get; set; }
 
-        //    public bool Checked { get; set; }
-        //}
+            public bool Checked { get; set; }
+        }
 
         public string href { get; set; }
-        //public List<Item> items { get; set; }
-        //public int limit { get; set; }
-        //public string next { get; set; }
-        //public int offset { get; set; }
-        //public object previous { get; set; }
+        public List<Item> items { get; set; }
+        public int limit { get; set; }
+        public string next { get; set; }
+        public int offset { get; set; }
+        public object previous { get; set; }
         public int total { get; set; }
     }
 
