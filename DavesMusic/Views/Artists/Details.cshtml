@@ -16,7 +16,7 @@
             e2.style.display = 'block';
     }
 </script>
-@using (Html.BeginForm()) {
+
 
     <h2>@Model.ArtistDetails.Name</h2>
 
@@ -58,8 +58,8 @@
     <h3>Biography</h3>
 
 
-    if (Model.ArtistBiography.response.biographies.Count > 0) {
-        foreach (var item in Model.ArtistBiography.response.biographies) {
+    @if (Model.ArtistBiography.response.biographies.Count > 0) {
+       foreach (var item in Model.ArtistBiography.response.biographies) {
             if (item != null) {
                 <button id="button" onclick=" toggle_visibility('idOfElement'); ">Toggle</button>
                 <div>
@@ -103,7 +103,7 @@
             </tr>
         }
     </table>
-
+@using (Html.BeginForm()) {
     <h3>Albums</h3>
     <div class="action">
         <button class="actionButton" type="submit">
