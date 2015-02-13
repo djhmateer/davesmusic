@@ -1,0 +1,35 @@
+﻿@model List<DavesMusic.Controllers.AlbumDetails>
+
+<h2>DavesMusic Playlist</h2>
+
+<table>
+    @foreach (var item in Model) {
+        <tr>
+            <td>
+                <a href="/Artists/Details/@item.artists[0].id">@item.artists[0].name</a>
+                <br />
+                Popularity: @item.popularity
+                <br />
+                <a href="@item.uri">Open directly</a>
+            </td>
+            @if (item.images.Count == 4) {
+                <td>
+                    <a href="/Albums/Details/@item.id">
+                        <img src="@item.images[2].url" />
+                    </a>
+                </td>
+            }
+
+            @if (item.images.Count == 3) {
+                <td>
+                    <a href="/Albums/Details/@item.id">
+                        <img width="200" src="@item.images[1].url" />
+                    </a>
+                </td>
+            }
+        </tr>
+    }
+</table>
+
+
+

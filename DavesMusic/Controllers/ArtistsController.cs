@@ -1,20 +1,61 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Web.Mvc;
 
 namespace DavesMusic.Controllers {
     public class ArtistsController : Controller {
+        string connectionString = ConfigurationManager.ConnectionStrings["DavesMusicConnection"].ConnectionString;
 
         [HttpPost]
         public ActionResult Details(ArtistDetailsViewModel vm, string id) {
 
-            return View();
+            using (var connection = new SqlConnection(connectionString))
+            using (var command = new SqlCommand(null, connection)) {
+                connection.Open();
+                // Iterate through vm and save the checked albums id's to db
+                foreach (var item in vm.ArtistAlbums.items) {
+                    if (item.Checked) {
+                        // Is it already there as in the database?
+                        command.CommandText = String.Format("SELECT COUNT(*) FROM Playlist WHERE AlbumID = '{0}'", item.id);
+                        command.CommandType = System.Data.CommandType.Text;
+                        var result = command.ExecuteScalar().ToString();
+                        if (result == "0") {
+                            command.CommandText = String.Format("INSERT INTO Playlist (AlbumID) VALUES ('{0}')", item.id);
+                            command.CommandType = System.Data.CommandType.Text;
+                            command.ExecuteNonQuery();
+                        }
+                    }
+                    else {
+                        // If its been unchecked and is there in the database?
+                        command.CommandText = String.Format("SELECT COUNT(*) FROM Playlist WHERE AlbumID = '{0}'", item.id);
+                        command.CommandType = System.Data.CommandType.Text;
+                        var result = command.ExecuteScalar().ToString();
+                        if (result != "0") {
+                            command.CommandText = String.Format("DELETE FROM Playlist WHERE AlbumID = '{0}'", item.id);
+                            command.CommandType = System.Data.CommandType.Text;
+                            command.ExecuteNonQuery();
+                        }
+                    }
+                }
+            }
+
+            // Get data again as not saved, including Checked status
+            var vm2 = GetArtistDetailsViewModel(id);
+
+            return View(vm2);
         }
 
         [HttpGet]
         public ActionResult Details(string id) {
+            var vm = GetArtistDetailsViewModel(id);
+            return View(vm);
+        }
+
+        private ArtistDetailsViewModel GetArtistDetailsViewModel(string id) {
             var apiHelper = new SpotifyHelper();
             var stopWatchResult = new StopWatchResult();
             string json = apiHelper.CallSpotifyAPIArtist(stopWatchResult: stopWatchResult,
@@ -45,7 +86,32 @@ namespace DavesMusic.Controllers {
 
             // All Artists albums - possibly more than 50!
             apiResult = apiHelper.CallSpotifyAPIArtistAlbums(stopWatchResult, id);
-            var artistAlbums = JsonConvert.DeserializeObject<ArtistAlbums>(apiResult.Json);
+            ArtistAlbums artistAlbums = JsonConvert.DeserializeObject<ArtistAlbums>(apiResult.Json);
+            // set Checked status of ArtistAlbums
+            // Iterate through records in db, setting vm checked property
+            using (var connection = new SqlConnection(connectionString))
+            using (var command = new SqlCommand(null, connection)) {
+                connection.Open();
+                command.CommandText = String.Format("SELECT AlbumID FROM Playlist");
+                command.CommandType = System.Data.CommandType.Text;
+
+                var albumIDs = new List<string>();
+                using (var reader = command.ExecuteReader()) {
+                    while (reader.Read()) {
+                        var albumID = reader.GetString(reader.GetOrdinal("AlbumID"));
+                        albumIDs.Add(albumID);
+                    }
+                }
+
+                foreach (var albumID in albumIDs) {
+                    // Is this album in the current search list?
+                    var album = artistAlbums.items.FirstOrDefault(x => x.id == albumID);
+                    if (album != null) {
+                        album.Checked = true;
+                    }
+                }
+            }
+
             apiDebug = new APIDebug {
                 APITime = String.Format("{0:0}", stopWatchResult.ElapsedTime.TotalMilliseconds),
                 APIURL = apiResult.Url
@@ -88,9 +154,7 @@ namespace DavesMusic.Controllers {
                 ArtistRelated = artistRelated,
                 ArtistBiography = artistBiography
             };
-            //var vm = new ArtistDetailsViewModel{ArtistAlbums = artistAlbums};
-            //var vm = artistAlbums;
-            return View(vm);
+            return vm;
         }
     }
 

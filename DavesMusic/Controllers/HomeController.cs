@@ -1,10 +1,13 @@
-﻿using Newtonsoft.Json;
+﻿using System.Configuration;
+using System.Data.SqlClient;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Web.Mvc;
 
 namespace DavesMusic.Controllers {
     public class HomeController : Controller {
+        string connectionString = ConfigurationManager.ConnectionStrings["DavesMusicConnection"].ConnectionString;
 
         public ActionResult Search(string artist = "", int offset = 0, string playlist = "", bool isAPost = false) {
             var spotifyHelper = new SpotifyHelper();
@@ -31,6 +34,33 @@ namespace DavesMusic.Controllers {
 
             vm.ArtistsResponse2 = result;
             return View(vm);
+        }
+
+        // Gets a list from the database of everything in the current DavesMusic playlist!
+        public ActionResult Playlist() {
+            var albumIDs = new List<string>();
+            using (var connection = new SqlConnection(connectionString))
+            using (var command = new SqlCommand(null, connection)) {
+                connection.Open();
+                command.CommandText = String.Format("SELECT AlbumID FROM Playlist");
+                using (var reader = command.ExecuteReader()) {
+                    while (reader.Read()) {
+                        var albumID = reader.GetString(reader.GetOrdinal("AlbumID"));
+                        albumIDs.Add(albumID);
+                    }
+                }
+            }
+
+            // now got a list of albumID's we want to call spotify to get info
+            var listAlbumDetails = new List<AlbumDetails>();
+            var spotifyHelper = new SpotifyHelper();
+            foreach (var albumID in albumIDs){
+                var apiResult = spotifyHelper.CallSpotifyAPIAlbum(null, id: albumID);
+                var albumDetails = JsonConvert.DeserializeObject<AlbumDetails>(apiResult.Json);
+                listAlbumDetails.Add(albumDetails);
+            }
+
+            return View(listAlbumDetails);
         }
 
         public ActionResult SpotifyTest() {
