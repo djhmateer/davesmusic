@@ -2,7 +2,9 @@
 
 <h2>@Model.name</h2>
 
-<img src="@Model.images[0].url" width="200">
+@if (Model.images.Count > 0){
+    <img src="@Model.images[0].url" width="200">
+}
 
 <p><a href="@Model.uri">direct</a></p>
 <p><a href="/Playlists/Follow/@Model.owner.id/@Model.id">Follow this playlist</a></p>

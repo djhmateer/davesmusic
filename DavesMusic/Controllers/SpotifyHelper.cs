@@ -4,8 +4,10 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Threading;
 using System.Web;
+using System.Web.Script.Serialization;
 
 namespace DavesMusic.Controllers{
    
@@ -19,14 +21,51 @@ namespace DavesMusic.Controllers{
             return result;
         }
 
+        public string CallSpotifyPostAPIPassingToken(string access_token, string url) {
+            var client = new HttpClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", access_token);
+            var httpResponse = client.PostAsync(url, null);
+            var result = httpResponse.Result.Content.ReadAsStringAsync().Result;
+            return result;
+        }
+
         public string CallSpotifyPutAPIPassingToken(string access_token, string url) {
             var client = new HttpClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", access_token);
-            // **HERE** - getting doesn't seem to be working
             var httpResponse = client.PutAsync(url,null);
             var result = httpResponse.Result.Content.ReadAsStringAsync().Result;
             return result;
         }
+
+        public class Thing{
+            public string name { get; set; }
+        }
+
+        public class Thing2{
+            public string uris { get; set; }
+        }
+        public string CallSpotifyCreatePlaylistPostAPIPassingToken(string access_token, string url) {
+            var client = new HttpClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", access_token);
+            var p = new Thing { name = "A New Playlist" };
+            var serializer = new JavaScriptSerializer();
+            var jsonString = serializer.Serialize(p);
+            var stringContent = new StringContent(jsonString, Encoding.UTF8, "application/json");
+
+            var httpResponse = client.PostAsync(url, stringContent);
+            var result = httpResponse.Result.Content.ReadAsStringAsync().Result;
+
+            return result;
+        }
+
+        //public string CallSpotifyAddTracksToPlaylistQueryStringAPIPassingToken(string access_token, string url, string csvOfUris) {
+        //    //var p2 = new Thing2{uris = csvOfUris};
+        //    //var jsonString2 = serializer.Serialize(p2);
+        //    //var stringContent2 = new StringContent(jsonString2, Encoding.UTF8, "application/json");
+        //    var text = CallAPI(null, url);
+        //    return text;
+        //}
+
 
         public string CallSpotifyAPISearch(string artistName, int offset) {
             if (!String.IsNullOrWhiteSpace(artistName)) artistName = HttpUtility.UrlEncode(artistName);

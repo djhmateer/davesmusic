@@ -35,10 +35,32 @@ namespace DavesMusic.Controllers {
             var sh = new SpotifyHelper();
             var result2 = sh.CallSpotifyPutAPIPassingToken(access_token, url2);
 
-            //var meReponse = JsonConvert.DeserializeObject<PlaylistDetails>(result2);
-            //meReponse.access_token = access_token;
             return Redirect("/Profiles/Me");
         }
+
+        //https://api.spotify.com/v1/users/{user_id}/playlists
+        public ActionResult Create(string id) {
+            var returnURL = "/Playlists/Create/" + id;
+            var ah = new AuthHelper();
+            var result = ah.DoAuth(returnURL, this);
+            if (result != null)
+                return Redirect(result);
+
+            var access_token = Session["AccessToken"].ToString();
+            //var url2 = String.Format("https://api.spotify.com/v1/users/{0}/playlists",id);
+            var sh = new SpotifyHelper();
+            //var result2 = sh.CallSpotifyCreatePlaylistPostAPIPassingToken(access_token, url2);
+
+
+            var csvOfUris = "spotify:track:4iV5W9uYEdYUVa79Axb7Rh,spotify:track:1301WleyT98MSxVHPZCA6M";
+            //spotify:user:davemateer:playlist:3jc45qdh3cbQWGKdu1rRVN
+            // http://localhost:64550/Playlists/Details/1eYXcmXynB3TVWgFun8NX8/davemateer
+            var url3 = String.Format("https://api.spotify.com/v1/users/{0}/playlists/{1}/tracks?uris={2}", id, "3jc45qdh3cbQWGKdu1rRVN", csvOfUris);
+            var result3 = sh.CallSpotifyPostAPIPassingToken(access_token, url3);
+
+            return Redirect("/Profiles/Me");
+        }
+
     }
 
     public class PlaylistDetails {
