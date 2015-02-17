@@ -106,7 +106,7 @@ namespace DavesMusic.Controllers{
             };
         }
 
-        public APIResult CallSpotifyAPIAlbum(StopWatchResult stopWatchResult, string id) {
+        public APIResult CallSpotifyAPIAlbumDetails(StopWatchResult stopWatchResult, string id) {
             var url = String.Format("https://api.spotify.com/v1/albums/{0}", id);
             var json = CallAPI(stopWatchResult, url);
             return new APIResult {

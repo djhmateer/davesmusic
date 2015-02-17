@@ -1,10 +1,14 @@
-﻿using Newtonsoft.Json;
+﻿using System.Configuration;
+using System.Data.SqlClient;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Web.Mvc;
 
 namespace DavesMusic.Controllers {
     public class PlaylistsController : Controller {
+        string connectionString = ConfigurationManager.ConnectionStrings["DavesMusicConnection"].ConnectionString;
+
         public ActionResult Details(string id, string userId) {
             var returnURL = "/Playlists/Details/" + id + "/" + userId;
             var ah = new AuthHelper();
@@ -38,29 +42,106 @@ namespace DavesMusic.Controllers {
             return Redirect("/Profiles/Me");
         }
 
-        //https://api.spotify.com/v1/users/{user_id}/playlists
+        ///v1/users/{user_id}/playlists
         public ActionResult Create(string id) {
-            var returnURL = "/Playlists/Create/" + id;
+            string userId = id;
+            var returnURL = "/Playlists/Create/" + userId;
             var ah = new AuthHelper();
             var result = ah.DoAuth(returnURL, this);
             if (result != null)
                 return Redirect(result);
 
-            var access_token = Session["AccessToken"].ToString();
-            //var url2 = String.Format("https://api.spotify.com/v1/users/{0}/playlists",id);
             var sh = new SpotifyHelper();
-            //var result2 = sh.CallSpotifyCreatePlaylistPostAPIPassingToken(access_token, url2);
+            var access_token = Session["AccessToken"].ToString();
 
+            // Does the playlist exist already for this user?
+            var url4 = String.Format("https://api.spotify.com/v1/users/{0}/playlists", userId);
+            var result4 = sh.CallSpotifyAPIPassingToken(access_token, url4);
+            var meReponse = JsonConvert.DeserializeObject<PlaylistDetails2>(result4);
+            var currentPlaylistID = "";
+            foreach (var thing in meReponse.items) {
+                if (thing.name == "A New Playlist") {
+                    currentPlaylistID = thing.id;
+                }
+            }
 
+            // If not playlist create one
+            if (currentPlaylistID == "") {
+                var url2 = String.Format("https://api.spotify.com/v1/users/{0}/playlists", userId);
+                var result2 = sh.CallSpotifyCreatePlaylistPostAPIPassingToken(access_token, url2);
+                var playlistReturn = JsonConvert.DeserializeObject<CreatePlaylistReturn>(result2);
+                currentPlaylistID = playlistReturn.id;
+            }
+
+            // Replace tracks in playlist - get trackID's from database??
             var csvOfUris = "spotify:track:4iV5W9uYEdYUVa79Axb7Rh,spotify:track:1301WleyT98MSxVHPZCA6M";
-            //spotify:user:davemateer:playlist:3jc45qdh3cbQWGKdu1rRVN
-            // http://localhost:64550/Playlists/Details/1eYXcmXynB3TVWgFun8NX8/davemateer
-            var url3 = String.Format("https://api.spotify.com/v1/users/{0}/playlists/{1}/tracks?uris={2}", id, "3jc45qdh3cbQWGKdu1rRVN", csvOfUris);
-            var result3 = sh.CallSpotifyPostAPIPassingToken(access_token, url3);
+             //using (var connection = new SqlConnection(connectionString))
+             //using (var command = new SqlCommand(null, connection)){
+             //    connection.Open();
+             //            command.CommandText = String.Format("SELECT COUNT(*) FROM Playlist WHERE AlbumID = '{0}'",item.id);
+             //            command.CommandType = System.Data.CommandType.Text;
+             //        }
+             //    }
+            var url3 = String.Format("https://api.spotify.com/v1/users/{0}/playlists/{1}/tracks?uris={2}", userId, currentPlaylistID, csvOfUris);
+
+            // this will add
+            //var result3 = sh.CallSpotifyPostAPIPassingToken(access_token, url3);
+
+            // this will replace
+            var result3 = sh.CallSpotifyPutAPIPassingToken(access_token, url3);
 
             return Redirect("/Profiles/Me");
         }
 
+    }
+
+    public class CreatePlaylistReturn {
+
+        public class ExternalUrls {
+            public string spotify { get; set; }
+        }
+
+        public class Followers {
+            public object href { get; set; }
+            public int total { get; set; }
+        }
+
+        public class ExternalUrls2 {
+            public string spotify { get; set; }
+        }
+
+        public class Owner {
+            public ExternalUrls2 external_urls { get; set; }
+            public string href { get; set; }
+            public string id { get; set; }
+            public string type { get; set; }
+            public string uri { get; set; }
+        }
+
+        public class Tracks {
+            public string href { get; set; }
+            public List<object> items { get; set; }
+            public int limit { get; set; }
+            public object next { get; set; }
+            public int offset { get; set; }
+            public object previous { get; set; }
+            public int total { get; set; }
+        }
+
+        public bool collaborative { get; set; }
+        public object description { get; set; }
+        public ExternalUrls external_urls { get; set; }
+        public Followers followers { get; set; }
+        public string href { get; set; }
+        public string id { get; set; }
+        public List<object> images { get; set; }
+        public string name { get; set; }
+        public Owner owner { get; set; }
+        public bool @public { get; set; }
+        public string snapshot_id { get; set; }
+        public Tracks tracks { get; set; }
+        public string type { get; set; }
+        public string uri { get; set; }
     }
 
     public class PlaylistDetails {

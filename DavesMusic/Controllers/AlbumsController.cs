@@ -9,7 +9,7 @@ namespace DavesMusic.Controllers
         public ActionResult Details(string id) {
             var spotifyHelper = new SpotifyHelper();
             var stopWatchResult = new StopWatchResult();
-            var apiResult = spotifyHelper.CallSpotifyAPIAlbum(stopWatchResult: stopWatchResult, id: id);
+            var apiResult = spotifyHelper.CallSpotifyAPIAlbumDetails(stopWatchResult, id);
             ViewBag.Id = id;
             var albumDetails = JsonConvert.DeserializeObject<AlbumDetails>(apiResult.Json);
 

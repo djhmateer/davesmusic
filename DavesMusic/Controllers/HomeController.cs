@@ -55,7 +55,7 @@ namespace DavesMusic.Controllers {
             var listAlbumDetails = new List<AlbumDetails>();
             var spotifyHelper = new SpotifyHelper();
             foreach (var albumID in albumIDs){
-                var apiResult = spotifyHelper.CallSpotifyAPIAlbum(null, id: albumID);
+                var apiResult = spotifyHelper.CallSpotifyAPIAlbumDetails(null, id: albumID);
                 var albumDetails = JsonConvert.DeserializeObject<AlbumDetails>(apiResult.Json);
                 listAlbumDetails.Add(albumDetails);
             }

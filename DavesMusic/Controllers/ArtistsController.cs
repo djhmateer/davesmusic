@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System.Data;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -11,32 +12,42 @@ namespace DavesMusic.Controllers {
         string connectionString = ConfigurationManager.ConnectionStrings["DavesMusicConnection"].ConnectionString;
 
         [HttpPost]
-        public ActionResult Details(ArtistDetailsViewModel vm, string id) {
-
+        public ActionResult Details(ArtistDetailsViewModel vm, string id){
+            var sh = new SpotifyHelper();
             using (var connection = new SqlConnection(connectionString))
             using (var command = new SqlCommand(null, connection)) {
                 connection.Open();
                 // Iterate through vm and save the checked albums id's to db
-                foreach (var item in vm.ArtistAlbums.items) {
-                    if (item.Checked) {
-                        // Is it already there as in the database?
-                        command.CommandText = String.Format("SELECT COUNT(*) FROM Playlist WHERE AlbumID = '{0}'", item.id);
+                foreach (var album in vm.ArtistAlbums.items) {
+                    if (album.Checked) {
+                        // Is it already there in the database?
+                        command.CommandText = String.Format("SELECT COUNT(*) FROM Playlist WHERE AlbumID = '{0}'", album.id);
                         command.CommandType = System.Data.CommandType.Text;
                         var result = command.ExecuteScalar().ToString();
                         if (result == "0") {
-                            command.CommandText = String.Format("INSERT INTO Playlist (AlbumID) VALUES ('{0}')", item.id);
-                            command.CommandType = System.Data.CommandType.Text;
-                            command.ExecuteNonQuery();
+                            // Get all the tracks from this album
+
+                            var result2 = sh.CallSpotifyAPIAlbumDetails(null, album.id);
+                            var albumDetails = JsonConvert.DeserializeObject<AlbumDetails>(result2.Json);
+                            // Insert each track into the database
+                            foreach (var track in albumDetails.tracks.items){
+                                // problem - getting a single quote in insert statement.. for Muse.. the Resistance
+                                command.CommandText = String.Format("INSERT INTO Playlist (AlbumID, TrackID, TrackName, AlbumName) VALUES ('{0}', '{1}', @TrackName,'{2}')", album.id, track.id, album.name);
+                                command.Parameters.Clear();
+                                command.Parameters.Add("@TrackName", SqlDbType.VarChar).Value = track.name;
+                                command.CommandType = CommandType.Text;
+                                command.ExecuteNonQuery(); 
+                            }
                         }
                     }
                     else {
                         // If its been unchecked and is there in the database?
-                        command.CommandText = String.Format("SELECT COUNT(*) FROM Playlist WHERE AlbumID = '{0}'", item.id);
-                        command.CommandType = System.Data.CommandType.Text;
+                        command.CommandText = String.Format("SELECT COUNT(*) FROM Playlist WHERE AlbumID = '{0}'", album.id);
+                        command.CommandType = CommandType.Text;
                         var result = command.ExecuteScalar().ToString();
                         if (result != "0") {
-                            command.CommandText = String.Format("DELETE FROM Playlist WHERE AlbumID = '{0}'", item.id);
-                            command.CommandType = System.Data.CommandType.Text;
+                            command.CommandText = String.Format("DELETE FROM Playlist WHERE AlbumID = '{0}'", album.id);
+                            command.CommandType = CommandType.Text;
                             command.ExecuteNonQuery();
                         }
                     }
