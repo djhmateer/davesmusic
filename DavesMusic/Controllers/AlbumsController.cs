@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System.Diagnostics;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Web.Mvc;
@@ -123,6 +124,8 @@ namespace DavesMusic.Controllers
         public string name { get; set; }
         public int popularity { get; set; }
         public string release_date { get; set; }
+        public DateTime releaseDateTime { get; set; }
+        
         public string release_date_precision { get; set; }
         public Tracks tracks { get; set; }
         public string type { get; set; }

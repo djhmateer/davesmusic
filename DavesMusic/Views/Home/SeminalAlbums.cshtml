@@ -1,17 +1,18 @@
 ﻿@model List<DavesMusic.Controllers.AlbumDetails>
 
-<h2>DavesMusic Playlist</h2>
+<h2>Seminal Albums</h2>
 
 <a href="/Playlists/Create/davemateer">Create this playlist in Spotify</a>
 @*<a href="/Playlists/Follow/davemateer/12345">Update this playlist in Spotify</a>*@
 @*<a href="/Playlists/Follow/davemateer/12345">Follow this playlist in Spotify</a>*@
+<p>Albums that are stand out over time, and are worth listening to in their entirety</p>
 <table>
     @foreach (var item in Model) {
         <tr>
             <td>
                 <a href="/Artists/Details/@item.artists[0].id">@item.artists[0].name</a>
                 <br />
-                Popularity: @item.popularity
+                @item.releaseDateTime.Year
                 <br />
                 <a href="@item.uri">Open directly</a>
             </td>
@@ -26,7 +27,7 @@
             @if (item.images.Count == 3) {
                 <td>
                     <a href="/Albums/Details/@item.id">
-                        <img width="200" src="@item.images[1].url" />
+                        <img width="100" src="@item.images[1].url" />
                     </a>
                 </td>
             }

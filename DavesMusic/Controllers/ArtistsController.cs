@@ -22,7 +22,7 @@ namespace DavesMusic.Controllers {
                     if (album.Checked) {
                         // Is it already there in the database?
                         command.CommandText = String.Format("SELECT COUNT(*) FROM Playlist WHERE AlbumID = '{0}'", album.id);
-                        command.CommandType = System.Data.CommandType.Text;
+                        command.CommandType = CommandType.Text;
                         var result = command.ExecuteScalar().ToString();
                         if (result == "0") {
                             // Get all the tracks from this album
@@ -31,10 +31,10 @@ namespace DavesMusic.Controllers {
                             var albumDetails = JsonConvert.DeserializeObject<AlbumDetails>(result2.Json);
                             // Insert each track into the database
                             foreach (var track in albumDetails.tracks.items){
-                                // problem - getting a single quote in insert statement.. for Muse.. the Resistance
                                 command.CommandText = String.Format("INSERT INTO Playlist (AlbumID, TrackID, TrackName, AlbumName) VALUES ('{0}', '{1}', @TrackName,'{2}')", album.id, track.id, album.name);
                                 command.Parameters.Clear();
-                                command.Parameters.Add("@TrackName", SqlDbType.VarChar).Value = track.name;
+                                command.Parameters.AddWithValue("@TrackName", track.name);
+
                                 command.CommandType = CommandType.Text;
                                 command.ExecuteNonQuery(); 
                             }
@@ -104,7 +104,7 @@ namespace DavesMusic.Controllers {
             using (var command = new SqlCommand(null, connection)) {
                 connection.Open();
                 command.CommandText = String.Format("SELECT AlbumID FROM Playlist");
-                command.CommandType = System.Data.CommandType.Text;
+                command.CommandType = CommandType.Text;
 
                 var albumIDs = new List<string>();
                 using (var reader = command.ExecuteReader()) {

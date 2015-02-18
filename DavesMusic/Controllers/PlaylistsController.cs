@@ -1,8 +1,9 @@
-﻿using System.Configuration;
-using System.Data.SqlClient;
+﻿using System.Data.SqlClient;
+using System.Linq;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Web.Mvc;
 
 namespace DavesMusic.Controllers {
@@ -73,22 +74,66 @@ namespace DavesMusic.Controllers {
                 currentPlaylistID = playlistReturn.id;
             }
 
-            // Replace tracks in playlist - get trackID's from database??
-            var csvOfUris = "spotify:track:4iV5W9uYEdYUVa79Axb7Rh,spotify:track:1301WleyT98MSxVHPZCA6M";
-             //using (var connection = new SqlConnection(connectionString))
-             //using (var command = new SqlCommand(null, connection)){
-             //    connection.Open();
-             //            command.CommandText = String.Format("SELECT COUNT(*) FROM Playlist WHERE AlbumID = '{0}'",item.id);
-             //            command.CommandType = System.Data.CommandType.Text;
-             //        }
-             //    }
-            var url3 = String.Format("https://api.spotify.com/v1/users/{0}/playlists/{1}/tracks?uris={2}", userId, currentPlaylistID, csvOfUris);
+            // Replace all tracks in playlist - get trackID's from database
+            //var csvOfUris = "spotify:track:4iV5W9uYEdYUVa79Axb7Rh,spotify:track:1301WleyT98MSxVHPZCA6M";
+            //var csvOfUris = "";
+            var listOfTrackIDs = new List<String>();
+            using (var connection = new SqlConnection(connectionString))
+            using (var command = new SqlCommand(null, connection)) {
+                connection.Open();
+                command.CommandText = String.Format("SELECT TrackID FROM Playlist");
+                command.CommandType = System.Data.CommandType.Text;
+                using (var reader = command.ExecuteReader()) {
+                    while (reader.Read()) {
+                        var trackID = reader.GetString(reader.GetOrdinal("TrackID"));
+                        //csvOfUris += "spotify:track:" + trackID + ",";
+                        listOfTrackIDs.Add(trackID);
+                    }
+                }
+            }
 
-            // this will add
-            //var result3 = sh.CallSpotifyPostAPIPassingToken(access_token, url3);
+            if (listOfTrackIDs.Count > 100){
+                string csvOfUris = "";
 
-            // this will replace
-            var result3 = sh.CallSpotifyPutAPIPassingToken(access_token, url3);
+                // Get first 100 tracks and put into a csv string
+                var first100 = listOfTrackIDs.Take(100);
+                foreach (var trackID in first100){
+                    csvOfUris += "spotify:track:" + trackID + ",";
+                }
+                csvOfUris = csvOfUris.TrimEnd(',');
+
+                var url3 = String.Format("https://api.spotify.com/v1/users/{0}/playlists/{1}/tracks?uris={2}", userId,
+                    currentPlaylistID, csvOfUris);
+
+                // this will replace
+                var result3 = sh.CallSpotifyPutAPIPassingToken(access_token, url3);
+
+                // Get 101-201
+                var stuff = listOfTrackIDs.Skip(100).Take(100);
+                csvOfUris = "";
+                foreach (var trackID in stuff){
+                    csvOfUris += "spotify:track:" + trackID + ",";
+                }
+                csvOfUris = csvOfUris.TrimEnd(',');
+
+                // this will add
+                var result5 = sh.CallSpotifyPostAPIPassingToken(access_token, url3);
+            }
+            else{
+                string csvOfUris = "";
+
+                var first100 = listOfTrackIDs;
+                foreach (var trackID in first100) {
+                    csvOfUris += "spotify:track:" + trackID + ",";
+                }
+                csvOfUris = csvOfUris.TrimEnd(',');
+
+                var url3 = String.Format("https://api.spotify.com/v1/users/{0}/playlists/{1}/tracks?uris={2}", userId,
+                    currentPlaylistID, csvOfUris);
+
+                // this will replace
+                var result3 = sh.CallSpotifyPutAPIPassingToken(access_token, url3);
+            }
 
             return Redirect("/Profiles/Me");
         }

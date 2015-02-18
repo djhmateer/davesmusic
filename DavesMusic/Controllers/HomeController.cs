@@ -1,5 +1,6 @@
 ﻿using System.Configuration;
 using System.Data.SqlClient;
+using System.Linq;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -37,12 +38,12 @@ namespace DavesMusic.Controllers {
         }
 
         // Gets a list from the database of everything in the current DavesMusic playlist!
-        public ActionResult Playlist() {
+        public ActionResult SeminalAlbums() {
             var albumIDs = new List<string>();
             using (var connection = new SqlConnection(connectionString))
             using (var command = new SqlCommand(null, connection)) {
                 connection.Open();
-                command.CommandText = String.Format("SELECT AlbumID FROM Playlist");
+                command.CommandText = String.Format("SELECT DISTINCT AlbumID FROM Playlist");
                 using (var reader = command.ExecuteReader()) {
                     while (reader.Read()) {
                         var albumID = reader.GetString(reader.GetOrdinal("AlbumID"));
@@ -57,10 +58,21 @@ namespace DavesMusic.Controllers {
             foreach (var albumID in albumIDs){
                 var apiResult = spotifyHelper.CallSpotifyAPIAlbumDetails(null, id: albumID);
                 var albumDetails = JsonConvert.DeserializeObject<AlbumDetails>(apiResult.Json);
+                DateTime d;
+                bool success = DateTime.TryParse(albumDetails.release_date, out d);
+
+                if (!success){
+                    // Black crowes was just a year ie 2009   
+                    int year = Int32.Parse(albumDetails.release_date);
+                    d = new DateTime(year,1,1);
+                }
+                
+                albumDetails.releaseDateTime = d;
                 listAlbumDetails.Add(albumDetails);
             }
 
-            return View(listAlbumDetails);
+            var a = listAlbumDetails.OrderByDescending(x => x.releaseDateTime).ToList();
+            return View(a);
         }
 
         public ActionResult SpotifyTest() {
