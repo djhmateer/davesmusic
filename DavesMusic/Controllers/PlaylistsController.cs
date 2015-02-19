@@ -43,8 +43,9 @@ namespace DavesMusic.Controllers {
             return Redirect("/Profiles/Me");
         }
 
-        ///v1/users/{user_id}/playlists
+        //eg /v1/users/davemateer/playlists
         public ActionResult Create(string id) {
+            // have a null?
             string userId = id;
             var returnURL = "/Playlists/Create/" + userId;
             var ah = new AuthHelper();

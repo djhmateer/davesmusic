@@ -248,6 +248,7 @@
     <Content Include="Views\Profiles\User.cshtml" />
     <Content Include="Views\Users\Playlists.cshtml" />
     <Content Include="Views\Home\SeminalAlbums.cshtml" />
+    <Content Include="Views\Home\SeminalSongs.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

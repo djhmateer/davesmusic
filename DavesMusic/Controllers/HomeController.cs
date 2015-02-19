@@ -37,7 +37,7 @@ namespace DavesMusic.Controllers {
             return View(vm);
         }
 
-        // Gets a list from the database of everything in the current DavesMusic playlist!
+        // Gets a list from the database of everything in the current db playlist!
         public ActionResult SeminalAlbums() {
             var albumIDs = new List<string>();
             using (var connection = new SqlConnection(connectionString))
@@ -71,19 +71,62 @@ namespace DavesMusic.Controllers {
                 listAlbumDetails.Add(albumDetails);
             }
 
+            // Pass current userID to view?
             var a = listAlbumDetails.OrderByDescending(x => x.releaseDateTime).ToList();
             return View(a);
         }
 
-        public ActionResult SpotifyTest() {
-            return View();
-        }
+        // Gets a list from the database of everything in the current db playlist!
+        public ActionResult SeminalSongs() {
+            var vm = new List<SongsVM>();
+            using (var connection = new SqlConnection(connectionString))
+            using (var command = new SqlCommand(null, connection)) {
+                connection.Open();
+                command.CommandText = String.Format("SELECT TrackID, TrackName, ArtistName FROM Tracks");
+                using (var reader = command.ExecuteReader()) {
+                    while (reader.Read()) {
+                        var trackID = reader.GetString(reader.GetOrdinal("TrackID"));
+                        var trackName = reader.GetString(reader.GetOrdinal("TrackName"));
+                        var artistName = reader.GetString(reader.GetOrdinal("ArtistName"));
+                        var songsVM = new SongsVM{
+                            TrackID = trackID,
+                            TrackName = trackName,
+                            ArtistName = artistName
+                        };
+                        vm.Add(songsVM);
+                    }
+                }
+            }
 
-        public ActionResult About() {
-            ViewBag.Message = "Your application description page.";
+            // now got a list of albumID's we want to call spotify to get info
+            //var listAlbumDetails = new List<AlbumDetails>();
+            //var spotifyHelper = new SpotifyHelper();
+            //foreach (var albumID in albumIDs) {
+            //    var apiResult = spotifyHelper.CallSpotifyAPIAlbumDetails(null, id: albumID);
+            //    var albumDetails = JsonConvert.DeserializeObject<AlbumDetails>(apiResult.Json);
+            //    DateTime d;
+            //    bool success = DateTime.TryParse(albumDetails.release_date, out d);
 
-            return View();
+            //    if (!success) {
+            //        // Black crowes was just a year ie 2009   
+            //        int year = Int32.Parse(albumDetails.release_date);
+            //        d = new DateTime(year, 1, 1);
+            //    }
+
+            //    albumDetails.releaseDateTime = d;
+            //    listAlbumDetails.Add(albumDetails);
+            //}
+
+            //// Pass current userID to view?
+            //var a = listAlbumDetails.OrderByDescending(x => x.releaseDateTime).ToList();
+            return View(vm);
         }
+    }
+
+    public class SongsVM{
+        public string TrackID { get; set; }
+        public string TrackName { get; set; }
+        public string ArtistName { get; set; }
     }
 
     public class MeResponse {

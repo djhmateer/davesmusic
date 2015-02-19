@@ -84,53 +84,46 @@
         }
     }
 
-
+@using (Html.BeginForm()) {
+    @Html.HiddenFor(model => Model.ArtistDetails.Name)
+    
+    @Model.ArtistDetails.Name
+    
     <h3>Top Tracks</h3>
+    <h3>Albums</h3>
+    <div class="action">
+        <button class="actionButton" type="submit">
+            <span>Add tracks to DavesMusic playlist</span>
+        </button>
+    </div>
     <table class="table">
-        @foreach (var item in Model.ArtistTopTracks.tracks) {
+        @for (int i = 0; i < Model.ArtistTopTracks.tracks.Count; i++) {
+            @Html.HiddenFor(model => Model.ArtistTopTracks.tracks[i].id)
+            @Html.HiddenFor(model => Model.ArtistTopTracks.tracks[i].name)
             <tr>
-                <td>@item.name</td>
+                <td>@Model.ArtistTopTracks.tracks[i].name</td>
+                <td>@Html.EditorFor(model => Model.ArtistTopTracks.tracks[i].Checked)</td>
                 <td>
                     <audio controls style="width: 150px; display: block;">
-                        <source src="@item.preview_url" type="audio/mpeg">
+                        <source src="@Model.ArtistTopTracks.tracks[i].preview_url" type="audio/mpeg">
                         <p>Ooops - please use a more up to date browser so you can preview songs</p>
                     </audio>
                 </td>
-                <td><a href="@item.uri">Direct</a></td>
-                <td>@item.popularity</td>
-                <td>@item.album.name</td>
-                <td><a href="/Albums/Details/@item.album.id"> <img src="@item.album.images[2].url" /> </a></td>
+                <td><a href="@Model.ArtistTopTracks.tracks[i].uri">Direct</a></td>
+                <td>@Model.ArtistTopTracks.tracks[i].popularity</td>
+                <td>@Model.ArtistTopTracks.tracks[i].album.name</td>
+                <td><a href="/Albums/Details/@Model.ArtistTopTracks.tracks[i].album.id"> <img src="@Model.ArtistTopTracks.tracks[i].album.images[2].url" /> </a></td>
             </tr>
         }
     </table>
-@using (Html.BeginForm()) {
+
     <h3>Albums</h3>
     <div class="action">
         <button class="actionButton" type="submit">
             <span>Add albums to DavesMusic playlist</span>
         </button>
     </div>
-    @Html.HiddenFor(x => x.ArtistAlbums.total)
     <table class="table">
-        @*@foreach (var item in Model.ArtistAlbums.items) {
-                <tr>
-                    <td>@item.name</td>
-
-                    <td>
-                        <input type="checkbox" name="albumToAdd" value="@item.id">Add
-                    </td>
-                    <td><a href="@item.uri">Direct</a></td>
-                    <td>
-                        <a href="/Albums/Details/@item.id">
-                            @if (item.images.Count > 2) {
-                                <img src="@item.images[2].url" />
-                            }
-
-                        </a>
-                    </td>
-                </tr>
-            }*@
-
         @for (int i = 0; i < Model.ArtistAlbums.items.Count; i++) {
             @Html.HiddenFor(model => Model.ArtistAlbums.items[i].id)
             @Html.HiddenFor(model => Model.ArtistAlbums.items[i].name)

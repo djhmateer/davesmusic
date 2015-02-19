@@ -17,7 +17,39 @@ namespace DavesMusic.Controllers {
             using (var connection = new SqlConnection(connectionString))
             using (var command = new SqlCommand(null, connection)) {
                 connection.Open();
-                // Iterate through vm and save the checked albums id's to db
+                // Tracks
+                foreach (var t in vm.ArtistTopTracks.tracks){
+                    if (t.Checked){
+                        // Is it already there in the database?
+                        command.CommandText = String.Format("SELECT COUNT(*) FROM Tracks WHERE TrackID = '{0}'", t.id);
+                        command.CommandType = CommandType.Text;
+                        var result = command.ExecuteScalar().ToString();
+                        if (result == "0"){
+                            // Add track to db
+                            command.CommandText =
+                                String.Format(
+                                    "INSERT INTO Tracks (TrackID, TrackName, ArtistName) VALUES ('{0}', @TrackName,'{1}')",t.id, vm.ArtistDetails.Name);
+                            command.Parameters.Clear();
+                            command.Parameters.AddWithValue("@TrackName", t.name);
+
+                            command.CommandType = CommandType.Text;
+                            command.ExecuteNonQuery();
+                        }
+                    }
+                    else{
+                        // If its been unchecked and is there in the database?
+                        command.CommandText = String.Format("SELECT COUNT(*) FROM Playlist WHERE TrackID = '{0}'", t.id);
+                        command.CommandType = CommandType.Text;
+                        var result = command.ExecuteScalar().ToString();
+                        if (result != "0"){
+                            command.CommandText = String.Format("DELETE FROM Tracks WHERE TrackID = '{0}'", t.id);
+                            command.CommandType = CommandType.Text;
+                            command.ExecuteNonQuery();
+                        }
+                    }
+                }
+
+                // Albums - Iterate through vm and save the checked albums id's to db
                 foreach (var album in vm.ArtistAlbums.items) {
                     if (album.Checked) {
                         // Is it already there in the database?
@@ -92,7 +124,33 @@ namespace DavesMusic.Controllers {
             // Only want top 5 tracks in toptracks
             var tracks = artistTopTracks.tracks;
             var top5 = tracks.OrderByDescending(x => x.popularity).Take(5);
+            
+            // Iterate through records in db, setting vm checked property
+            using (var connection = new SqlConnection(connectionString))
+            using (var command = new SqlCommand(null, connection)) {
+                connection.Open();
+                command.CommandText = String.Format("SELECT TrackID FROM Tracks");
+                command.CommandType = CommandType.Text;
+
+                var trackIDs = new List<string>();
+                using (var reader = command.ExecuteReader()) {
+                    while (reader.Read()) {
+                        var trackID = reader.GetString(reader.GetOrdinal("TrackID"));
+                        trackIDs.Add(trackID);
+                    }
+                }
+
+                foreach (var trackID in trackIDs) {
+                    // Is this track in the current search list?
+                    var track = top5.FirstOrDefault(x => x.id == trackID);
+                    if (track != null) {
+                        track.Checked = true;
+                    }
+                }
+            }
             artistTopTracks.tracks = top5.ToList();
+
+
 
 
             // All Artists albums - possibly more than 50!
@@ -280,7 +338,6 @@ namespace DavesMusic.Controllers {
         public ArtistAlbums ArtistAlbums { get; set; }
         public ArtistRelated ArtistRelated { get; set; }
         public ArtistBiography ArtistBiography { get; set; }
-
     }
 
     public class ArtistTopTracks {
@@ -302,6 +359,8 @@ namespace DavesMusic.Controllers {
             public int track_number { get; set; }
             public string type { get; set; }
             public string uri { get; set; }
+
+            public bool Checked { get; set; }
         }
         public class ExternalUrls {
             public string spotify { get; set; }

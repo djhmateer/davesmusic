@@ -1,0 +1,18 @@
+﻿@model List<DavesMusic.Controllers.SongsVM>
+
+<h2>Seminal Songs</h2>
+
+<!-- make it so that this passes a null? so can get current users id in the controller-->
+<a href="/Playlists/Create/davemateer">Make new playlist in my Spotify</a>
+<p>Great songs of all time!  If the entire album is worth it, put it on that playlist too.</p>
+<table>
+    @foreach (var item in Model) {
+        <tr>
+            <td>@item.TrackName</td>
+            <td>@item.ArtistName</td>
+        </tr>
+    }
+</table>
+
+
+
