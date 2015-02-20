@@ -44,10 +44,14 @@ namespace DavesMusic.Controllers {
         }
 
         //eg /v1/users/davemateer/playlists
-        public ActionResult Create(string id) {
+        //public ActionResult Create(string id) {
+        public ActionResult Create(){
+            //string id = "davemateer";
             // have a null?
-            string userId = id;
-            var returnURL = "/Playlists/Create/" + userId;
+            //string userId = id;
+            //var returnURL = "/Playlists/Create/" + userId;
+            var returnURL = "/Playlists/Create";
+
             var ah = new AuthHelper();
             var result = ah.DoAuth(returnURL, this);
             if (result != null)
@@ -55,6 +59,13 @@ namespace DavesMusic.Controllers {
 
             var sh = new SpotifyHelper();
             var access_token = Session["AccessToken"].ToString();
+
+            // need to get the current users id eg davemateer
+            var url7 = "https://api.spotify.com/v1/me";
+            var result7 = sh.CallSpotifyAPIPassingToken(access_token, url7);
+
+            var meReponse7 = JsonConvert.DeserializeObject<MeResponse>(result7);
+            string userId = meReponse7.id;
 
             // Does the playlist exist already for this user?
             var url4 = String.Format("https://api.spotify.com/v1/users/{0}/playlists", userId);

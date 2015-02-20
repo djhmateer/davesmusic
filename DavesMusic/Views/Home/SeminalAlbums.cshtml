@@ -2,10 +2,10 @@
 
 <h2>Seminal Albums</h2>
 
-<!-- make it so that this passes a null? so can get current users id in the controller-->
-<a href="/Playlists/Create/davemateer">Make new playlist in my Spotify</a>
-@*<a href="/Playlists/Follow/davemateer/12345">Update this playlist in Spotify</a>*@
-@*<a href="/Playlists/Follow/davemateer/12345">Follow this playlist in Spotify</a>*@
+@*<a href="/Playlists/Create/davemateer">Make new playlist in my Spotify</a>*@
+
+<!-- Don't know the username yet as they may or may not be logged in-->
+<a href="/Playlists/Create">Make new playlist in my Spotify</a>
 <p>Albums that are stand out over time, and are worth listening to in their entirety</p>
 <table>
     @foreach (var item in Model) {
@@ -16,7 +16,8 @@
                 @item.releaseDateTime.Year
                 <br />
                 @item.name
-                @*<a href="@item.uri">Open directly</a>*@
+                <br />
+                @*<a href="@item.uri">listen</a>*@
             </td>
             @if (item.images.Count == 4) {
                 <td>
