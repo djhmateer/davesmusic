@@ -54,18 +54,18 @@ namespace DavesMusic.Controllers {
             // now got a list of albumID's we want to call spotify to get info
             var listAlbumDetails = new List<AlbumDetails>();
             var spotifyHelper = new SpotifyHelper();
-            foreach (var albumID in albumIDs){
+            foreach (var albumID in albumIDs) {
                 var apiResult = spotifyHelper.CallSpotifyAPIAlbumDetails(null, id: albumID);
                 var albumDetails = JsonConvert.DeserializeObject<AlbumDetails>(apiResult.Json);
                 DateTime d;
                 bool success = DateTime.TryParse(albumDetails.release_date, out d);
 
-                if (!success){
+                if (!success) {
                     // Black crowes was just a year ie 2009   
                     int year = Int32.Parse(albumDetails.release_date);
-                    d = new DateTime(year,1,1);
+                    d = new DateTime(year, 1, 1);
                 }
-                
+
                 albumDetails.releaseDateTime = d;
                 listAlbumDetails.Add(albumDetails);
             }
@@ -86,7 +86,7 @@ namespace DavesMusic.Controllers {
                         var trackID = reader.GetString(reader.GetOrdinal("TrackID"));
                         var trackName = reader.GetString(reader.GetOrdinal("TrackName"));
                         var artistName = reader.GetString(reader.GetOrdinal("ArtistName"));
-                        var songsVM = new SongsVM{
+                        var songsVM = new SongsVM {
                             TrackID = trackID,
                             TrackName = trackName,
                             ArtistName = artistName
@@ -97,9 +97,21 @@ namespace DavesMusic.Controllers {
             }
             return View(vm);
         }
+
+        public ActionResult MyPlaylist() {
+            return View();
+        }
+
+        public ActionResult GetGreeting(string name) {
+            return Content("Hello " + name);
+        }
+
+        public ActionResult AddTrack() {
+            return View();
+        }
     }
 
-    public class SongsVM{
+    public class SongsVM {
         public string TrackID { get; set; }
         public string TrackName { get; set; }
         public string ArtistName { get; set; }

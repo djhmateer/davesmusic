@@ -1,5 +1,20 @@
 ﻿@model List<DavesMusic.Controllers.SongsVM>
 
+<script type="text/javascript" src="../../Scripts/jquery-1.10.2.min.js"></script>
+<script type="text/javascript">
+    function go() {
+        $.get("@Url.Action("GetGreeting")" ,
+            {
+                name: "Joe"
+            }, function (data){
+                alert(data);
+            }
+        );
+    }
+
+    go();
+</script>
+
 <h2>Seminal Songs</h2>
 
 <!-- make it so that this passes a null? so can get current users id in the controller-->
@@ -10,9 +25,11 @@
         <tr>
             <td>@item.TrackName</td>
             <td>@item.ArtistName</td>
+            <td>
+
+
+            </td>
         </tr>
     }
 </table>
-
-
 
