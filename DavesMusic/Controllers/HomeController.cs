@@ -102,12 +102,8 @@ namespace DavesMusic.Controllers {
             return View();
         }
 
-        public ActionResult GetGreeting(string name) {
-            return Content("Hello " + name);
-        }
-
-        public ActionResult AddTrack() {
-            return View();
+        public String AddTrack(string trackId) {
+            return trackId;
         }
     }
 
