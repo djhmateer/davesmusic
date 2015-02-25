@@ -16,14 +16,16 @@
                 // Success
                
                 // change the button title to remove, so user knows it is added already
-                $("#"+data).css("background-color", "blue");
+                //$("#"+data).css("background-color", "blue");
                 var messageToDisplay = "";
                 if ($("#" + data).text() === "Add") {
-                    $("#" + data).text("Remove");
+                    $("#" + data).text("Delete");
+                    $("#" + data).css("margin-left", "50px");
                     messageToDisplay = "Added track: ";
                 } else {
                     $("#" + data).text("Add");
-                    $("#"+data).css("background-color", "white");
+                    $("#" + data).css("background-color", "white");
+                    $("#" + data).css("margin-left", "0");
                     messageToDisplay = "Removed track: ";
                 }
                 messageToDisplay = messageToDisplay + data;
@@ -63,7 +65,7 @@ else {
             <td>@item.ArtistName</td>
            
             @if (item.AddedInPlaylist) {
-                <td><button id="@item.TrackID" onclick="addTrack('@item.TrackID')">Delete</button></td>
+                <td><button id="@item.TrackID" style="margin-left: 50px" onclick="addTrack('@item.TrackID')">Delete</button></td>
             }
             else {
                 <td><button id="@item.TrackID" onclick="addTrack('@item.TrackID')">Add</button></td>

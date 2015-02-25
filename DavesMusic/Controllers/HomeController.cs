@@ -176,11 +176,27 @@ namespace DavesMusic.Controllers {
                 using (var connection = new SqlConnection(connectionString))
                 using (var command = new SqlCommand(null, connection)){
                     connection.Open();
-                    command.CommandText =
-                        String.Format("INSERT into UserPlaylists (UserID, TrackID) VALUES (@UserID, @TrackID)");
+
+                    // Is the track already in playlist?  If yes, then delete from list user's playlist
+                    command.CommandText = String.Format("SELECT Count(TrackID) FROM UserPlaylists WHERE UserID = @UserID AND TrackID = @TrackID");
                     command.Parameters.AddWithValue("@UserID", userID);
                     command.Parameters.AddWithValue("@TrackID", trackId);
-                    command.ExecuteNonQuery();
+                    var result = command.ExecuteScalar().ToString();
+                    if (result == "0")
+                    {
+                        command.CommandText =
+                            String.Format("INSERT into UserPlaylists (UserID, TrackID) VALUES (@UserID2, @TrackID2)");
+                        command.Parameters.AddWithValue("@UserID2", userID);
+                        command.Parameters.AddWithValue("@TrackID2", trackId);
+                        command.ExecuteNonQuery();
+                    }
+                    else {
+                        command.CommandText =
+                               String.Format("DELETE FROM UserPlaylists WHERE UserID = @UserID2 AND TrackID=@TrackID2");
+                        command.Parameters.AddWithValue("@UserID2", userID);
+                        command.Parameters.AddWithValue("@TrackID2", trackId);
+                        command.ExecuteNonQuery();
+                    }
                 }
             }
             return trackId;
