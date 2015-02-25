@@ -171,13 +171,17 @@ namespace DavesMusic.Controllers {
         public String AddOrRemoveTrack(string trackId) {
             // Insert into the database 
             var userID = Session["UserID"];
-            using (var connection = new SqlConnection(connectionString))
-            using (var command = new SqlCommand(null, connection)) {
-                connection.Open();
-                command.CommandText = String.Format("INSERT into UserPlaylists (UserID, TrackID) VALUES (@UserID, @TrackID)");
-                command.Parameters.AddWithValue("@UserID", userID);
-                command.Parameters.AddWithValue("@TrackID", trackId);
-                command.ExecuteNonQuery();
+            // give illusion interface is working if not logged in
+            if (userID != null){
+                using (var connection = new SqlConnection(connectionString))
+                using (var command = new SqlCommand(null, connection)){
+                    connection.Open();
+                    command.CommandText =
+                        String.Format("INSERT into UserPlaylists (UserID, TrackID) VALUES (@UserID, @TrackID)");
+                    command.Parameters.AddWithValue("@UserID", userID);
+                    command.Parameters.AddWithValue("@TrackID", trackId);
+                    command.ExecuteNonQuery();
+                }
             }
             return trackId;
         }
