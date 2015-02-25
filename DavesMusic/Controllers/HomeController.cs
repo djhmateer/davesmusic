@@ -95,14 +95,90 @@ namespace DavesMusic.Controllers {
                     }
                 }
             }
+            // It is possible to be on this page without logging in - user clicks via LoginRedirect to come back here
+            if (Session["AccessToken"] != null){
+                ViewBag.access_token = Session["AccessToken"].ToString();
+   
+                var access_token = Session["AccessToken"].ToString();
+
+                // If this is the first time back to this page after logging in, need to get the UserID
+                if (Session["UserID"] == null){
+                    var url2 = "https://api.spotify.com/v1/me";
+                    var sh = new SpotifyHelper();
+                    var result2 = sh.CallSpotifyAPIPassingToken(access_token, url2);
+
+                    var meReponse = JsonConvert.DeserializeObject<MeResponse>(result2);
+                    meReponse.access_token = access_token;
+                   
+                    Session["UserID"] = meReponse.id;
+                }
+                // Grab the userID as we'll use that in our database to remember what a user has selected
+                ViewBag.user_id = Session["UserID"];
+
+                // Find out what the user has already added to their playlist
+                var listTracksAlreadyAdded = new List<string>();
+                var userID = Session["UserID"];
+                using (var connection = new SqlConnection(connectionString))
+                using (var command = new SqlCommand(null, connection)) {
+                    connection.Open();
+                    command.CommandText = String.Format("SELECT TrackID FROM UserPlaylists WHERE UserID = @UserID");
+                    command.Parameters.AddWithValue("@UserID", userID);
+                    using (var reader = command.ExecuteReader()) {
+                        while (reader.Read()) {
+                            var trackID = reader.GetString(reader.GetOrdinal("TrackID"));
+                            listTracksAlreadyAdded.Add(trackID);
+                        }
+                    }
+                }
+
+                foreach (var track in vm){
+                    if (listTracksAlreadyAdded.Contains(track.TrackID)){
+                        track.AddedInPlaylist = true;
+                    }
+                }
+            }
             return View(vm);
         }
 
+        public ActionResult LoginRedirect() {
+            var returnURL = "/Home/SeminalSongs";
+            var ah = new AuthHelper();
+            var result = ah.DoAuth(returnURL, this);
+            if (result != null)
+                return Redirect(result);
+
+            return Redirect(returnURL);
+        }
+
         public ActionResult MyPlaylist() {
+            var returnURL = "/Home/MyPlaylist";
+            var ah = new AuthHelper();
+            var result = ah.DoAuth(returnURL, this);
+            if (result != null)
+                return Redirect(result);
+
+            var access_token = Session["AccessToken"].ToString();
+            var url2 = "https://api.spotify.com/v1/me";
+            var sh = new SpotifyHelper();
+            var result2 = sh.CallSpotifyAPIPassingToken(access_token, url2);
+
+            var meReponse = JsonConvert.DeserializeObject<MeResponse>(result2);
+            meReponse.access_token = access_token;
+            //return View(meReponse);
             return View();
         }
 
-        public String AddTrack(string trackId) {
+        public String AddOrRemoveTrack(string trackId) {
+            // Insert into the database 
+            var userID = Session["UserID"];
+            using (var connection = new SqlConnection(connectionString))
+            using (var command = new SqlCommand(null, connection)) {
+                connection.Open();
+                command.CommandText = String.Format("INSERT into UserPlaylists (UserID, TrackID) VALUES (@UserID, @TrackID)");
+                command.Parameters.AddWithValue("@UserID", userID);
+                command.Parameters.AddWithValue("@TrackID", trackId);
+                command.ExecuteNonQuery();
+            }
             return trackId;
         }
     }
@@ -111,6 +187,7 @@ namespace DavesMusic.Controllers {
         public string TrackID { get; set; }
         public string TrackName { get; set; }
         public string ArtistName { get; set; }
+        public bool AddedInPlaylist { get; set; }
     }
 
     public class MeResponse {
@@ -138,7 +215,7 @@ namespace DavesMusic.Controllers {
         public string access_token { get; set; }
     }
 
-    internal class accesstoken {
+    internal class AccessToken {
         public string access_token { get; set; }
         public string token_type { get; set; }
         public int expires_in { get; set; }

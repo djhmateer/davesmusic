@@ -78,7 +78,7 @@ namespace DavesMusic.Controllers {
                 }
             }
 
-            var obj = JsonConvert.DeserializeObject<accesstoken>(resultContent, new JsonSerializerSettings {
+            var obj = JsonConvert.DeserializeObject<AccessToken>(resultContent, new JsonSerializerSettings {
                 TypeNameHandling = TypeNameHandling.All,
                 TypeNameAssemblyFormat = System.Runtime.Serialization.Formatters.FormatterAssemblyStyle.Simple
             });

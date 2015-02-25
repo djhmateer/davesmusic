@@ -93,12 +93,12 @@ namespace DavesMusic.Controllers {
             using (var connection = new SqlConnection(connectionString))
             using (var command = new SqlCommand(null, connection)) {
                 connection.Open();
-                command.CommandText = String.Format("SELECT TrackID FROM Playlist");
+                command.CommandText = String.Format("SELECT TrackID FROM UserPlaylists WHERE UserID = @UserID");
+                command.Parameters.AddWithValue("@UserID", userId);
                 command.CommandType = System.Data.CommandType.Text;
                 using (var reader = command.ExecuteReader()) {
                     while (reader.Read()) {
                         var trackID = reader.GetString(reader.GetOrdinal("TrackID"));
-                        //csvOfUris += "spotify:track:" + trackID + ",";
                         listOfTrackIDs.Add(trackID);
                     }
                 }

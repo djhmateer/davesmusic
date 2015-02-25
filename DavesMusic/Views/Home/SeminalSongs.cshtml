@@ -2,19 +2,38 @@
 
 <script type="text/javascript" src="../../Scripts/jquery-1.10.2.min.js"></script>
 <script type="text/javascript">
+    $(function(){
+        $("[data-hide]").on("click", function(){
+            $(this).closest("." + $(this).attr("data-hide")).hide();
+        });
+    });
+
     function addTrack(trackId) {
-        $.get('@Url.Action("AddTrack")',
+        $.get('@Url.Action("AddOrRemoveTrack")',
             {
                 trackId: trackId
             }, function(data) {
-                $("#message").html(data);
+                // Success
+               
                 // change the button title to remove, so user knows it is added already
-                $(":button").css("background-color", "red");
                 $("#"+data).css("background-color", "blue");
+                var messageToDisplay = "";
+                if ($("#" + data).text() === "Add") {
+                    $("#" + data).text("Remove");
+                    messageToDisplay = "Added track: ";
+                } else {
+                    $("#" + data).text("Add");
+                    $("#"+data).css("background-color", "white");
+                    messageToDisplay = "Removed track: ";
+                }
+                messageToDisplay = messageToDisplay + data;
+                // show alert
+                $('#le-alert').show();
+                $("#message").html(messageToDisplay);
             }
-        //).fail(function() {
-        //    alert("error");
-        //}
+            //).fail(function() {
+            //    alert("error");
+            //}
         );
     }
 </script>
@@ -22,16 +41,35 @@
 <h2>Seminal Songs</h2>
 
 <!-- make it so that this passes a null? so can get current users id in the controller-->
-@*<a href="/Playlists/Create/davemateer">Make new playlist in my Spotify</a>*@
-<p>Great songs of all time!  Add tracks to your playlist.</p>
+
+@if (ViewBag.user_id == null){
+    <p>Please <a href="/Home/LoginRedirect/">login</a> to Spotify so I know where to send your awesome musical choices!</p>
+}
+else {
+    @*<p>Hi: @ViewBag.user_id</p>*@
+    <p><a href="/Playlists/Create/">Create/Update this playlist Spotify</a></p>
+}
+
+<div id="le-alert" class="alert alert-success" hidden="hidden">
+    <button href="#" type="button" class="close" data-hide="alert">&times;</button>
+    <div id="message"></div>
+</div>
+
+
 <table>
     @foreach (var item in Model) {
         <tr>
             <td>@item.TrackName</td>
             <td>@item.ArtistName</td>
-            <td><button id="@item.TrackID" onclick="addTrack('@item.TrackID')">Add</button></td>
+           
+            @if (item.AddedInPlaylist) {
+                <td><button id="@item.TrackID" onclick="addTrack('@item.TrackID')">Delete</button></td>
+            }
+            else {
+                <td><button id="@item.TrackID" onclick="addTrack('@item.TrackID')">Add</button></td>
+            }
         </tr>
     }
 </table>
-<div id="message"></div>
+
 
