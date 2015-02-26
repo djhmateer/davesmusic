@@ -40,10 +40,7 @@ namespace DavesMusic.Controllers{
         public class Thing{
             public string name { get; set; }
         }
-
-        public class Thing2{
-            public string uris { get; set; }
-        }
+       
         public string CallSpotifyCreatePlaylistPostAPIPassingToken(string access_token, string url) {
             var client = new HttpClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", access_token);
@@ -57,6 +54,10 @@ namespace DavesMusic.Controllers{
 
             return result;
         }
+
+        //public class Thing2{
+        //    public string uris { get; set; }
+        //}
 
         //public string CallSpotifyAddTracksToPlaylistQueryStringAPIPassingToken(string access_token, string url, string csvOfUris) {
         //    //var p2 = new Thing2{uris = csvOfUris};

@@ -1,4 +1,11 @@
+drop table Playlist
+drop table tracks
+drop table UserPlaylists
+GO
+
+
 /****** Object:  Table [dbo].[Playlist]    Script Date: 25/02/2015 16:47:02 ******/
+
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
