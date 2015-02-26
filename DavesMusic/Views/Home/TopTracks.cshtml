@@ -2,8 +2,8 @@
 
 <script type="text/javascript" src="../../Scripts/jquery-1.10.2.min.js"></script>
 <script type="text/javascript">
-    $(function(){
-        $("[data-hide]").on("click", function(){
+    $(function () {
+        $("[data-hide]").on("click", function () {
             $(this).closest("." + $(this).attr("data-hide")).hide();
         });
     });
@@ -12,9 +12,9 @@
         $.get('@Url.Action("AddOrRemoveTrack")',
             {
                 trackId: trackId
-            }, function(data) {
+            }, function (data) {
                 // Success
-               
+
                 // change the button title to remove, so user knows it is added already
                 //$("#"+data).css("background-color", "blue");
                 var messageToDisplay = "";
@@ -24,7 +24,7 @@
                     messageToDisplay = "Added track: ";
                 } else {
                     $("#" + data).text("Add");
-                    $("#" + data).css("background-color", "white");
+                    //$("#" + data).css("background-color", "gray");
                     $("#" + data).css("margin-left", "0");
                     messageToDisplay = "Removed track: ";
                 }
@@ -33,18 +33,16 @@
                 $('#le-alert').show();
                 $("#message").html(messageToDisplay);
             }
-            //).fail(function() {
-            //    alert("error");
-            //}
+            ).fail(function( jqXHR, textStatus ) {
+                alert( "Sorry request failed: " + textStatus );
+            }
         );
     }
 </script>
 
-<h2>Seminal Songs</h2>
+<h2>Top Tracks</h2>
 
-<!-- make it so that this passes a null? so can get current users id in the controller-->
-
-@if (ViewBag.user_id == null){
+@if (ViewBag.user_id == null) {
     <p>Please <a href="/Home/LoginRedirect/">login</a> to Spotify so I know where to send your awesome musical choices!</p>
 }
 else {
@@ -52,18 +50,12 @@ else {
     <p><a href="/Playlists/Create/">Create/Update this playlist Spotify</a></p>
 }
 
-<div id="le-alert" class="alert alert-success" hidden="hidden">
-    <button href="#" type="button" class="close" data-hide="alert">&times;</button>
-    <div id="message"></div>
-</div>
-
-
-<table>
+@*<table>
     @foreach (var item in Model) {
         <tr>
             <td>@item.TrackName</td>
             <td>@item.ArtistName</td>
-           
+
             @if (item.AddedInPlaylist) {
                 <td><button id="@item.TrackID" style="margin-left: 50px" onclick="addTrack('@item.TrackID')">Delete</button></td>
             }
@@ -72,6 +64,32 @@ else {
             }
         </tr>
     }
+</table>*@
+
+<table class="table">
+    @for (int i = 0; i < Model.Count; i++) {
+        @Html.HiddenFor(model => Model[i].TrackID)
+        @Html.HiddenFor(model => Model[i].TrackName)
+        <tr>
+            <td><a href="/Artists/Details/@Model[i].ArtistID"></a>@Model[i].ArtistName</td>
+            <td>@Model[i].TrackName</td>
+            <td>
+                <audio controls style="width: 150px; display: block;">
+                    <source src="@Model[i].TrackPreviewURL" type="audio/mpeg">
+                    <p>Ooops - please use a more up to date browser so you can preview songs</p>
+                </audio>
+            </td>
+            <td>@Model[i].AlbumName</td>
+            <td><a href="/Albums/Details/@Model[i].AlbumID"> <img src="@Model[i].AlbumImageURL" /></a></td>
+        </tr>
+    }
 </table>
+
+
+
+@*<div id="le-alert" class="alert alert-success" hidden="hidden">
+        <button href="#" type="button" class="close" data-hide="alert">&times;</button>
+        <div id="message"></div>
+    </div>*@
 
 

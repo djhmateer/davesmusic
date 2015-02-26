@@ -44,12 +44,7 @@ namespace DavesMusic.Controllers {
         }
 
         //eg /v1/users/davemateer/playlists
-        //public ActionResult Create(string id) {
         public ActionResult Create(){
-            //string id = "davemateer";
-            // have a null?
-            //string userId = id;
-            //var returnURL = "/Playlists/Create/" + userId;
             var returnURL = "/Playlists/Create";
 
             var ah = new AuthHelper();
@@ -147,9 +142,8 @@ namespace DavesMusic.Controllers {
                 var result3 = sh.CallSpotifyPutAPIPassingToken(access_token, url3);
             }
 
-            return Redirect("/Profiles/Me");
+            return Redirect("/");
         }
-
     }
 
     public class CreatePlaylistReturn {

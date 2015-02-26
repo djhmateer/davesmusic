@@ -1,9 +1,9 @@
-﻿using System.Configuration;
-using System.Data.SqlClient;
-using System.Linq;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
+using System.Data.SqlClient;
+using System.Linq;
 using System.Web.Mvc;
 
 namespace DavesMusic.Controllers {
@@ -37,7 +37,7 @@ namespace DavesMusic.Controllers {
             return View(vm);
         }
 
-        public ActionResult SeminalAlbums() {
+        public ActionResult TopAlbums() {
             var albumIDs = new List<string>();
             using (var connection = new SqlConnection(connectionString))
             using (var command = new SqlCommand(null, connection)) {
@@ -75,21 +75,32 @@ namespace DavesMusic.Controllers {
             return View(a);
         }
 
-        public ActionResult SeminalSongs() {
+        public ActionResult TopTracks() {
             var vm = new List<SongsVM>();
             using (var connection = new SqlConnection(connectionString))
             using (var command = new SqlCommand(null, connection)) {
                 connection.Open();
-                command.CommandText = String.Format("SELECT TrackID, TrackName, ArtistName FROM Tracks");
+                command.CommandText = String.Format("SELECT ArtistName, TrackID, TrackName," +
+                " ArtistID, TrackPreviewURL, AlbumName, AlbumID, AlbumImageURL FROM Tracks");
                 using (var reader = command.ExecuteReader()) {
                     while (reader.Read()) {
                         var trackID = reader.GetString(reader.GetOrdinal("TrackID"));
                         var trackName = reader.GetString(reader.GetOrdinal("TrackName"));
                         var artistName = reader.GetString(reader.GetOrdinal("ArtistName"));
+                        var artistID = reader.GetString(reader.GetOrdinal("ArtistID"));
+                        var trackPreviewURL = reader.GetString(reader.GetOrdinal("TrackPreviewURL"));
+                        var albumName = reader.GetString(reader.GetOrdinal("AlbumName"));
+                        var albumID = reader.GetString(reader.GetOrdinal("AlbumID"));
+                        var albumImageURL = reader.GetString(reader.GetOrdinal("AlbumImageURL"));
                         var songsVM = new SongsVM {
                             TrackID = trackID,
                             TrackName = trackName,
-                            ArtistName = artistName
+                            ArtistName = artistName,
+                            ArtistID = artistID,
+                            TrackPreviewURL = trackPreviewURL,
+                            AlbumName = albumName,
+                            AlbumID = albumID,
+                            AlbumImageURL = albumImageURL
                         };
                         vm.Add(songsVM);
                     }
@@ -133,7 +144,7 @@ namespace DavesMusic.Controllers {
 
                 foreach (var track in vm){
                     if (listTracksAlreadyAdded.Contains(track.TrackID)){
-                        track.AddedInPlaylist = true;
+                        track.AddedInUserPlaylist = true;
                     }
                 }
             }
@@ -141,7 +152,7 @@ namespace DavesMusic.Controllers {
         }
 
         public ActionResult LoginRedirect() {
-            var returnURL = "/Home/SeminalSongs";
+            var returnURL = "/Home/TopTracks";
             var ah = new AuthHelper();
             var result = ah.DoAuth(returnURL, this);
             if (result != null)
@@ -164,7 +175,6 @@ namespace DavesMusic.Controllers {
 
             var meReponse = JsonConvert.DeserializeObject<MeResponse>(result2);
             meReponse.access_token = access_token;
-            //return View(meReponse);
             return View();
         }
 
@@ -207,7 +217,12 @@ namespace DavesMusic.Controllers {
         public string TrackID { get; set; }
         public string TrackName { get; set; }
         public string ArtistName { get; set; }
-        public bool AddedInPlaylist { get; set; }
+        public bool AddedInUserPlaylist { get; set; }
+        public string ArtistID { get; set; }
+        public string TrackPreviewURL{ get; set; }
+        public string AlbumName { get; set; }
+        public string AlbumID { get; set; }
+        public string AlbumImageURL { get; set; }
     }
 
     public class MeResponse {

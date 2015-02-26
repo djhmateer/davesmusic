@@ -1,4 +1,18 @@
-﻿@model DavesMusic.Controllers.SearchViewModel
+﻿@using (Html.BeginForm("Search", "Home", FormMethod.Post, new { id = "logoutForm", @class = "navbar-right" })) {
+    @Html.AntiForgeryToken()
+
+    @*<ul class="nav navbar-nav navbar-right">*@
+    <ul class="nav navbar-nav">
+        <li><input id="artist" name="artist" type="text" placeholder="" /></li>
+        @*@Html.ActionLink("Hello " + User.Identity.GetUserName() + "!", "Index", "Manage", routeValues: null, htmlAttributes: new { title = "Manage" })*@
+        <li><input type="submit" value="Search" /></li>
+        <li>@*<a href="javascript:document.getElementById('logoutForm').submit()">Search</a>*@</li>
+    </ul>
+}
+
+
+
+@*@model DavesMusic.Controllers.SearchViewModel
 
 @if (Model != null) {
     if (Model.ArtistsResponse2 != null) {
@@ -16,7 +30,7 @@ else {
 }
 
 
-@*<form action="/Home/Search">
+<form action="/Home/Search">
     @if (String.IsNullOrEmpty(@Request["artist"]) && (String.IsNullOrEmpty(@Request["playlist"]))) {
         <input id="artist" name="artist" type="text" placeholder="Muse" />
     }
@@ -32,7 +46,7 @@ else {
     <input type="submit" value="Search for Playlists" />
 </form>
 <br />
-<br />*@
+<br />
 
 <p><a href="/Profiles/Me">User Details (login)</a></p>
 <p><a href="/Browse/NewReleases">New Releases (login)</a></p>
@@ -104,6 +118,6 @@ else {
             }
         </table>
     }
-}
+}*@
 
 

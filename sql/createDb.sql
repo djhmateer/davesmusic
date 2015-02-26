@@ -15,9 +15,26 @@ CREATE TABLE [dbo].[Playlist](
 	[ID] ASC
 )WITH (STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF)
 )
-
 GO
-/****** Object:  Table [dbo].[Tracks]    Script Date: 25/02/2015 16:47:04 ******/
+-- /****** Object:  Table [dbo].[Tracks]    Script Date: 25/02/2015 16:47:04 ******/
+-- SET ANSI_NULLS ON
+-- GO
+-- SET QUOTED_IDENTIFIER ON
+-- GO
+-- CREATE TABLE [dbo].[Tracks](
+	-- [ID] [int] IDENTITY(1,1) NOT NULL,
+	-- [TrackID] [nvarchar](50) NOT NULL,
+	-- [TrackName] [nvarchar](255) NOT NULL,
+	-- [ArtistName] [nvarchar](255) NOT NULL,
+ -- CONSTRAINT [PK_Tracks] PRIMARY KEY CLUSTERED 
+-- (
+	-- [ID] ASC
+-- )WITH (STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF)
+-- )
+
+-- GO
+
+/****** Object:  Table [dbo].[Tracks]    Script Date: 26/02/2015 06:57:58 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -27,6 +44,11 @@ CREATE TABLE [dbo].[Tracks](
 	[TrackID] [nvarchar](50) NOT NULL,
 	[TrackName] [nvarchar](255) NOT NULL,
 	[ArtistName] [nvarchar](255) NOT NULL,
+	[ArtistID] [nvarchar](50) NULL,
+	[TrackPreviewURL] [nvarchar](255) NULL,
+	[AlbumName] [nvarchar](255) NULL,
+	[AlbumID] [nvarchar](50) NULL,
+	[AlbumImageURL] [nvarchar](255) NULL,
  CONSTRAINT [PK_Tracks] PRIMARY KEY CLUSTERED 
 (
 	[ID] ASC
@@ -34,6 +56,27 @@ CREATE TABLE [dbo].[Tracks](
 )
 
 GO
+SET IDENTITY_INSERT [dbo].[Tracks] ON 
+
+GO
+INSERT [dbo].[Tracks] ([ID], [TrackID], [TrackName], [ArtistName], [ArtistID], [TrackPreviewURL], [AlbumName], [AlbumID], [AlbumImageURL]) VALUES (3, N'0c4IEciLCDdXEhhKxj4ThA', N'Madness', N'Muse', NULL, NULL, NULL, NULL, NULL)
+GO
+INSERT [dbo].[Tracks] ([ID], [TrackID], [TrackName], [ArtistName], [ArtistID], [TrackPreviewURL], [AlbumName], [AlbumID], [AlbumImageURL]) VALUES (4, N'4VqPOruhp5EdPBeR92t6lQ', N'Uprising', N'Muse', NULL, NULL, NULL, NULL, NULL)
+GO
+INSERT [dbo].[Tracks] ([ID], [TrackID], [TrackName], [ArtistName], [ArtistID], [TrackPreviewURL], [AlbumName], [AlbumID], [AlbumImageURL]) VALUES (8, N'3skn2lauGk7Dx6bVIt5DVj', N'Starlight', N'Muse', NULL, NULL, NULL, NULL, NULL)
+GO
+SET IDENTITY_INSERT [dbo].[Tracks] OFF
+GO
+
+
+
+
+
+
+
+
+
+
 /****** Object:  Table [dbo].[UserPlaylists]    Script Date: 25/02/2015 16:47:04 ******/
 SET ANSI_NULLS ON
 GO
