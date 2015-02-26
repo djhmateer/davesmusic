@@ -25,7 +25,6 @@ namespace DavesMusic.Controllers {
 
             if (isAPost && artist == "") artist = "Muse";
 
-
             // Initial load of the page
             if (artist == "") return View();
 
