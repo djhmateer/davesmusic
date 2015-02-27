@@ -17,17 +17,17 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                @*@Html.ActionLink("Daves Music", "Search", "Home", new { area = "" }, new { @class = "navbar-brand" })*@
                 @Html.ActionLink("Top Tracks", "TopTracks", "Home", new { area = "" }, new { @class = "navbar-brand" })
-
+                <span class="navbar-text">
+                    @Html.Partial("_SearchPartial")
+                </span>
 
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
-                    <li>@Html.ActionLink("Top Albums", "TopAlbums", "Home")</li>
-                    <li>@*@Html.ActionLink("Top Tracks", "TopTracks", "Home")*@</li>
+                    <li>@*@Html.ActionLink("Top Albums", "TopAlbums", "Home")*@</li>
                     <li>@*@Html.ActionLink("My Playlist", "MyPlaylist", "Home")*@</li>
-                    <li>@Html.Partial("_SearchPartial")</li>
+                    <li>@*@Html.Partial("_SearchPartial")*@</li>
                 </ul>
                
                 @*@Html.Partial("_LoginPartial")*@

@@ -71,7 +71,7 @@ else {
         @Html.HiddenFor(model => Model[i].TrackID)
         @Html.HiddenFor(model => Model[i].TrackName)
         <tr>
-            <td><a href="/Artists/Details/@Model[i].ArtistID"></a>@Model[i].ArtistName</td>
+            <td><a href="/Artists/Details/@Model[i].ArtistID">@Model[i].ArtistName</a></td>
             <td>@Model[i].TrackName</td>
             <td>
                 <audio controls style="width: 150px; display: block;">
@@ -79,8 +79,14 @@ else {
                     <p>Ooops - please use a more up to date browser so you can preview songs</p>
                 </audio>
             </td>
+            @if (@Model[i].AddedInUserPlaylist) {
+                <td><button id="@Model[i].TrackID" style="margin-left: 50px" onclick="addTrack('@Model[i].TrackID')">Delete</button></td>
+            }
+            else {
+                <td><button id="@Model[i].TrackID" onclick="addTrack('@Model[i].TrackID')">Add</button></td>
+            }
             <td>@Model[i].AlbumName</td>
-            <td><a href="/Albums/Details/@Model[i].AlbumID"> <img src="@Model[i].AlbumImageURL" /></a></td>
+            <td><a href="/Albums/Details/@Model[i].AlbumID"><img src="@Model[i].AlbumImageURL" /></a></td>
         </tr>
     }
 </table>

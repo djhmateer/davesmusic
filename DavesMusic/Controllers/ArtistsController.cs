@@ -26,12 +26,20 @@ namespace DavesMusic.Controllers {
                         var result = command.ExecuteScalar().ToString();
                         if (result == "0"){
                             // Add track to db
-                            command.CommandText =
-                                String.Format(
-                                    "INSERT INTO Tracks (TrackID, TrackName, ArtistName) VALUES ('{0}', @TrackName,'{1}')",t.id, vm.ArtistDetails.Name);
+                            command.CommandText = 
+                             "INSERT INTO Tracks (TrackID, TrackName, ArtistName, ArtistID, TrackPreviewURL, AlbumName," +
+                             "AlbumID, AlbumImageURL) " +
+                             "VALUES (@TrackID, @TrackName,@ArtistName,@ArtistID,@TrackPreviewURL, @AlbumName, @AlbumID," +
+                             "@AlbumImageURL)";
                             command.Parameters.Clear();
+                            command.Parameters.AddWithValue("@TrackID", t.id);
                             command.Parameters.AddWithValue("@TrackName", t.name);
-
+                            command.Parameters.AddWithValue("@ArtistName", vm.ArtistDetails.Name);
+                            command.Parameters.AddWithValue("@ArtistID", vm.ArtistDetails.Id);
+                            command.Parameters.AddWithValue("@TrackPreviewURL", t.preview_url);
+                            command.Parameters.AddWithValue("@AlbumName", t.album.name);
+                            command.Parameters.AddWithValue("@AlbumID", t.album.id);
+                            command.Parameters.AddWithValue("@AlbumImageURL",t.album.images[2].url);
                             command.CommandType = CommandType.Text;
                             command.ExecuteNonQuery();
                         }

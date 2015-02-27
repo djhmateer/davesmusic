@@ -17,88 +17,95 @@
     }
 </script>
 
+<h2>@Model.ArtistDetails.Name</h2>
 
-    <h2>@Model.ArtistDetails.Name</h2>
+<table>
+    <tr>
+        <td>
+            <table>
+                <td>
+                    @if (@Model.ArtistDetails.Images.Count > 0) {
+                        <img src="@Model.ArtistDetails.Images[1].URL" width="300" />
+                    }
+                </td>
+                <td>
+                    <a href="/Home/Search">Search</a>
 
-    <table>
-        <tr>
-            <td>
-                <table>
-                    <td>
-                        @if (@Model.ArtistDetails.Images.Count > 0) {
-                            <img src="@Model.ArtistDetails.Images[1].URL" width="300" />
+                    <button id="button" onclick=" toggle_visibility('debug'); ">Toggle</button>
+                    <div id="debug" style="display: none">
+                        @foreach (var item in Model.APIDebugList) {
+                            <p>@item.APITime : @item.APIURL</p>
                         }
-                    </td>
-                    <td>
-                        <a href="/Home/Search">Search</a>
+                    </div>
 
-                        <button id="button" onclick=" toggle_visibility('debug'); ">Toggle</button>
-                        <div id="debug" style="display: none">
-                            @foreach (var item in Model.APIDebugList) {
-                                <p>@item.APITime : @item.APIURL</p>
+                    <p><a href="@Model.ArtistDetails.Uri">Direct</a></p>
+                    <p>Popularity: @Model.ArtistDetails.Popularity</p>
+                    <p>Followers Total: @Model.ArtistDetails.followers.Total</p>
+                </td>
+            </table>
+
+        </td>
+        <td>
+            <h3>Related Artists</h3>
+            @foreach (var item in Model.ArtistRelated.artists) {
+                <a href="/Artists/Details/@item.id">@item.name</a>
+                <br />
+            }
+        </td>
+    </tr>
+</table>
+<h3>Biography</h3>
+
+
+@if (Model.ArtistBiography.response.biographies.Count > 0) {
+    foreach (var item in Model.ArtistBiography.response.biographies) {
+        if (item != null) {
+            <button id="button" onclick=" toggle_visibility('idOfElement'); ">Toggle</button>
+            <div>
+                @if (@item.text != null) {
+                    if (item.url != null) {
+                        <div id="idOfElement2" style="display: block; white-space: pre-line">
+                            @if (@item.text.Length > 500) {
+                                @item.text.Substring(0, 500)
+                            }
+                            else {
+                                @item.text
                             }
                         </div>
 
-                        <p><a href="@Model.ArtistDetails.Uri">Direct</a></p>
-                        <p>Popularity: @Model.ArtistDetails.Popularity</p>
-                        <p>Followers Total: @Model.ArtistDetails.followers.Total</p>
-                    </td>
-                </table>
-
-            </td>
-            <td>
-                <h3>Related Artists</h3>
-                @foreach (var item in Model.ArtistRelated.artists) {
-                    <a href="/Artists/Details/@item.id">@item.name</a>
-                    <br />
-                }
-            </td>
-        </tr>
-    </table>
-    <h3>Biography</h3>
-
-
-    @if (Model.ArtistBiography.response.biographies.Count > 0) {
-       foreach (var item in Model.ArtistBiography.response.biographies) {
-            if (item != null) {
-                <button id="button" onclick=" toggle_visibility('idOfElement'); ">Toggle</button>
-                <div>
-                    @if (@item.text != null) {
-                        if (item.url != null) {
-                            <div id="idOfElement2" style="display: block; white-space: pre-line">
-                                @if (@item.text.Length > 500) {
-                                    @item.text.Substring(0, 500)
-                                }
-                                else {
-                                    @item.text
-                                }
-                            </div>
-
-                            <div id="idOfElement" style="display: none; white-space: pre-line">
-                                @item.text - <a href="@item.url">@item.url</a>
-                            </div>
-                        }
+                        <div id="idOfElement" style="display: none; white-space: pre-line">
+                            @item.text - <a href="@item.url">@item.url</a>
+                        </div>
                     }
-                </div>
-            }
+                }
+            </div>
         }
     }
+}
 
 @using (Html.BeginForm()) {
     @Html.HiddenFor(model => Model.ArtistDetails.Name)
-    
+    @Html.HiddenFor(model => Model.ArtistDetails.Id)
+
     @Model.ArtistDetails.Name
-    
+
     <h3>Top Tracks</h3>
     <div class="action">
         <button class="actionButton" type="submit">
-            <span>Add tracks to DavesMusic playlist</span>
+            <span>Admin - Add to Top Tracks</span>
         </button>
     </div>
     <table class="table">
         @for (int i = 0; i < Model.ArtistTopTracks.tracks.Count; i++) {
             @Html.HiddenFor(model => Model.ArtistTopTracks.tracks[i].id)
             @Html.HiddenFor(model => Model.ArtistTopTracks.tracks[i].name)
+            @Html.HiddenFor(model => Model.ArtistTopTracks.tracks[i].preview_url)
+            @Html.HiddenFor(model => Model.ArtistTopTracks.tracks[i].album.name)
+            @Html.HiddenFor(model => Model.ArtistTopTracks.tracks[i].album.id)
+            @Html.HiddenFor(model => Model.ArtistTopTracks.tracks[i].album.images[0].url)
+            @Html.HiddenFor(model => Model.ArtistTopTracks.tracks[i].album.images[1].url)
+            @Html.HiddenFor(model => Model.ArtistTopTracks.tracks[i].album.images[2].url)
+            
             <tr>
                 <td>@Model.ArtistTopTracks.tracks[i].name</td>
                 <td>@Html.EditorFor(model => Model.ArtistTopTracks.tracks[i].Checked)</td>
@@ -119,7 +126,7 @@
     <h3>Albums</h3>
     <div class="action">
         <button class="actionButton" type="submit">
-            <span>Add albums to DavesMusic playlist</span>
+            <span>Admin - Add all to Top Tracks</span>
         </button>
     </div>
     <table class="table">
