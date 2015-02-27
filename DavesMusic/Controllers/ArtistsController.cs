@@ -40,7 +40,14 @@ namespace DavesMusic.Controllers {
                             command.Parameters.AddWithValue("@AlbumName", t.album.name);
                             command.Parameters.AddWithValue("@AlbumID", t.album.id);
                             command.Parameters.AddWithValue("@AlbumImageURL",t.album.images[2].url);
-                            command.Parameters.AddWithValue("@AlbumDate",t.album.DateOfAlbumRelease);
+                            string dateOfAlbum = t.album.DateOfAlbumRelease;
+                            DateTime d;
+                            bool r = DateTime.TryParse(dateOfAlbum, out d);
+                            if (!r){
+                                d = new DateTime(2000,1,1);
+                            }
+
+                            command.Parameters.AddWithValue("@AlbumDate",d);
                             command.CommandType = CommandType.Text;
                             command.ExecuteNonQuery();
                         }
