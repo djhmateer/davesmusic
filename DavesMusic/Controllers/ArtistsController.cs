@@ -28,9 +28,9 @@ namespace DavesMusic.Controllers {
                             // Add track to db
                             command.CommandText = 
                              "INSERT INTO Tracks (TrackID, TrackName, ArtistName, ArtistID, TrackPreviewURL, AlbumName," +
-                             "AlbumID, AlbumImageURL) " +
+                             "AlbumID, AlbumImageURL, AlbumDate) " +
                              "VALUES (@TrackID, @TrackName,@ArtistName,@ArtistID,@TrackPreviewURL, @AlbumName, @AlbumID," +
-                             "@AlbumImageURL)";
+                             "@AlbumImageURL, @AlbumDate)";
                             command.Parameters.Clear();
                             command.Parameters.AddWithValue("@TrackID", t.id);
                             command.Parameters.AddWithValue("@TrackName", t.name);
@@ -40,13 +40,16 @@ namespace DavesMusic.Controllers {
                             command.Parameters.AddWithValue("@AlbumName", t.album.name);
                             command.Parameters.AddWithValue("@AlbumID", t.album.id);
                             command.Parameters.AddWithValue("@AlbumImageURL",t.album.images[2].url);
+                            command.Parameters.AddWithValue("@AlbumDate",t.album.DateOfAlbumRelease);
                             command.CommandType = CommandType.Text;
                             command.ExecuteNonQuery();
                         }
                     }
                     else{
                         // If its been unchecked and is there in the database?
-                        command.CommandText = String.Format("SELECT COUNT(*) FROM Playlist WHERE TrackID = '{0}'", t.id);
+                        //command.CommandText = String.Format("SELECT COUNT(*) FROM Playlist WHERE TrackID = '{0}'", t.id);
+                        command.CommandText = String.Format("SELECT COUNT(*) FROM Tracks WHERE TrackID = '{0}'", t.id);
+
                         command.CommandType = CommandType.Text;
                         var result = command.ExecuteScalar().ToString();
                         if (result != "0"){
@@ -133,7 +136,7 @@ namespace DavesMusic.Controllers {
             var tracks = artistTopTracks.tracks;
             var top5 = tracks.OrderByDescending(x => x.popularity).Take(5);
             
-            // Iterate through records in db, setting vm checked property
+            // Iterate through records in db, setting vm checked property for Admin - add to playlist
             using (var connection = new SqlConnection(connectionString))
             using (var command = new SqlCommand(null, connection)) {
                 connection.Open();
@@ -158,7 +161,17 @@ namespace DavesMusic.Controllers {
             }
             artistTopTracks.tracks = top5.ToList();
 
-
+            var sh = new SpotifyHelper();
+            // Loop through the top5 tracks and get the date that this track/album was released
+            foreach (var track in top5) {
+                // Get the albumID
+                var albumID = track.album.id;
+                // album details
+                var apiResult2 = sh.CallSpotifyAPIAlbumDetails(null, albumID);
+                var albumDetails = JsonConvert.DeserializeObject<AlbumDetails>(apiResult2.Json);
+                // changing the list while iterating!
+                track.album.DateOfAlbumRelease = albumDetails.release_date;
+            }
 
 
             // All Artists albums - possibly more than 50!
@@ -390,6 +403,7 @@ namespace DavesMusic.Controllers {
             public string name { get; set; }
             public string type { get; set; }
             public string uri { get; set; }
+            public string DateOfAlbumRelease { get; set; }
         }
 
         public class ExternalUrls2 {

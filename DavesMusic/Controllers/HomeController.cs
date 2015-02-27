@@ -80,7 +80,8 @@ namespace DavesMusic.Controllers {
             using (var command = new SqlCommand(null, connection)) {
                 connection.Open();
                 command.CommandText = String.Format("SELECT ArtistName, TrackID, TrackName," +
-                " ArtistID, TrackPreviewURL, AlbumName, AlbumID, AlbumImageURL FROM Tracks");
+                " ArtistID, TrackPreviewURL, AlbumName, AlbumID, AlbumImageURL, AlbumDate FROM Tracks" +
+                " ORDER BY AlbumDate desc");
                 using (var reader = command.ExecuteReader()) {
                     while (reader.Read()) {
                         var trackID = reader.GetString(reader.GetOrdinal("TrackID"));
@@ -91,6 +92,7 @@ namespace DavesMusic.Controllers {
                         var albumName = reader.GetString(reader.GetOrdinal("AlbumName"));
                         var albumID = reader.GetString(reader.GetOrdinal("AlbumID"));
                         var albumImageURL = reader.GetString(reader.GetOrdinal("AlbumImageURL"));
+                        DateTime albumDate = reader.GetDateTime(reader.GetOrdinal("AlbumDate"));
                         var songsVM = new SongsVM {
                             TrackID = trackID,
                             TrackName = trackName,
@@ -99,27 +101,28 @@ namespace DavesMusic.Controllers {
                             TrackPreviewURL = trackPreviewURL,
                             AlbumName = albumName,
                             AlbumID = albumID,
-                            AlbumImageURL = albumImageURL
+                            AlbumImageURL = albumImageURL,
+                            AlbumDate = albumDate
                         };
                         vm.Add(songsVM);
                     }
                 }
             }
             // It is possible to be on this page without logging in - user clicks via LoginRedirect to come back here
-            if (Session["AccessToken"] != null){
+            if (Session["AccessToken"] != null) {
                 ViewBag.access_token = Session["AccessToken"].ToString();
-   
+
                 var access_token = Session["AccessToken"].ToString();
 
                 // If this is the first time back to this page after logging in, need to get the UserID
-                if (Session["UserID"] == null){
+                if (Session["UserID"] == null) {
                     var url2 = "https://api.spotify.com/v1/me";
                     var sh = new SpotifyHelper();
                     var result2 = sh.CallSpotifyAPIPassingToken(access_token, url2);
 
                     var meReponse = JsonConvert.DeserializeObject<MeResponse>(result2);
                     meReponse.access_token = access_token;
-                   
+
                     Session["UserID"] = meReponse.id;
                 }
                 // Grab the userID as we'll use that in our database to remember what a user has selected
@@ -141,8 +144,8 @@ namespace DavesMusic.Controllers {
                     }
                 }
 
-                foreach (var track in vm){
-                    if (listTracksAlreadyAdded.Contains(track.TrackID)){
+                foreach (var track in vm) {
+                    if (listTracksAlreadyAdded.Contains(track.TrackID)) {
                         track.AddedInUserPlaylist = true;
                     }
                 }
@@ -181,9 +184,9 @@ namespace DavesMusic.Controllers {
             // Insert into the database 
             var userID = Session["UserID"];
             // give illusion interface is working if not logged in
-            if (userID != null){
+            if (userID != null) {
                 using (var connection = new SqlConnection(connectionString))
-                using (var command = new SqlCommand(null, connection)){
+                using (var command = new SqlCommand(null, connection)) {
                     connection.Open();
 
                     // Is the track already in playlist?  If yes, then delete from list user's playlist
@@ -191,8 +194,7 @@ namespace DavesMusic.Controllers {
                     command.Parameters.AddWithValue("@UserID", userID);
                     command.Parameters.AddWithValue("@TrackID", trackId);
                     var result = command.ExecuteScalar().ToString();
-                    if (result == "0")
-                    {
+                    if (result == "0") {
                         command.CommandText =
                             String.Format("INSERT into UserPlaylists (UserID, TrackID) VALUES (@UserID2, @TrackID2)");
                         command.Parameters.AddWithValue("@UserID2", userID);
@@ -218,10 +220,11 @@ namespace DavesMusic.Controllers {
         public string ArtistName { get; set; }
         public bool AddedInUserPlaylist { get; set; }
         public string ArtistID { get; set; }
-        public string TrackPreviewURL{ get; set; }
+        public string TrackPreviewURL { get; set; }
         public string AlbumName { get; set; }
         public string AlbumID { get; set; }
         public string AlbumImageURL { get; set; }
+        public DateTime AlbumDate { get; set; }
     }
 
     public class MeResponse {

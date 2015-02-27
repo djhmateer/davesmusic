@@ -73,6 +73,7 @@ else {
         <tr>
             <td><a href="/Artists/Details/@Model[i].ArtistID">@Model[i].ArtistName</a></td>
             <td>@Model[i].TrackName</td>
+            <td>@Model[i].AlbumDate.ToString("yyyy")</td>
             <td>
                 <audio controls style="width: 150px; display: block;">
                     <source src="@Model[i].TrackPreviewURL" type="audio/mpeg">

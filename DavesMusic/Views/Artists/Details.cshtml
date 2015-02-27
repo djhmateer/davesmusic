@@ -92,7 +92,7 @@
     <h3>Top Tracks</h3>
     <div class="action">
         <button class="actionButton" type="submit">
-            <span>Admin - Add to Top Tracks</span>
+            <span>Admin - Add/Remove to Top Tracks</span>
         </button>
     </div>
     <table class="table">
@@ -105,6 +105,7 @@
             @Html.HiddenFor(model => Model.ArtistTopTracks.tracks[i].album.images[0].url)
             @Html.HiddenFor(model => Model.ArtistTopTracks.tracks[i].album.images[1].url)
             @Html.HiddenFor(model => Model.ArtistTopTracks.tracks[i].album.images[2].url)
+            @Html.HiddenFor(model => Model.ArtistTopTracks.tracks[i].album.DateOfAlbumRelease)
             
             <tr>
                 <td>@Model.ArtistTopTracks.tracks[i].name</td>

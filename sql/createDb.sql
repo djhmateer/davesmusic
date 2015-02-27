@@ -2,8 +2,7 @@ drop table Playlist
 drop table tracks
 drop table UserPlaylists
 GO
-
-/****** Object:  Table [dbo].[Playlist]    Script Date: 27/02/2015 05:51:54 ******/
+/****** Object:  Table [dbo].[Playlist]    Script Date: 27/02/2015 06:58:42 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -22,7 +21,7 @@ CREATE TABLE [dbo].[Playlist](
 )
 
 GO
-/****** Object:  Table [dbo].[Tracks]    Script Date: 27/02/2015 05:51:54 ******/
+/****** Object:  Table [dbo].[Tracks]    Script Date: 27/02/2015 06:58:42 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -37,6 +36,7 @@ CREATE TABLE [dbo].[Tracks](
 	[AlbumName] [nvarchar](255) NULL,
 	[AlbumID] [nvarchar](50) NULL,
 	[AlbumImageURL] [nvarchar](255) NULL,
+	[AlbumDate] [datetime] NULL,
  CONSTRAINT [PK_Tracks] PRIMARY KEY CLUSTERED 
 (
 	[ID] ASC
@@ -44,7 +44,7 @@ CREATE TABLE [dbo].[Tracks](
 )
 
 GO
-/****** Object:  Table [dbo].[UserPlaylists]    Script Date: 27/02/2015 05:51:54 ******/
+/****** Object:  Table [dbo].[UserPlaylists]    Script Date: 27/02/2015 06:58:42 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -364,42 +364,38 @@ GO
 SET IDENTITY_INSERT [dbo].[Tracks] ON 
 
 GO
-INSERT [dbo].[Tracks] ([ID], [TrackID], [TrackName], [ArtistName], [ArtistID], [TrackPreviewURL], [AlbumName], [AlbumID], [AlbumImageURL]) VALUES (11, N'0c4IEciLCDdXEhhKxj4ThA', N'Madness', N'Muse', N'12Chz98pHFMPJEknJQMWvI', N'https://p.scdn.co/mp3-preview/014c44998d46b5a2e52f9b75d1c28a187247d3c8', N'The 2nd Law', N'3KuXEGcqLcnEYWnn3OEGy0', N'https://i.scdn.co/image/2b412376036f7bc4394a120b9b7281442a6c2357')
+INSERT [dbo].[Tracks] ([ID], [TrackID], [TrackName], [ArtistName], [ArtistID], [TrackPreviewURL], [AlbumName], [AlbumID], [AlbumImageURL], [AlbumDate]) VALUES (24, N'0c4IEciLCDdXEhhKxj4ThA', N'Madness', N'Muse', N'12Chz98pHFMPJEknJQMWvI', N'https://p.scdn.co/mp3-preview/014c44998d46b5a2e52f9b75d1c28a187247d3c8', N'The 2nd Law', N'3KuXEGcqLcnEYWnn3OEGy0', N'https://i.scdn.co/image/2b412376036f7bc4394a120b9b7281442a6c2357', CAST(N'2012-09-24 00:00:00.000' AS DateTime))
 GO
-INSERT [dbo].[Tracks] ([ID], [TrackID], [TrackName], [ArtistName], [ArtistID], [TrackPreviewURL], [AlbumName], [AlbumID], [AlbumImageURL]) VALUES (12, N'4VqPOruhp5EdPBeR92t6lQ', N'Uprising', N'Muse', N'12Chz98pHFMPJEknJQMWvI', N'https://p.scdn.co/mp3-preview/4fcb9dc0aa51f0f5e4f95ef550a813a89d9c395d', N'The Resistance', N'0eFHYz8NmK75zSplL5qlfM', N'https://i.scdn.co/image/f6500569e0b98137a6d26eee33286c5bb9ff623c')
+INSERT [dbo].[Tracks] ([ID], [TrackID], [TrackName], [ArtistName], [ArtistID], [TrackPreviewURL], [AlbumName], [AlbumID], [AlbumImageURL], [AlbumDate]) VALUES (25, N'4VqPOruhp5EdPBeR92t6lQ', N'Uprising', N'Muse', N'12Chz98pHFMPJEknJQMWvI', N'https://p.scdn.co/mp3-preview/4fcb9dc0aa51f0f5e4f95ef550a813a89d9c395d', N'The Resistance', N'0eFHYz8NmK75zSplL5qlfM', N'https://i.scdn.co/image/f6500569e0b98137a6d26eee33286c5bb9ff623c', CAST(N'2009-09-10 00:00:00.000' AS DateTime))
 GO
-INSERT [dbo].[Tracks] ([ID], [TrackID], [TrackName], [ArtistName], [ArtistID], [TrackPreviewURL], [AlbumName], [AlbumID], [AlbumImageURL]) VALUES (13, N'5ERnPWGQc5QK7M7HW3rjC6', N'Paranoid', N'Black Sabbath', N'5M52tdBnJaKSvOpJGz8mfZ', N'https://p.scdn.co/mp3-preview/ead22582dbac29f7e7104fa60c9fa2c532ffe7b0', N'Paranoid (Remastered)', N'7DBES3oV6jjAmWob7kJg6P', N'https://i.scdn.co/image/22046ce2b8e0d559c5364b31b7616edeac85a114')
+INSERT [dbo].[Tracks] ([ID], [TrackID], [TrackName], [ArtistName], [ArtistID], [TrackPreviewURL], [AlbumName], [AlbumID], [AlbumImageURL], [AlbumDate]) VALUES (26, N'3skn2lauGk7Dx6bVIt5DVj', N'Starlight', N'Muse', N'12Chz98pHFMPJEknJQMWvI', N'https://p.scdn.co/mp3-preview/0e946239cd2f8264b27f2ffb1e5ff0718290f679', N'Black Holes And Revelations', N'0lw68yx3MhKflWFqCsGkIs', N'https://i.scdn.co/image/6c751d61a730ab14dca55b1c7d3ce1f7f838aa23', CAST(N'2006-06-19 00:00:00.000' AS DateTime))
 GO
-INSERT [dbo].[Tracks] ([ID], [TrackID], [TrackName], [ArtistName], [ArtistID], [TrackPreviewURL], [AlbumName], [AlbumID], [AlbumImageURL]) VALUES (14, N'4HzdhXWJqczW6gOIXT6QRH', N'Iron Man', N'Black Sabbath', N'5M52tdBnJaKSvOpJGz8mfZ', N'https://p.scdn.co/mp3-preview/1ee92cb008bb25c5590f1b7c7e07303dfd0a7b7f', N'Paranoid (Remastered)', N'7DBES3oV6jjAmWob7kJg6P', N'https://i.scdn.co/image/22046ce2b8e0d559c5364b31b7616edeac85a114')
+INSERT [dbo].[Tracks] ([ID], [TrackID], [TrackName], [ArtistName], [ArtistID], [TrackPreviewURL], [AlbumName], [AlbumID], [AlbumImageURL], [AlbumDate]) VALUES (29, N'1UBQ5GK8JaQjm5VbkBZY66', N'Sharp Dressed Man (2008 Remastered LP Version)', N'ZZ Top', N'2AM4ilv6UzW0uMRuqKtDgN', N'https://p.scdn.co/mp3-preview/cde2a145ad66d756ef1717a97ed1841ee7048cfb', N'Eliminator', N'5LMGAYhn2ywaxGZdtmXGpw', N'https://i.scdn.co/image/832cbab41aa6239e672eb785f2ec3cbf788855ff', CAST(N'1983-03-23 00:00:00.000' AS DateTime))
 GO
-INSERT [dbo].[Tracks] ([ID], [TrackID], [TrackName], [ArtistName], [ArtistID], [TrackPreviewURL], [AlbumName], [AlbumID], [AlbumImageURL]) VALUES (15, N'0S3gpZzlT9Hb7CCSV2owX7', N'Mama, I''m Coming Home', N'Ozzy Osbourne', N'6ZLTlhejhndI4Rh53vYhrY', N'https://p.scdn.co/mp3-preview/b0076437adc18b6d9ef81a02aa0890722324e965', N'No More Tears (Bonus Track Version)', N'6eh82ojicL8RSJF7GkYTh7', N'https://i.scdn.co/image/6c3292ac6db0f9384927e5060e93af1eca489c41')
+INSERT [dbo].[Tracks] ([ID], [TrackID], [TrackName], [ArtistName], [ArtistID], [TrackPreviewURL], [AlbumName], [AlbumID], [AlbumImageURL], [AlbumDate]) VALUES (30, N'7t6CAWplijBj4sdl0q3z0e', N'Legs (2008 Remastered Album Edit Version)', N'ZZ Top', N'2AM4ilv6UzW0uMRuqKtDgN', N'https://p.scdn.co/mp3-preview/b51737840dd206542d0ee61e479ac1269003987e', N'Eliminator', N'5LMGAYhn2ywaxGZdtmXGpw', N'https://i.scdn.co/image/832cbab41aa6239e672eb785f2ec3cbf788855ff', CAST(N'1983-03-23 00:00:00.000' AS DateTime))
 GO
-INSERT [dbo].[Tracks] ([ID], [TrackID], [TrackName], [ArtistName], [ArtistID], [TrackPreviewURL], [AlbumName], [AlbumID], [AlbumImageURL]) VALUES (16, N'7w6PJe5KBPyvuRYxFkPssC', N'No More Tears', N'Ozzy Osbourne', N'6ZLTlhejhndI4Rh53vYhrY', N'https://p.scdn.co/mp3-preview/6a402ac16c927eaa19b0b2d31781e1f65d6132db', N'No More Tears (Bonus Track Version)', N'6eh82ojicL8RSJF7GkYTh7', N'https://i.scdn.co/image/6c3292ac6db0f9384927e5060e93af1eca489c41')
+INSERT [dbo].[Tracks] ([ID], [TrackID], [TrackName], [ArtistName], [ArtistID], [TrackPreviewURL], [AlbumName], [AlbumID], [AlbumImageURL], [AlbumDate]) VALUES (31, N'11cPCZ0BYWJmAm7N8eDxtu', N'Johnny B. Goode - Single Version', N'Chuck Berry', N'293zczrfYafIItmnmM3coR', N'https://p.scdn.co/mp3-preview/aeb87cfd86fe72b286a83ebf34ff58b1f2374dd2', N'Berry Is On Top', N'2W3GOisQj5XAFbtxmbDBr5', N'https://i.scdn.co/image/a635693a4a861e794f6de41e853ad33849a7855a', CAST(N'1959-01-01 00:00:00.000' AS DateTime))
 GO
-INSERT [dbo].[Tracks] ([ID], [TrackID], [TrackName], [ArtistName], [ArtistID], [TrackPreviewURL], [AlbumName], [AlbumID], [AlbumImageURL]) VALUES (17, N'7D7tJseXUZAxhg7l8RbTOj', N'Crazy Crazy Nights', N'KISS', N'07XSN3sPlIlB2L2XNcTwJw', N'https://p.scdn.co/mp3-preview/1eb1180a05a251e2864c7d83888394eb25eeff52', N'Crazy Nights (Remastered Version)', N'20C4ft1hM6sICitdBEsMZa', N'https://i.scdn.co/image/5fbec9ab8590d8fe9283eaae9d6ab63c8caf11ae')
+INSERT [dbo].[Tracks] ([ID], [TrackID], [TrackName], [ArtistName], [ArtistID], [TrackPreviewURL], [AlbumName], [AlbumID], [AlbumImageURL], [AlbumDate]) VALUES (32, N'0N7LKqYxUrg5UFb6Z4OSDF', N'Hard To Handle', N'The Black Crowes', N'5krkohEVJYw0qoB5VWwxaC', N'https://p.scdn.co/mp3-preview/2d530e5a72343412463ad526ebb4acc6a89b0fec', N'Shake Your Money Maker', N'6QU6itggAYKtzjKOMqz8Ch', N'https://i.scdn.co/image/2f77e2ce3d040f113e420a0a18666c9f5ec43ddf', CAST(N'1990-01-01 00:00:00.000' AS DateTime))
 GO
-INSERT [dbo].[Tracks] ([ID], [TrackID], [TrackName], [ArtistName], [ArtistID], [TrackPreviewURL], [AlbumName], [AlbumID], [AlbumImageURL]) VALUES (18, N'0LN0ASTtcGIbNTnjSHG6eO', N'Pour Some Sugar On Me (2012)', N'Def Leppard', N'6H1RjVyNruCmrBEWRbD0VZ', N'https://p.scdn.co/mp3-preview/f8ad90d3836a565655d5fe6e8ee76c7464edcba9', N'Pour Some Sugar On Me (2012)', N'5eJnzLcFCVt0Wcepaj6GiW', N'https://i.scdn.co/image/611db1f195b6580e228f6dfe2a75f59dff8905e1')
+INSERT [dbo].[Tracks] ([ID], [TrackID], [TrackName], [ArtistName], [ArtistID], [TrackPreviewURL], [AlbumName], [AlbumID], [AlbumImageURL], [AlbumDate]) VALUES (35, N'1AhDOtG9vPSOmsWgNW0BEY', N'Bohemian Rhapsody - Remastered 2011', N'Queen', N'1dfeR4HaWDbWqFHLkxsg1d', N'https://p.scdn.co/mp3-preview/0fae7e2f08f20f23cb5393b2bd8291e1db6c7da9', N'A Night At The Opera (2011 Remaster)', N'1TSZDcvlPtAnekTaItI3qO', N'https://i.scdn.co/image/05e237f63c31eb4941753e5fb171e31cfca6a877', CAST(N'1975-11-21 00:00:00.000' AS DateTime))
 GO
-INSERT [dbo].[Tracks] ([ID], [TrackID], [TrackName], [ArtistName], [ArtistID], [TrackPreviewURL], [AlbumName], [AlbumID], [AlbumImageURL]) VALUES (19, N'1hKdDCpiI9mqz1jVHRKG0E', N'Enter Sandman', N'Metallica', N'2ye2Wgw4gimLv2eAKyk1NB', N'https://p.scdn.co/mp3-preview/41113bb93fe7a245a752e23b695aa6f5b3eec559', N'Metallica', N'37lWyRxkf3wQHCOlXM5WfX', N'https://i.scdn.co/image/28674e2f4fbcbfb0028b6b8769af6fce1f44412f')
+INSERT [dbo].[Tracks] ([ID], [TrackID], [TrackName], [ArtistName], [ArtistID], [TrackPreviewURL], [AlbumName], [AlbumID], [AlbumImageURL], [AlbumDate]) VALUES (36, N'4pbJqGIASGPr0ZpGpnWkDn', N'We Will Rock You - Remastered 2011', N'Queen', N'1dfeR4HaWDbWqFHLkxsg1d', N'https://p.scdn.co/mp3-preview/182947e6d8b9a048948cb74afd2675cb6dce135f', N'News Of The World (2011 Remaster)', N'7tB40pGzj6Tg0HePj2jWZt', N'https://i.scdn.co/image/249cb44ec1b26a567ae996bcea62fb8226910899', CAST(N'1977-10-28 00:00:00.000' AS DateTime))
 GO
-INSERT [dbo].[Tracks] ([ID], [TrackID], [TrackName], [ArtistName], [ArtistID], [TrackPreviewURL], [AlbumName], [AlbumID], [AlbumImageURL]) VALUES (20, N'3ZFwuJwUpIl0GeXsvF1ELf', N'Nothing Else Matters', N'Metallica', N'2ye2Wgw4gimLv2eAKyk1NB', N'https://p.scdn.co/mp3-preview/0412497220348ab14f8914b85bbda4417c10f032', N'Metallica', N'37lWyRxkf3wQHCOlXM5WfX', N'https://i.scdn.co/image/28674e2f4fbcbfb0028b6b8769af6fce1f44412f')
+INSERT [dbo].[Tracks] ([ID], [TrackID], [TrackName], [ArtistName], [ArtistID], [TrackPreviewURL], [AlbumName], [AlbumID], [AlbumImageURL], [AlbumDate]) VALUES (37, N'32OlwWuMpZ6b0aN2RZOeMS', N'Uptown Funk', N'Mark Ronson', N'3hv9jJF3adDNsBSIQDqcjp', N'https://p.scdn.co/mp3-preview/57fbea25cab128a8ec695af69e58dd5a98ba1e7c', N'Uptown Special', N'3vLaOYCNCzngDf8QdBg2V1', N'https://i.scdn.co/image/ae0c6b9da25cd8c02c958fd4998b1807c9238e07', CAST(N'2015-01-12 00:00:00.000' AS DateTime))
 GO
-INSERT [dbo].[Tracks] ([ID], [TrackID], [TrackName], [ArtistName], [ArtistID], [TrackPreviewURL], [AlbumName], [AlbumID], [AlbumImageURL]) VALUES (21, N'1Hl2rRCw06EPGD2DGWLCuz', N'Violence And Force', N'Exciter', N'1jH2JkQvdH6R63yORA8GTd', N'https://p.scdn.co/mp3-preview/212bced2ec9fb93760eca108a100c86f7b1f976e', N'New Testament', N'5eFR1SErPmyghAsKh10XDm', N'https://i.scdn.co/image/03207d28fb590ed36cfaceddcb0a9504fbab344a')
+INSERT [dbo].[Tracks] ([ID], [TrackID], [TrackName], [ArtistName], [ArtistID], [TrackPreviewURL], [AlbumName], [AlbumID], [AlbumImageURL], [AlbumDate]) VALUES (40, N'7LygtNjQ65PSdzVjUnHXQb', N'Cherry Pie', N'Warrant', N'7HLvzuM9p11k9lUQfSM4Rq', N'https://p.scdn.co/mp3-preview/ad7b0fa8685ba6a4d4a3831b494b612989b3360d', N'Cherry Pie', N'4LgsHyufRmmcB1HIqTES19', N'https://i.scdn.co/image/dfa1cedc593f6cb06adfc8fc830fe5e3d3eec440', CAST(N'1990-10-04 00:00:00.000' AS DateTime))
+GO
+INSERT [dbo].[Tracks] ([ID], [TrackID], [TrackName], [ArtistName], [ArtistID], [TrackPreviewURL], [AlbumName], [AlbumID], [AlbumImageURL], [AlbumDate]) VALUES (41, N'6mcxQ1Y3uQRU0IHsvdNLH1', N'Where Is My Mind? (Remastered)', N'Pixies', N'6zvul52xwTWzilBZl6BUbT', N'https://p.scdn.co/mp3-preview/f5b45332151a7dab439016940779c9524fc8e1bd', N'Surfer Rosa & Come On Pilgrim', N'2l7RPWC3E6eStJJLBsUeCI', N'https://i.scdn.co/image/9bf3ad2f0954dd692d5894a31ff33b2163ec62f0', CAST(N'1988-01-01 00:00:00.000' AS DateTime))
 GO
 SET IDENTITY_INSERT [dbo].[Tracks] OFF
 GO
 SET IDENTITY_INSERT [dbo].[UserPlaylists] ON 
 
 GO
-INSERT [dbo].[UserPlaylists] ([ID], [UserID], [TrackID]) VALUES (21, N'davemateer', N'4VqPOruhp5EdPBeR92t6lQ')
+INSERT [dbo].[UserPlaylists] ([ID], [UserID], [TrackID]) VALUES (26, N'davemateer', N'0c4IEciLCDdXEhhKxj4ThA')
 GO
-INSERT [dbo].[UserPlaylists] ([ID], [UserID], [TrackID]) VALUES (22, N'davemateer', N'0S3gpZzlT9Hb7CCSV2owX7')
-GO
-INSERT [dbo].[UserPlaylists] ([ID], [UserID], [TrackID]) VALUES (23, N'davemateer', N'4HzdhXWJqczW6gOIXT6QRH')
-GO
-INSERT [dbo].[UserPlaylists] ([ID], [UserID], [TrackID]) VALUES (24, N'davemateer', N'7D7tJseXUZAxhg7l8RbTOj')
-GO
-INSERT [dbo].[UserPlaylists] ([ID], [UserID], [TrackID]) VALUES (25, N'davemateer', N'0LN0ASTtcGIbNTnjSHG6eO')
+INSERT [dbo].[UserPlaylists] ([ID], [UserID], [TrackID]) VALUES (27, N'davemateer', N'11cPCZ0BYWJmAm7N8eDxtu')
 GO
 SET IDENTITY_INSERT [dbo].[UserPlaylists] OFF
 GO
