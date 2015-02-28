@@ -21,7 +21,6 @@ namespace DavesMusic.Controllers
             };
             apiDebugList.Add(apiDebug);
 
-
             var vm = new AlbumDetailsViewModel {
                 APIDebugList = apiDebugList,
                 AlbumDetails = albumDetails,

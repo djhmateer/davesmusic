@@ -42,9 +42,17 @@ namespace DavesMusic.Controllers {
                             command.Parameters.AddWithValue("@AlbumImageURL",t.album.images[2].url);
                             string dateOfAlbum = t.album.DateOfAlbumRelease;
                             DateTime d;
+                            // Maybe its in 2000/01/01
                             bool r = DateTime.TryParse(dateOfAlbum, out d);
                             if (!r){
-                                d = new DateTime(2000,1,1);
+                                // Maybe its in the format 2000
+                                int year;
+                                if (Int32.TryParse(dateOfAlbum, out year)){
+                                    if (DateTime.TryParse(year + "/1/1", out d)){}
+                                    else{
+                                        d = new DateTime(1900, 1, 1);  
+                                    }
+                                }
                             }
 
                             command.Parameters.AddWithValue("@AlbumDate",d);
@@ -142,7 +150,7 @@ namespace DavesMusic.Controllers {
             // Only want top 5 tracks in toptracks
             var tracks = artistTopTracks.tracks;
             var top5 = tracks.OrderByDescending(x => x.popularity).Take(5);
-            
+
             // Iterate through records in db, setting vm checked property for Admin - add to playlist
             using (var connection = new SqlConnection(connectionString))
             using (var command = new SqlCommand(null, connection)) {
