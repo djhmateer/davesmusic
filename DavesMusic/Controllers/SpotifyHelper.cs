@@ -9,8 +9,8 @@ using System.Threading;
 using System.Web;
 using System.Web.Script.Serialization;
 
-namespace DavesMusic.Controllers{
-   
+namespace DavesMusic.Controllers {
+
     public class SpotifyHelper {
 
         public string CallSpotifyAPIPassingToken(string access_token, string url) {
@@ -32,15 +32,15 @@ namespace DavesMusic.Controllers{
         public string CallSpotifyPutAPIPassingToken(string access_token, string url) {
             var client = new HttpClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", access_token);
-            var httpResponse = client.PutAsync(url,null);
+            var httpResponse = client.PutAsync(url, null);
             var result = httpResponse.Result.Content.ReadAsStringAsync().Result;
             return result;
         }
 
-        public class Thing{
+        public class Thing {
             public string name { get; set; }
         }
-       
+
         public string CallSpotifyCreatePlaylistPostAPIPassingToken(string access_token, string url) {
             var client = new HttpClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", access_token);
@@ -116,6 +116,15 @@ namespace DavesMusic.Controllers{
             };
         }
 
+        public APIResult CallSpotifyAPIMultipleAlbumDetails(StopWatchResult stopWatchResult, string csvListOfAlbums) {
+            var url = String.Format("https://api.spotify.com/v1/albums/?ids={0}", csvListOfAlbums);
+            var json = CallAPI(stopWatchResult, url);
+            return new APIResult {
+                Json = json,
+                Url = url
+            };
+        }
+
         public APIResult CallSpotifyAPIArtistRelated(StopWatchResult stopWatchResult, string id) {
             var url = String.Format("https://api.spotify.com/v1/artists/{0}/related-artists", id);
             var json = CallAPI(stopWatchResult, url);
@@ -138,6 +147,9 @@ namespace DavesMusic.Controllers{
         }
 
         public static string CallAPI(StopWatchResult stopWatchResult = null, string url = "") {
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
+
             int errorCount = 0;
             string text = null;
             bool done = false;
@@ -157,10 +169,18 @@ namespace DavesMusic.Controllers{
                 catch (WebException ex) {
                     Debug.WriteLine("Exception: " + ex.Message);
                     Thread.Sleep(100);
-                    errorCount ++;
+                    errorCount++;
                     if (errorCount == 10)
                         throw;
                 }
+            }
+
+            stopWatch.Stop();
+            TimeSpan ts = stopWatch.Elapsed;
+            string elapsedTime = String.Format("{0:0}", ts.TotalMilliseconds);
+            if (stopWatchResult != null){
+                stopWatchResult.ElapsedTime = ts;
+                stopWatchResult.TimeInMs = elapsedTime;
             }
 
             if (String.IsNullOrEmpty(text)) throw new InvalidOperationException();
