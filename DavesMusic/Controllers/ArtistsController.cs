@@ -76,7 +76,8 @@ namespace DavesMusic.Controllers {
                 }
 
                 // Albums - Iterate through vm and save the checked albums id's to db
-                foreach (var album in vm.ArtistAlbums.items) {
+                //foreach (var album in vm.ArtistAlbums.items) {
+                foreach (var album in vm.ArtistAlbums.albums) {
                     if (album.Checked) {
                         // Is it already there in the database?
                         command.CommandText = String.Format("SELECT COUNT(*) FROM Playlist WHERE AlbumID = '{0}'", album.id);
@@ -128,15 +129,15 @@ namespace DavesMusic.Controllers {
             var apiHelper = new SpotifyHelper();
             // 1. Get the Artist's details
             var stopWatchResult = new StopWatchResult();
-            string json = apiHelper.CallSpotifyAPIArtist(stopWatchResult: stopWatchResult,
-                artistCode: id);
+            string json = apiHelper.CallSpotifyAPIArtist(stopWatchResult: stopWatchResult,artistCode: id);
             ViewBag.Id = id;
             var artistDetails = JsonConvert.DeserializeObject<ArtistDetails>(json);
 
             var apiDebugList = new List<APIDebug>();
             var apiDebug = new APIDebug {
                 APITime = String.Format("{0:0}", stopWatchResult.ElapsedTime.TotalMilliseconds),
-                APIURL = artistDetails.Href
+                APIURL = artistDetails.Href,
+                APITimeSpan = stopWatchResult.ElapsedTime
             };
             apiDebugList.Add(apiDebug);
 
@@ -145,7 +146,8 @@ namespace DavesMusic.Controllers {
             var artistTopTracks = JsonConvert.DeserializeObject<ArtistTopTracks>(apiResult.Json);
             apiDebug = new APIDebug {
                 APITime = String.Format("{0:0}", stopWatchResult.ElapsedTime.TotalMilliseconds),
-                APIURL = apiResult.Url
+                APIURL = apiResult.Url,
+                APITimeSpan = stopWatchResult.ElapsedTime
             };
             apiDebugList.Add(apiDebug);
 
@@ -179,7 +181,7 @@ namespace DavesMusic.Controllers {
             artistTopTracks.tracks = top5.ToList();
 
             var sh = new SpotifyHelper();
-            // 3. Loop through the top5 tracks and get the date that this track/album was released - using GetMultipleAlbums
+            // 3. Top5 tracks and get the date that this track/album was released - using GetMultipleAlbums
             var csvStringOfAlbumIDs = "";
 
             foreach (var track in top5) {
@@ -190,21 +192,43 @@ namespace DavesMusic.Controllers {
             var apiResult2 = sh.CallSpotifyAPIMultipleAlbumDetails(stopWatchResult, csvStringOfAlbumIDs);
             apiDebug = new APIDebug {
                 APITime = String.Format("{0:0}", stopWatchResult.ElapsedTime.TotalMilliseconds),
-                APIURL = apiResult2.Url
+                APIURL = apiResult2.Url,
+                APITimeSpan = stopWatchResult.ElapsedTime
             };
             apiDebugList.Add(apiDebug);
-
 
             var multiAlbumDetails = JsonConvert.DeserializeObject<MultipleAlbums>(apiResult2.Json);
             foreach (var album in multiAlbumDetails.albums) {
                 // get the associated album in top5
                 var albumInTop5 = top5.FirstOrDefault(x => x.album.id == album.id);
                 albumInTop5.album.DateOfAlbumRelease = album.release_date;
+                albumInTop5.album.album_type = album.album_type;
+                albumInTop5.album.available_markets = album.available_markets;
             }
 
             // 4. All Artists albums - possibly more than 50!
             apiResult = apiHelper.CallSpotifyAPIArtistAlbums(stopWatchResult, id);
             var artistAlbums = JsonConvert.DeserializeObject<ArtistAlbums>(apiResult.Json);
+
+            // Only want 'albums' and not single nor compilation
+           artistAlbums.items = artistAlbums.items.Where(x => x.album_type == "album").ToList();
+
+            // 4.5 Get full album information (20 at a time)
+           csvStringOfAlbumIDs = "";
+           foreach (var album in artistAlbums.items.Take(20)) {
+               csvStringOfAlbumIDs += album.id + ",";
+           }
+           csvStringOfAlbumIDs = csvStringOfAlbumIDs.TrimEnd(',');
+
+           var apiResult3 = sh.CallSpotifyAPIMultipleAlbumDetails(stopWatchResult, csvStringOfAlbumIDs);
+           var apiDebug3 = new APIDebug {
+               APITime = String.Format("{0:0}", stopWatchResult.ElapsedTime.TotalMilliseconds),
+               APIURL = apiResult3.Url,
+               APITimeSpan = stopWatchResult.ElapsedTime
+           };
+           apiDebugList.Add(apiDebug3);
+           MultipleAlbums multiAlbumDetails3 = JsonConvert.DeserializeObject<MultipleAlbums>(apiResult3.Json);
+
             // set Checked status of ArtistAlbums
             // Iterate through records in db, setting vm checked property
             using (var connection = new SqlConnection(connectionString))
@@ -223,7 +247,9 @@ namespace DavesMusic.Controllers {
 
                 foreach (var albumID in albumIDs) {
                     // Is this album in the current search list?
-                    var album = artistAlbums.items.FirstOrDefault(x => x.id == albumID);
+                    //var album = artistAlbums.items.FirstOrDefault(x => x.id == albumID);
+                    var album = multiAlbumDetails3.albums.FirstOrDefault(x => x.id == albumID);
+
                     if (album != null) {
                         album.Checked = true;
                     }
@@ -232,7 +258,8 @@ namespace DavesMusic.Controllers {
 
             apiDebug = new APIDebug {
                 APITime = String.Format("{0:0}", stopWatchResult.ElapsedTime.TotalMilliseconds),
-                APIURL = apiResult.Url
+                APIURL = apiResult.Url,
+                APITimeSpan = stopWatchResult.ElapsedTime
             };
             apiDebugList.Add(apiDebug);
 
@@ -243,7 +270,8 @@ namespace DavesMusic.Controllers {
             artistRelated.artists = y;
             apiDebug = new APIDebug {
                 APITime = String.Format("{0:0}", stopWatchResult.ElapsedTime.TotalMilliseconds),
-                APIURL = apiResult.Url
+                APIURL = apiResult.Url,
+                APITimeSpan = stopWatchResult.ElapsedTime
             };
             apiDebugList.Add(apiDebug);
 
@@ -260,26 +288,26 @@ namespace DavesMusic.Controllers {
             }
             apiDebug = new APIDebug {
                 APITime = String.Format("{0:0}", stopWatchResult.ElapsedTime.TotalMilliseconds),
-                APIURL = apiResult.Url
+                APIURL = apiResult.Url,
+                APITimeSpan = stopWatchResult.ElapsedTime
+                
             };
             apiDebugList.Add(apiDebug);
 
-            // Get total time in API calls **HERE** not in ms!!
-            TimeSpan ts = new TimeSpan();
+            // Get total time in API calls
+            var ts = new TimeSpan();
             foreach (var apiDebug2 in apiDebugList){
-                string thing = apiDebug2.APITime;
-                TimeSpan tsResult;
-                TimeSpan.TryParse(thing, out tsResult);
-                ts = ts + tsResult;
+                ts = ts + apiDebug2.APITimeSpan;
             }
             var vm = new ArtistDetailsViewModel {
                 APIDebugList = apiDebugList,
                 ArtistDetails = artistDetails,
                 ArtistTopTracks = artistTopTracks,
-                ArtistAlbums = artistAlbums,
+                //ArtistAlbums = artistAlbums,
+                ArtistAlbums = multiAlbumDetails3,
                 ArtistRelated = artistRelated,
                 ArtistBiography = artistBiography,
-                TotalTimeInMSOfAPICalls = ts.TotalMilliseconds.ToString()
+                TotalTimeInMSOfAPICalls = String.Format("{0:0}",ts.TotalMilliseconds)
             };
             return vm;
         }
@@ -380,6 +408,7 @@ namespace DavesMusic.Controllers {
             public Tracks tracks { get; set; }
             public string type { get; set; }
             public string uri { get; set; }
+            public bool Checked { get; set; }
         }
 
         public List<Album> albums { get; set; }
@@ -488,13 +517,15 @@ namespace DavesMusic.Controllers {
     public class APIDebug {
         public string APITime { get; set; }
         public string APIURL { get; set; }
+        public TimeSpan APITimeSpan { get; set; }
     }
 
     public class ArtistDetailsViewModel {
         public List<APIDebug> APIDebugList { get; set; }
         public ArtistDetails ArtistDetails { get; set; }
         public ArtistTopTracks ArtistTopTracks { get; set; }
-        public ArtistAlbums ArtistAlbums { get; set; }
+        //public ArtistAlbums ArtistAlbums { get; set; }
+        public MultipleAlbums ArtistAlbums { get; set; }
         public ArtistRelated ArtistRelated { get; set; }
         public ArtistBiography ArtistBiography { get; set; }
         public string TotalTimeInMSOfAPICalls { get; set; }

@@ -32,10 +32,12 @@
                     <a href="/Home/Search">Search</a>
 
                     <button id="button" onclick=" toggle_visibility('debug'); ">Toggle</button>
+                    <!-- Debug Times-->
                     <div id="debug" style="display: none">
                         @foreach (var item in Model.APIDebugList) {
                             <p>@item.APITime : @item.APIURL</p>
                         }
+                        Total: @Model.TotalTimeInMSOfAPICalls ms
                     </div>
 
                     <p><a href="@Model.ArtistDetails.Uri">Direct</a></p>
@@ -106,7 +108,7 @@
             @Html.HiddenFor(model => Model.ArtistTopTracks.tracks[i].album.images[1].url)
             @Html.HiddenFor(model => Model.ArtistTopTracks.tracks[i].album.images[2].url)
             @Html.HiddenFor(model => Model.ArtistTopTracks.tracks[i].album.DateOfAlbumRelease)
-            
+
             <tr>
                 <td>@Model.ArtistTopTracks.tracks[i].name</td>
                 <td>@Html.EditorFor(model => Model.ArtistTopTracks.tracks[i].Checked)</td>
@@ -119,11 +121,14 @@
                 <td><a href="@Model.ArtistTopTracks.tracks[i].uri">Direct</a></td>
                 <td>@Model.ArtistTopTracks.tracks[i].popularity</td>
                 <td>@Model.ArtistTopTracks.tracks[i].album.name</td>
+                <td>@Model.ArtistTopTracks.tracks[i].album.album_type</td>
+                <td>@Model.ArtistTopTracks.tracks[i].album.available_markets.Count</td>
                 <td><a href="/Albums/Details/@Model.ArtistTopTracks.tracks[i].album.id"> <img src="@Model.ArtistTopTracks.tracks[i].album.images[2].url" /> </a></td>
             </tr>
         }
     </table>
 
+    <!-- Full list of Albums-->
     <h3>Albums</h3>
     <div class="action">
         <button class="actionButton" type="submit">
@@ -131,17 +136,20 @@
         </button>
     </div>
     <table class="table">
-        @for (int i = 0; i < Model.ArtistAlbums.items.Count; i++) {
-            @Html.HiddenFor(model => Model.ArtistAlbums.items[i].id)
-            @Html.HiddenFor(model => Model.ArtistAlbums.items[i].name)
+        @for (int i = 0; i < Model.ArtistAlbums.albums.Count; i++) {
+            @Html.HiddenFor(model => Model.ArtistAlbums.albums[i].id)
+            @Html.HiddenFor(model => Model.ArtistAlbums.albums[i].name)
             <tr>
-                <td>@Model.ArtistAlbums.items[i].name</td>
-                <td>@Html.EditorFor(model => Model.ArtistAlbums.items[i].Checked)</td>
-                <td><a href="@Model.ArtistAlbums.items[i].uri">Direct</a></td>
+                <td>@Model.ArtistAlbums.albums[i].name</td>
+                <td>@Html.EditorFor(model => Model.ArtistAlbums.albums[i].Checked)</td>
+                <td><a href="@Model.ArtistAlbums.albums[i].uri">Direct</a></td>
+                @*<td>@Model.ArtistAlbums.items[i].album_type</td>*@
+                @*<td>@Model.ArtistAlbums.items[i].available_markets.Count</td>*@
+                <td>@Model.ArtistAlbums.albums[i].release_date</td>
                 <td>
-                    <a href="/Albums/Details/@Model.ArtistAlbums.items[i].id">
-                        @if (Model.ArtistAlbums.items[i].images.Count > 2) {
-                            <img src="@Model.ArtistAlbums.items[i].images[2].url" />
+                    <a href="/Albums/Details/@Model.ArtistAlbums.albums[i].id">
+                        @if (Model.ArtistAlbums.albums[i].images.Count > 2) {
+                            <img src="@Model.ArtistAlbums.albums[i].images[2].url" />
                         }
 
                     </a>
@@ -150,6 +158,7 @@
         }
     </table>
 
+    <!-- Image at bottom-->
     if (@Model.ArtistDetails.Images.Count > 0) {
         <img src="@Model.ArtistDetails.Images[0].URL" />
     }
