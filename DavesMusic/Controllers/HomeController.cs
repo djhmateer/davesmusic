@@ -1,4 +1,8 @@
-﻿using Newtonsoft.Json;
+﻿using System.Diagnostics;
+using System.IO;
+using System.Net;
+using System.Threading;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -9,6 +13,80 @@ using System.Web.Mvc;
 namespace DavesMusic.Controllers {
     public class HomeController : Controller {
         string connectionString = ConfigurationManager.ConnectionStrings["DavesMusicConnection"].ConnectionString;
+
+        // Designed to find out what is happening on various servers
+        public ActionResult SpeedTest(){
+            var sp = new SpotifyHelper();
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
+
+            var url1 = "https://api.spotify.com/v1/artists/3hv9jJF3adDNsBSIQDqcjp";
+            var text = CallSpeedTestAPI(null, url1);
+
+            var url2 = "https://api.spotify.com/v1/artists/3hv9jJF3adDNsBSIQDqcjp/top-tracks?country=GB";
+            text = CallSpeedTestAPI(null, url2);
+
+            var url3 =
+                "https://api.spotify.com/v1/albums/?ids=3vLaOYCNCzngDf8QdBg2V1,3vLaOYCNCzngDf8QdBg2V1,3vLaOYCNCzngDf8QdBg2V1,3vLaOYCNCzngDf8QdBg2V1,3vLaOYCNCzngDf8QdBg2V1";
+            text = CallSpeedTestAPI(null, url3);
+
+            var url4 =
+                "https://api.spotify.com/v1/albums/?ids=3vLaOYCNCzngDf8QdBg2V1,1cvcW2kVGrN9tdyoaVjmf0,0m8wvW3WNm9D7J0KUlbf3h,1nojrwBYMmq5jY1gJYtywa,0lrBKnE4qQnr8VM56J3gow,4ttFaYVApnyblaGHNwGAf7,62Qu5QoNx3De0p5qQT0u7o,69UMMsDqpBwy7Dr2oZn2Ra,311yDc6Ow5WF8puYAAte1B,05IBZIkN7fdbiVCgGCJCWX,6Z9OaWRC8Bsb64OyhiZ49L,6GMHua20KrXo7MlfwbTWk1,40pk5HrcQ3TDP0KBP3KhfQ,6KZwPiN4oDTcvgtbHGr1A1,2zlXL0UVwQrH9FRFSvNOBg,5hNZOA0YJBq0bGYnWGSo5x,0QluVU5ReXs7oI1ZyS101F,6pJf6YRFeyj615gGq6yDnZ,777UeiexLMf1mFR42nSoR2,2qkxQSusZ6JXAzpnptVUo1";
+            text = CallSpeedTestAPI(null, url4);
+
+            var url5 = "https://api.spotify.com/v1/artists/3hv9jJF3adDNsBSIQDqcjp/albums?country=GB&limit=50";
+            text = CallSpeedTestAPI(null, url5);
+
+            var url6 = "https://api.spotify.com/v1/artists/3hv9jJF3adDNsBSIQDqcjp/related-artists";
+            text = CallSpeedTestAPI(null, url6);
+            
+            stopWatch.Stop();
+            TimeSpan ts = stopWatch.Elapsed;
+            string elapsedTime = String.Format("{0:0}", ts.TotalMilliseconds);
+            ViewBag.totalTime = elapsedTime;
+
+            return View();
+        }
+
+        public static string CallSpeedTestAPI(StopWatchResult stopWatchResult = null, string url = "") {
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
+
+            int errorCount = 0;
+            string text = null;
+            bool done = false;
+            while (!done) {
+               // try {
+                    var request = (HttpWebRequest)WebRequest.Create(url);
+                    request.Accept = "application/json";
+
+                    var response = (HttpWebResponse)request.GetResponse();
+
+                    using (var sr = new StreamReader(response.GetResponseStream())) {
+                        text = sr.ReadToEnd();
+                    }
+
+                    done = true;
+                //}
+                //catch (WebException ex) {
+                //    Debug.WriteLine("Exception: " + ex.Message);
+                //    Thread.Sleep(100);
+                //    errorCount++;
+                //    if (errorCount == 10)
+                //        throw;
+                //}
+            }
+
+            stopWatch.Stop();
+            TimeSpan ts = stopWatch.Elapsed;
+            string elapsedTime = String.Format("{0:0}", ts.TotalMilliseconds);
+            if (stopWatchResult != null) {
+                stopWatchResult.ElapsedTime = ts;
+                stopWatchResult.TimeInMs = elapsedTime;
+            }
+
+            return text;
+        }
 
         public ActionResult Search(string artist = "", int offset = 0, string playlist = "", bool isAPost = false) {
             var spotifyHelper = new SpotifyHelper();
