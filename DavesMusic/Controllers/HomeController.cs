@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading;
 using Newtonsoft.Json;
 using System;
@@ -15,31 +17,30 @@ namespace DavesMusic.Controllers {
         string connectionString = ConfigurationManager.ConnectionStrings["DavesMusicConnection"].ConnectionString;
 
         // Designed to find out what is happening on various servers
-        public ActionResult SpeedTest(){
-            var sp = new SpotifyHelper();
+        public ActionResult SpeedTest() {
             var stopWatch = new Stopwatch();
             stopWatch.Start();
 
             var url1 = "https://api.spotify.com/v1/artists/3hv9jJF3adDNsBSIQDqcjp";
-            var text = CallSpeedTestAPI(null, url1);
+            var text = CallSpeedTestAPI(url1);
 
             var url2 = "https://api.spotify.com/v1/artists/3hv9jJF3adDNsBSIQDqcjp/top-tracks?country=GB";
-            text = CallSpeedTestAPI(null, url2);
+            text = CallSpeedTestAPI(url2);
 
             var url3 =
                 "https://api.spotify.com/v1/albums/?ids=3vLaOYCNCzngDf8QdBg2V1,3vLaOYCNCzngDf8QdBg2V1,3vLaOYCNCzngDf8QdBg2V1,3vLaOYCNCzngDf8QdBg2V1,3vLaOYCNCzngDf8QdBg2V1";
-            text = CallSpeedTestAPI(null, url3);
+            text = CallSpeedTestAPI(url3);
 
             var url4 =
                 "https://api.spotify.com/v1/albums/?ids=3vLaOYCNCzngDf8QdBg2V1,1cvcW2kVGrN9tdyoaVjmf0,0m8wvW3WNm9D7J0KUlbf3h,1nojrwBYMmq5jY1gJYtywa,0lrBKnE4qQnr8VM56J3gow,4ttFaYVApnyblaGHNwGAf7,62Qu5QoNx3De0p5qQT0u7o,69UMMsDqpBwy7Dr2oZn2Ra,311yDc6Ow5WF8puYAAte1B,05IBZIkN7fdbiVCgGCJCWX,6Z9OaWRC8Bsb64OyhiZ49L,6GMHua20KrXo7MlfwbTWk1,40pk5HrcQ3TDP0KBP3KhfQ,6KZwPiN4oDTcvgtbHGr1A1,2zlXL0UVwQrH9FRFSvNOBg,5hNZOA0YJBq0bGYnWGSo5x,0QluVU5ReXs7oI1ZyS101F,6pJf6YRFeyj615gGq6yDnZ,777UeiexLMf1mFR42nSoR2,2qkxQSusZ6JXAzpnptVUo1";
-            text = CallSpeedTestAPI(null, url4);
+            text = CallSpeedTestAPI(url4);
 
             var url5 = "https://api.spotify.com/v1/artists/3hv9jJF3adDNsBSIQDqcjp/albums?country=GB&limit=50";
-            text = CallSpeedTestAPI(null, url5);
+            text = CallSpeedTestAPI(url5);
 
             var url6 = "https://api.spotify.com/v1/artists/3hv9jJF3adDNsBSIQDqcjp/related-artists";
-            text = CallSpeedTestAPI(null, url6);
-            
+            text = CallSpeedTestAPI(url6);
+
             stopWatch.Stop();
             TimeSpan ts = stopWatch.Elapsed;
             string elapsedTime = String.Format("{0:0}", ts.TotalMilliseconds);
@@ -48,43 +49,59 @@ namespace DavesMusic.Controllers {
             return View();
         }
 
-        public static string CallSpeedTestAPI(StopWatchResult stopWatchResult = null, string url = "") {
+        public ActionResult SpeedTestWithToken() {
+            // get the token.. make sure to login first!
+            var access_token = Session["AccessToken"].ToString();
+
             var stopWatch = new Stopwatch();
             stopWatch.Start();
 
-            int errorCount = 0;
-            string text = null;
-            bool done = false;
-            while (!done) {
-               // try {
-                    var request = (HttpWebRequest)WebRequest.Create(url);
-                    request.Accept = "application/json";
+            var url1 = "https://api.spotify.com/v1/artists/3hv9jJF3adDNsBSIQDqcjp";
+            var text = CallSpeedTestAPI(url1);
 
-                    var response = (HttpWebResponse)request.GetResponse();
+            var url2 = "https://api.spotify.com/v1/artists/3hv9jJF3adDNsBSIQDqcjp/top-tracks?country=GB";
+            text = CallSpeedTestAPI(url2);
 
-                    using (var sr = new StreamReader(response.GetResponseStream())) {
-                        text = sr.ReadToEnd();
-                    }
+            var url3 =
+                "https://api.spotify.com/v1/albums/?ids=3vLaOYCNCzngDf8QdBg2V1,3vLaOYCNCzngDf8QdBg2V1,3vLaOYCNCzngDf8QdBg2V1,3vLaOYCNCzngDf8QdBg2V1,3vLaOYCNCzngDf8QdBg2V1";
+            text = CallSpeedTestAPI(url3);
 
-                    done = true;
-                //}
-                //catch (WebException ex) {
-                //    Debug.WriteLine("Exception: " + ex.Message);
-                //    Thread.Sleep(100);
-                //    errorCount++;
-                //    if (errorCount == 10)
-                //        throw;
-                //}
-            }
+            var url4 =
+                "https://api.spotify.com/v1/albums/?ids=3vLaOYCNCzngDf8QdBg2V1,1cvcW2kVGrN9tdyoaVjmf0,0m8wvW3WNm9D7J0KUlbf3h,1nojrwBYMmq5jY1gJYtywa,0lrBKnE4qQnr8VM56J3gow,4ttFaYVApnyblaGHNwGAf7,62Qu5QoNx3De0p5qQT0u7o,69UMMsDqpBwy7Dr2oZn2Ra,311yDc6Ow5WF8puYAAte1B,05IBZIkN7fdbiVCgGCJCWX,6Z9OaWRC8Bsb64OyhiZ49L,6GMHua20KrXo7MlfwbTWk1,40pk5HrcQ3TDP0KBP3KhfQ,6KZwPiN4oDTcvgtbHGr1A1,2zlXL0UVwQrH9FRFSvNOBg,5hNZOA0YJBq0bGYnWGSo5x,0QluVU5ReXs7oI1ZyS101F,6pJf6YRFeyj615gGq6yDnZ,777UeiexLMf1mFR42nSoR2,2qkxQSusZ6JXAzpnptVUo1";
+            text = CallSpeedTestAPI(url4);
+
+            var url5 = "https://api.spotify.com/v1/artists/3hv9jJF3adDNsBSIQDqcjp/albums?country=GB&limit=50";
+            text = CallSpeedTestAPI(url5);
+
+            var url6 = "https://api.spotify.com/v1/artists/3hv9jJF3adDNsBSIQDqcjp/related-artists";
+            text = CallSpeedTestAPI(url6);
 
             stopWatch.Stop();
             TimeSpan ts = stopWatch.Elapsed;
             string elapsedTime = String.Format("{0:0}", ts.TotalMilliseconds);
-            if (stopWatchResult != null) {
-                stopWatchResult.ElapsedTime = ts;
-                stopWatchResult.TimeInMs = elapsedTime;
-            }
+            ViewBag.totalTime = elapsedTime;
+            ViewBag.access_token = access_token;
 
+            return View();
+        }
+
+        public static string CallSpeedTestAPIWithToken(string url, string access_token) {
+            var client = new HttpClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", access_token);
+            var httpResponse = client.GetAsync(url);
+            var result = httpResponse.Result.Content.ReadAsStringAsync().Result;
+            return result;
+        }
+
+        public static string CallSpeedTestAPI(string url) {
+            string text;
+            var request = (HttpWebRequest)WebRequest.Create(url);
+            request.Accept = "application/json";
+            var response = (HttpWebResponse)request.GetResponse();
+
+            using (var sr = new StreamReader(response.GetResponseStream())) {
+                text = sr.ReadToEnd();
+            }
             return text;
         }
 
@@ -278,8 +295,7 @@ namespace DavesMusic.Controllers {
                         command.Parameters.AddWithValue("@UserID2", userID);
                         command.Parameters.AddWithValue("@TrackID2", trackId);
                         command.ExecuteNonQuery();
-                    }
-                    else {
+                    } else {
                         command.CommandText =
                                String.Format("DELETE FROM UserPlaylists WHERE UserID = @UserID2 AND TrackID=@TrackID2");
                         command.Parameters.AddWithValue("@UserID2", userID);

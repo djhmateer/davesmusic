@@ -23,6 +23,7 @@ namespace DavesMusic {
                 name: "Default",
                 url: "{controller}/{action}/{id}",
                 defaults: new { controller = "Home", action = "TopTracks", id = UrlParameter.Optional }
+                //defaults: new { controller = "Home", action = "SpeedTest", id = UrlParameter.Optional }
             );
         }
     }

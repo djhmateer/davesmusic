@@ -254,6 +254,7 @@
     <Content Include="Views\Home\MyPlaylist.cshtml" />
     <Content Include="Views\Shared\_SearchPartial.cshtml" />
     <Content Include="Views\Home\SpeedTest.cshtml" />
+    <Content Include="Views\Home\SpeedTestWithToken.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
