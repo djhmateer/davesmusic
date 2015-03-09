@@ -99,7 +99,7 @@ namespace DavesMusic.Controllers {
         }
 
         public APIResult CallSpotifyAPIArtistAlbums(StopWatchResult stopWatchResult, string artistCode) {
-            var url = String.Format("https://api.spotify.com/v1/artists/{0}/albums?country=GB&limit=50", artistCode);
+            var url = String.Format("https://api.spotify.com/v1/artists/{0}/albums?country=GB&album_type=album&limit=50", artistCode);
             var json = CallAPI(stopWatchResult, url);
             return new APIResult {
                 Json = json,
