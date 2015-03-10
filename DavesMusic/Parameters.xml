@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<parameters>
+  <parameter name="DatabaseConnectionString">
+    <parameterEntry match="/configuration/connectionStrings/add[@name='DavesMusicConnection']/@DavesMusicConnection" scope="\\web.config$" kind="XmlFile"/>
+  </parameter>
+</parameters>
