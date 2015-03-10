@@ -121,8 +121,9 @@
                 <td><a href="@Model.ArtistTopTracks.tracks[i].uri">Direct</a></td>
                 <td>@Model.ArtistTopTracks.tracks[i].popularity</td>
                 <td>@Model.ArtistTopTracks.tracks[i].album.name</td>
-                <td>@Model.ArtistTopTracks.tracks[i].album.album_type</td>
-                <td>@Model.ArtistTopTracks.tracks[i].album.available_markets.Count</td>
+                <td>@*@Model.ArtistTopTracks.tracks[i].album.album_type*@</td>
+                <td>@Model.ArtistTopTracks.tracks[i].album.DateOfAlbumRelease</td>
+@*                <td>@Model.ArtistTopTracks.tracks[i].album.available_markets.Count</td>*@
                 <td><a href="/Albums/Details/@Model.ArtistTopTracks.tracks[i].album.id"> <img src="@Model.ArtistTopTracks.tracks[i].album.images[2].url" /> </a></td>
             </tr>
         }
