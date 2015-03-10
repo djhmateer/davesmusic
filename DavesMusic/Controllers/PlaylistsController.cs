@@ -8,7 +8,7 @@ using System.Web.Mvc;
 
 namespace DavesMusic.Controllers {
     public class PlaylistsController : Controller {
-        string connectionString = ConfigurationManager.ConnectionStrings["DavesMusicConnection"].ConnectionString;
+        string connectionString = ConfigurationManager.ConnectionStrings["DavesMusicConnection2"].ConnectionString;
 
         public ActionResult Details(string id, string userId) {
             var returnURL = "/Playlists/Details/" + id + "/" + userId;

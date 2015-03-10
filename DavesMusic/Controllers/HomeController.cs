@@ -14,7 +14,7 @@ using System.Web.Mvc;
 
 namespace DavesMusic.Controllers {
     public class HomeController : Controller {
-        string connectionString = ConfigurationManager.ConnectionStrings["DavesMusicConnection"].ConnectionString;
+        string connectionString = ConfigurationManager.ConnectionStrings["DavesMusicConnection2"].ConnectionString;
 
         // Designed to find out what is happening on various servers
         public ActionResult SpeedTest() {

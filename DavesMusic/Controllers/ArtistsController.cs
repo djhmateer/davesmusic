@@ -9,7 +9,7 @@ using System.Web.Mvc;
 
 namespace DavesMusic.Controllers {
     public class ArtistsController : Controller {
-        string connectionString = ConfigurationManager.ConnectionStrings["DavesMusicConnection"].ConnectionString;
+        string connectionString = ConfigurationManager.ConnectionStrings["DavesMusicConnection2"].ConnectionString;
 
         [HttpPost]
         public ActionResult Details(ArtistDetailsViewModel vm, string id) {
