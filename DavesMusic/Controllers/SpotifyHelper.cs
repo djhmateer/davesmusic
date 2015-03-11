@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -8,6 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Web;
 using System.Web.Script.Serialization;
+using Newtonsoft.Json;
 
 namespace DavesMusic.Controllers {
 
@@ -115,6 +118,30 @@ namespace DavesMusic.Controllers {
                 Url = url
             };
         }
+        public List<MultipleAlbums.Album> CallSpotifyAPIMultipleAlbumDetails2(StopWatchResult stopWatchResult,IEnumerable<ArtistAlbums.Item> albums = null) {
+            // can only send 20 at a time, so have to chunck if more
+            int numberOfTimesToLoop = albums.Count() / 20 + 1;
+
+            int chunckUpTo = 0;
+            var masterListAlbums = new List<MultipleAlbums.Album>();
+            for (int i = 0; i < numberOfTimesToLoop; i++) {
+                //foreach (var album in studioAlbums.Take(20)) {
+                var csvStringOfAlbumIDs = "";
+                foreach (var album in albums.Skip(chunckUpTo).Take(20)) {
+                    csvStringOfAlbumIDs += album.id + ",";
+                }
+                csvStringOfAlbumIDs = csvStringOfAlbumIDs.TrimEnd(',');
+                var url = String.Format("https://api.spotify.com/v1/albums/?ids={0}", csvStringOfAlbumIDs);
+                var json = CallAPI(stopWatchResult, url);
+                MultipleAlbums multiAlbumDetails3 = JsonConvert.DeserializeObject<MultipleAlbums>(json);
+                // map to list
+                foreach (var albumx in multiAlbumDetails3.albums) {
+                    masterListAlbums.Add(albumx);
+                }
+                chunckUpTo += 20;
+            }
+            return masterListAlbums;
+        }
 
         public APIResult CallSpotifyAPIMultipleAlbumDetails(StopWatchResult stopWatchResult, string csvListOfAlbums) {
             var url = String.Format("https://api.spotify.com/v1/albums/?ids={0}", csvListOfAlbums);
@@ -178,7 +205,7 @@ namespace DavesMusic.Controllers {
             stopWatch.Stop();
             TimeSpan ts = stopWatch.Elapsed;
             string elapsedTime = String.Format("{0:0}", ts.TotalMilliseconds);
-            if (stopWatchResult != null){
+            if (stopWatchResult != null) {
                 stopWatchResult.ElapsedTime = ts;
                 stopWatchResult.TimeInMs = elapsedTime;
             }
