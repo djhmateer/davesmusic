@@ -120,12 +120,14 @@ namespace DavesMusic.Controllers {
         }
         public List<MultipleAlbums.Album> CallSpotifyAPIMultipleAlbumDetails2(StopWatchResult stopWatchResult,IEnumerable<ArtistAlbums.Item> albums = null) {
             // can only send 20 at a time, so have to chunck if more
-            int numberOfTimesToLoop = albums.Count() / 20 + 1;
+            //http://stackoverflow.com/a/17974/26086
+            var recordsPerPage = 20;
+            var records = albums.Count();
+            int numberOfTimesToLoop = (records + recordsPerPage - 1) / recordsPerPage;
 
             int chunckUpTo = 0;
             var masterListAlbums = new List<MultipleAlbums.Album>();
             for (int i = 0; i < numberOfTimesToLoop; i++) {
-                //foreach (var album in studioAlbums.Take(20)) {
                 var csvStringOfAlbumIDs = "";
                 foreach (var album in albums.Skip(chunckUpTo).Take(20)) {
                     csvStringOfAlbumIDs += album.id + ",";

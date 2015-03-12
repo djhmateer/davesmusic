@@ -155,22 +155,7 @@ namespace DavesMusic.Controllers {
             studioAlbums = studioAlbums.Where(x => !x.name.ToLower().Contains("live in"));
             studioAlbums = studioAlbums.Where(x => !x.name.ToLower().Contains("greatest hits"));
 
-            // 4.5 Get full album information (20 at a time)
-            //var csvStringOfAlbumIDs = "";
-            ////foreach (var album in studioAlbums.Take(20)) {
-            //foreach (var album in studioAlbums) {
-            //    csvStringOfAlbumIDs += album.id + ",";
-            //}
-            //csvStringOfAlbumIDs = csvStringOfAlbumIDs.TrimEnd(',');
-
             List<MultipleAlbums.Album> multiAlbumDetails3 = sh.CallSpotifyAPIMultipleAlbumDetails2(stopWatchResult, studioAlbums);
-            //var apiDebug3 = new APIDebug {
-            //    APITime = String.Format("{0:0}", stopWatchResult.ElapsedTime.TotalMilliseconds),
-            //    APIURL = apiResult3.Url,
-            //    APITimeSpan = stopWatchResult.ElapsedTime
-            //};
-            //apiDebugList.Add(apiDebug3);
-            //var multiAlbumDetails3 = JsonConvert.DeserializeObject<MultipleAlbums>(apiResult3.Json);
 
             // set Checked status of ArtistAlbums
             // Iterate through records in db, setting vm checked property
