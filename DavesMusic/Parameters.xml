@@ -1,0 +1,4 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<parameter name="DavesMusicConnection2-Web.config Connection String" defaultValue="">
+  <parameterEntry kind="XmlFile" scope="\\web.config$" match="/configuration/connectionStrings/add[@name='DavesMusicConnection2']" />
+</parameter>

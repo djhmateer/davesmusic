@@ -241,17 +241,25 @@ namespace DavesMusic.Controllers {
 
                 var xxx = multiAlbumDetails3.Select(x => x.tracks.items.Where(yy => yy.name == trackName));
                 // Descending so last one, is the earliest one
+                var listOfTrackName = new List<string>();
                 foreach (var album in multiAlbumDetails3.OrderByDescending(al => al.release_date)) {
                     foreach (var track in album.tracks.items) {
                         if (track.name.ToLower() == trackName.ToLower()) {
                             originalAlbum = album;
                         }
+                        listOfTrackName.Add(track.name);
                     }
                 }
                 // take off anything like (Remastered 2011)??
 
-                // **HERE** problem can't find album Queen Forever that the trackName is on.
-                dictionaryOfNameAndAlbumID.Add(trackName, originalAlbum.id);
+                if (originalAlbum == null){
+                    // Eminem - guts over fear.. on album Shadyyxv (a compilation)
+                    var asdf = distinctTop10.SingleOrDefault(x => x.name == trackName);
+                    dictionaryOfNameAndAlbumID.Add(trackName, asdf.album.id);
+                }
+                else{
+                    dictionaryOfNameAndAlbumID.Add(trackName, originalAlbum.id);
+                }
             }
 
             // Wire up new album if needed
