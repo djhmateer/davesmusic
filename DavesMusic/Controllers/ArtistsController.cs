@@ -234,12 +234,10 @@ namespace DavesMusic.Controllers {
                     }
 
                     album2.album.images = images;
-                    //album2.album.DateOfAlbumRelease = "1999";
                 }
             }
 
             artistTopTracks.tracks = distinctTop10.ToList();
-
 
             // 5. Artist's related Artists - top 7
             apiResult = apiHelper.CallSpotifyAPIArtistRelated(stopWatchResult, id);
