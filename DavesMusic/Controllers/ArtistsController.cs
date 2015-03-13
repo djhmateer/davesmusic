@@ -244,7 +244,7 @@ namespace DavesMusic.Controllers {
             // 5. Artist's related Artists - top 7
             apiResult = apiHelper.CallSpotifyAPIArtistRelated(stopWatchResult, id);
             var artistRelated = JsonConvert.DeserializeObject<ArtistRelated>(apiResult.Json);
-            var y = artistRelated.artists.Take(7).ToList();
+            var y = artistRelated.artists.Take(15).ToList();
             artistRelated.artists = y;
             apiDebug = new APIDebug {
                 APITime = String.Format("{0:0}", stopWatchResult.ElapsedTime.TotalMilliseconds),
