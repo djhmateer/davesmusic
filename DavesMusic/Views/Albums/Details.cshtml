@@ -11,32 +11,53 @@
         <p><a href="/Artists/Details/@Model.AlbumDetails.artists[0].id">@Model.AlbumDetails.artists[0].name</a></p>
 
         <a href="/Home/Search">Search</a>
-        @foreach (var item in Model.APIDebugList) {
+        @*@foreach (var item in Model.APIDebugList) {
             <p>@item.APITime : @item.APIURL</p>
-        }
+        }*@
 
         <p><a href="@Model.AlbumDetails.uri">Open direct</a></p>
         <p>Popularity: @Model.AlbumDetails.popularity</p>
         <p>Release: @Model.AlbumDetails.release_date</p>
     </td>
-
 </table>
 
-<h3>Tracks</h3>
-<table class="table">
-    @foreach (var item in Model.AlbumDetails.tracks.items) {
-        <tr>
-            <td>@item.name</td>
-            <td>
-                <audio controls="controls" style="width: 150px; display: block;">
-                    <source src="@item.preview_url" type="audio/mpeg">
-                    <p>Ooops - please use a more up to date browser so you can preview songs</p>
-                </audio>
-            </td>
-            <td><a href="@item.uri">Direct</a></td>
-        </tr>
-    }
-</table>
+@using (Html.BeginForm()) {
+    @Html.HiddenFor(model => model.AlbumDetails.name)
+    @Html.HiddenFor(model => model.AlbumDetails.id)
+    @Html.HiddenFor(model => model.AlbumDetails.artists[0].name)
+    @Html.HiddenFor(model => model.AlbumDetails.artists[0].id)
+    @Html.HiddenFor(model => model.AlbumDetails.images[0].url)
+    @Html.HiddenFor(model => model.AlbumDetails.images[1].url)
+    @Html.HiddenFor(model => model.AlbumDetails.images[2].url)
+    @Html.HiddenFor(model => model.AlbumDetails.release_date)
+    <h3>Tracks</h3>
+    <div class="action">
+        <button class="actionButton" type="submit">
+            <span>Admin - Add/Remove to Top Tracks</span>
+        </button>
+    </div>
+
+    <table class="table">
+        @for (int i = 0; i < Model.AlbumDetails.tracks.items.Count; i++) {
+            var item = Model.AlbumDetails.tracks.items[i];
+            @Html.HiddenFor(model => Model.AlbumDetails.tracks.items[i].id)
+            @Html.HiddenFor(model => Model.AlbumDetails.tracks.items[i].name)
+            @Html.HiddenFor(model => Model.AlbumDetails.tracks.items[i].preview_url)
+            <tr>
+                <td>@item.name</td>
+                <td>@Html.EditorFor(model => Model.AlbumDetails.tracks.items[i].Checked)</td>
+
+                <td>
+                    <audio controls="controls" style="width: 150px; display: block;">
+                        <source src="@Model.AlbumDetails.tracks.items[i].preview_url" type="audio/mpeg">
+                        <p>Ooops - please use a more up to date browser so you can preview songs</p>
+                    </audio>
+                </td>
+                <td><a href="@item.uri">Direct</a></td>
+            </tr>
+        }
+    </table>
+}
 
 @if (@Model.AlbumDetails.images.Count > 0) {
     <img src="@Model.AlbumDetails.images[0].url" />

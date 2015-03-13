@@ -13,7 +13,7 @@ namespace DavesMusic.Controllers {
 
         [HttpPost]
         public ActionResult Details(ArtistDetailsViewModel vm, string id) {
-            var sh = new SpotifyHelper();
+            // id is ArtistID
             using (var connection = new SqlConnection(connectionString))
             using (var command = new SqlCommand(null, connection)) {
                 connection.Open();
@@ -62,50 +62,12 @@ namespace DavesMusic.Controllers {
                     }
                     else {
                         // If its been unchecked and is there in the database?
-                        //command.CommandText = String.Format("SELECT COUNT(*) FROM Playlist WHERE TrackID = '{0}'", t.id);
                         command.CommandText = String.Format("SELECT COUNT(*) FROM Tracks WHERE TrackID = '{0}'", t.id);
 
                         command.CommandType = CommandType.Text;
                         var result = command.ExecuteScalar().ToString();
                         if (result != "0") {
                             command.CommandText = String.Format("DELETE FROM Tracks WHERE TrackID = '{0}'", t.id);
-                            command.CommandType = CommandType.Text;
-                            command.ExecuteNonQuery();
-                        }
-                    }
-                }
-
-                // Albums - Iterate through vm and save the checked albums id's to db
-                //foreach (var album in vm.ArtistAlbums.items) {
-                foreach (var album in vm.ArtistAlbums) {
-                    if (album.Checked) {
-                        // Is it already there in the database?
-                        command.CommandText = String.Format("SELECT COUNT(*) FROM Playlist WHERE AlbumID = '{0}'", album.id);
-                        command.CommandType = CommandType.Text;
-                        var result = command.ExecuteScalar().ToString();
-                        if (result == "0") {
-                            // Get all the tracks from this album
-
-                            var result2 = sh.CallSpotifyAPIAlbumDetails(null, album.id);
-                            var albumDetails = JsonConvert.DeserializeObject<AlbumDetails>(result2.Json);
-                            // Insert each track into the database
-                            foreach (var track in albumDetails.tracks.items) {
-                                command.CommandText = String.Format("INSERT INTO Playlist (AlbumID, TrackID, TrackName, AlbumName) VALUES ('{0}', '{1}', @TrackName,'{2}')", album.id, track.id, album.name);
-                                command.Parameters.Clear();
-                                command.Parameters.AddWithValue("@TrackName", track.name);
-
-                                command.CommandType = CommandType.Text;
-                                command.ExecuteNonQuery();
-                            }
-                        }
-                    }
-                    else {
-                        // If its been unchecked and is there in the database?
-                        command.CommandText = String.Format("SELECT COUNT(*) FROM Playlist WHERE AlbumID = '{0}'", album.id);
-                        command.CommandType = CommandType.Text;
-                        var result = command.ExecuteScalar().ToString();
-                        if (result != "0") {
-                            command.CommandText = String.Format("DELETE FROM Playlist WHERE AlbumID = '{0}'", album.id);
                             command.CommandType = CommandType.Text;
                             command.ExecuteNonQuery();
                         }
@@ -141,8 +103,6 @@ namespace DavesMusic.Controllers {
             };
             apiDebugList.Add(apiDebug);
 
-
-
             // 4. All Artists albums - possibly more than 50!
             var sh = new SpotifyHelper();
             var apiResult = apiHelper.CallSpotifyAPIArtistAlbums(stopWatchResult, id);
@@ -157,51 +117,9 @@ namespace DavesMusic.Controllers {
 
             List<MultipleAlbums.Album> multiAlbumDetails3 = sh.CallSpotifyAPIMultipleAlbumDetails2(stopWatchResult, studioAlbums);
 
-            // set Checked status of ArtistAlbums
-            // Iterate through records in db, setting vm checked property
-            using (var connection = new SqlConnection(connectionString))
-            using (var command = new SqlCommand(null, connection)) {
-                connection.Open();
-                command.CommandText = String.Format("SELECT AlbumID FROM Playlist");
-                command.CommandType = CommandType.Text;
-
-                var albumIDs = new List<string>();
-                using (var reader = command.ExecuteReader()) {
-                    while (reader.Read()) {
-                        var albumID = reader.GetString(reader.GetOrdinal("AlbumID"));
-                        albumIDs.Add(albumID);
-                    }
-                }
-
-                foreach (var albumID in albumIDs) {
-                    // Is this album in the current search list?
-                    var album = multiAlbumDetails3.FirstOrDefault(x => x.id == albumID);
-
-                    if (album != null) {
-                        album.Checked = true;
-                    }
-                }
-            }
-
-            apiDebug = new APIDebug {
-                APITime = String.Format("{0:0}", stopWatchResult.ElapsedTime.TotalMilliseconds),
-                APIURL = apiResult.Url,
-                APITimeSpan = stopWatchResult.ElapsedTime
-            };
-            apiDebugList.Add(apiDebug);
-
-
-
-
             // 2. Artists Top Tracks
             apiResult = apiHelper.CallSpotifyAPIArtistTopTracks(stopWatchResult, id);
             var artistTopTracks = JsonConvert.DeserializeObject<ArtistTopTracks>(apiResult.Json);
-            apiDebug = new APIDebug {
-                APITime = String.Format("{0:0}", stopWatchResult.ElapsedTime.TotalMilliseconds),
-                APIURL = apiResult.Url,
-                APITimeSpan = stopWatchResult.ElapsedTime
-            };
-            apiDebugList.Add(apiDebug);
 
             var tracks = artistTopTracks.tracks;
             var distinctTop10 = new List<ArtistTopTracks.Track>();
@@ -237,12 +155,12 @@ namespace DavesMusic.Controllers {
                 }
                 // take off anything like (Remastered 2011)??
 
-                if (originalAlbum == null){
+                if (originalAlbum == null) {
                     // Eminem - guts over fear.. on album Shadyyxv (a compilation)
                     var asdf = distinctTop10.SingleOrDefault(x => x.name == trackName);
                     dictionaryOfNameAndAlbumID.Add(trackName, asdf.album.id);
                 }
-                else{
+                else {
                     dictionaryOfNameAndAlbumID.Add(trackName, originalAlbum.id);
                 }
             }
@@ -294,12 +212,6 @@ namespace DavesMusic.Controllers {
             csvStringOfAlbumIDs = csvStringOfAlbumIDs.TrimEnd(',');
 
             var apiResult2 = sh.CallSpotifyAPIMultipleAlbumDetails(stopWatchResult, csvStringOfAlbumIDs);
-            apiDebug = new APIDebug {
-                APITime = String.Format("{0:0}", stopWatchResult.ElapsedTime.TotalMilliseconds),
-                APIURL = apiResult2.Url,
-                APITimeSpan = stopWatchResult.ElapsedTime
-            };
-            apiDebugList.Add(apiDebug);
 
             var multiAlbumDetails = JsonConvert.DeserializeObject<MultipleAlbums>(apiResult2.Json);
             foreach (var album in multiAlbumDetails.albums) {

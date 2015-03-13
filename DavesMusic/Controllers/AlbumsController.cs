@@ -1,31 +1,137 @@
-﻿using System.Diagnostics;
+﻿using System.Configuration;
+using System.Data;
+using System.Data.SqlClient;
+using System.Linq;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Web.Mvc;
 
-namespace DavesMusic.Controllers
-{
+namespace DavesMusic.Controllers {
     public class AlbumsController : Controller {
-        public ActionResult Details(string id) {
+        string connectionString = ConfigurationManager.ConnectionStrings["DavesMusicConnection2"].ConnectionString;
+
+        [HttpPost]
+        public ActionResult Details(AlbumDetailsViewModel vm, string id) {
+            // id is AlbumID?
+            using (var connection = new SqlConnection(connectionString))
+            using (var command = new SqlCommand(null, connection)) {
+                connection.Open();
+                // Tracks
+                foreach (var t in vm.AlbumDetails.tracks.items) {
+                    if (t.Checked) {
+                        // Is it already there in the database?
+                        command.CommandText = String.Format("SELECT COUNT(*) FROM Tracks WHERE TrackID = '{0}'", t.id);
+                        command.CommandType = CommandType.Text;
+                        var result = command.ExecuteScalar().ToString();
+                        if (result == "0") {
+                            // Add track to db
+                            command.CommandText =
+                             "INSERT INTO Tracks (TrackID, TrackName, ArtistName, ArtistID, TrackPreviewURL, AlbumName," +
+                             "AlbumID, AlbumImageURL, AlbumDate) " +
+                             "VALUES (@TrackID, @TrackName,@ArtistName,@ArtistID,@TrackPreviewURL, @AlbumName, @AlbumID," +
+                             "@AlbumImageURL, @AlbumDate)";
+                            command.Parameters.Clear();
+                            command.Parameters.AddWithValue("@TrackID", t.id);
+                            command.Parameters.AddWithValue("@TrackName", t.name);
+                            //command.Parameters.AddWithValue("@ArtistName", vm.ArtistDetails.Name);
+                            command.Parameters.AddWithValue("@ArtistName", vm.AlbumDetails.artists[0].name);
+
+                            command.Parameters.AddWithValue("@ArtistID", vm.AlbumDetails.artists[0].id);
+                            command.Parameters.AddWithValue("@TrackPreviewURL", t.preview_url);
+                            //command.Parameters.AddWithValue("@AlbumName", t.album.name);
+                            command.Parameters.AddWithValue("@AlbumName", vm.AlbumDetails.name);
+
+                            //command.Parameters.AddWithValue("@AlbumID", t.album.id);
+                            command.Parameters.AddWithValue("@AlbumID", vm.AlbumDetails.id);
+
+                            //command.Parameters.AddWithValue("@AlbumImageURL", t.album.images[2].url);
+                            command.Parameters.AddWithValue("@AlbumImageURL", vm.AlbumDetails.images[2].url);
+
+                            //string dateOfAlbum = t.album.DateOfAlbumRelease;
+                            string dateOfAlbum = vm.AlbumDetails.release_date;
+
+                            DateTime d;
+                            // Maybe its in 2000/01/01
+                            bool r = DateTime.TryParse(dateOfAlbum, out d);
+                            if (!r) {
+                                // Maybe its in the format 2000
+                                int year;
+                                if (Int32.TryParse(dateOfAlbum, out year)) {
+                                    if (DateTime.TryParse(year + "/1/1", out d)) { }
+                                    else {
+                                        d = new DateTime(1900, 1, 1);
+                                    }
+                                }
+                            }
+
+                            command.Parameters.AddWithValue("@AlbumDate", d);
+                            command.CommandType = CommandType.Text;
+                            command.ExecuteNonQuery();
+                        }
+                    }
+                    else {
+                        // If its been unchecked and is there in the database?
+                        command.CommandText = String.Format("SELECT COUNT(*) FROM Tracks WHERE TrackID = '{0}'", t.id);
+
+                        command.CommandType = CommandType.Text;
+                        var result = command.ExecuteScalar().ToString();
+                        if (result != "0") {
+                            command.CommandText = String.Format("DELETE FROM Tracks WHERE TrackID = '{0}'", t.id);
+                            command.CommandType = CommandType.Text;
+                            command.ExecuteNonQuery();
+                        }
+                    }
+                }
+            }
+
+            // Get data again as not saved, including Checked status
+            var vm2 = GetAlbumDetailsViewModel(id);
+
+            return View(vm2);
+        }
+
+
+        public ActionResult Details(string id){
+            var vm = GetAlbumDetailsViewModel(id);
+            return View(vm);
+        }
+
+        private AlbumDetailsViewModel GetAlbumDetailsViewModel(string id){
             var spotifyHelper = new SpotifyHelper();
             var stopWatchResult = new StopWatchResult();
             var apiResult = spotifyHelper.CallSpotifyAPIAlbumDetails(stopWatchResult, id);
             ViewBag.Id = id;
             var albumDetails = JsonConvert.DeserializeObject<AlbumDetails>(apiResult.Json);
 
-            var apiDebugList = new List<APIDebug>();
-            var apiDebug = new APIDebug {
-                APITime = String.Format("{0:0}", stopWatchResult.ElapsedTime.TotalMilliseconds),
-                APIURL = apiResult.Url
-            };
-            apiDebugList.Add(apiDebug);
+            // iterate through setting vm checked property
+            using (var connection = new SqlConnection(connectionString))
+            using (var command = new SqlCommand(null, connection)) {
+                connection.Open();
+                command.CommandText = String.Format("SELECT TrackID FROM Tracks");
+                command.CommandType = CommandType.Text;
 
-            var vm = new AlbumDetailsViewModel {
-                APIDebugList = apiDebugList,
+                var trackIDsSelectedInDb = new List<string>();
+                using (var reader = command.ExecuteReader()) {
+                    while (reader.Read()) {
+                        var trackID = reader.GetString(reader.GetOrdinal("TrackID"));
+                        trackIDsSelectedInDb.Add(trackID);
+                    }
+                }
+
+                foreach (var trackID in trackIDsSelectedInDb) {
+                    var track = albumDetails.tracks.items.FirstOrDefault(x => x.id == trackID);
+                    if (track != null) {
+                        track.Checked = true;
+                    }
+                }
+            }
+
+            var vm = new AlbumDetailsViewModel{
+                APIDebugList = null,
                 AlbumDetails = albumDetails,
             };
-            return View(vm);
+            return vm;
         }
     }
 
@@ -94,10 +200,13 @@ namespace DavesMusic.Controllers
             public string href { get; set; }
             public string id { get; set; }
             public string name { get; set; }
-            public object preview_url { get; set; }
+            //public object preview_url { get; set; }
+            public string preview_url { get; set; }
+
             public int track_number { get; set; }
             public string type { get; set; }
             public string uri { get; set; }
+            public bool Checked { get; set; }
         }
 
         public class Tracks {
@@ -124,7 +233,7 @@ namespace DavesMusic.Controllers
         public int popularity { get; set; }
         public string release_date { get; set; }
         public DateTime releaseDateTime { get; set; }
-        
+
         public string release_date_precision { get; set; }
         public Tracks tracks { get; set; }
         public string type { get; set; }

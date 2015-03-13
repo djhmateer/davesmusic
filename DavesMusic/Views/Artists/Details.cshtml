@@ -23,27 +23,29 @@
     <tr>
         <td>
             <table>
-                <td>
-                    @if (@Model.ArtistDetails.Images.Count > 0) {
-                        <img src="@Model.ArtistDetails.Images[1].URL" width="300" />
-                    }
-                </td>
-                <td>
-                    <a href="/Home/Search">Search</a>
-
-                    <button id="button" onclick=" toggle_visibility('debug'); ">Toggle</button>
-                    <!-- Debug Times-->
-                    <div id="debug" style="display: none">
-                        @foreach (var item in Model.APIDebugList) {
-                            <p>@item.APITime : @item.APIURL</p>
+                <tr>
+                    <td>
+                        @if (@Model.ArtistDetails.Images.Count > 0) {
+                            <img src="@Model.ArtistDetails.Images[1].URL" width="300" />
                         }
-                        Total: @Model.TotalTimeInMSOfAPICalls ms
-                    </div>
+                    </td>
+                    <td>
+                        <a href="/Home/Search">Search</a>
 
-                    <p><a href="@Model.ArtistDetails.Uri">Direct</a></p>
-                    <p>Popularity: @Model.ArtistDetails.Popularity</p>
-                    <p>Followers Total: @Model.ArtistDetails.followers.Total</p>
-                </td>
+                        <button id="button" onclick=" toggle_visibility('debug'); ">Toggle</button>
+                        <!-- Debug Times-->
+                        <div id="debug" style="display: none">
+                            @foreach (var item in Model.APIDebugList) {
+                                <p>@item.APITime : @item.APIURL</p>
+                            }
+                            Total: @Model.TotalTimeInMSOfAPICalls ms
+                        </div>
+
+                        <p><a href="@Model.ArtistDetails.Uri">Direct</a></p>
+                        <p>Popularity: @Model.ArtistDetails.Popularity</p>
+                        <p>Followers Total: @Model.ArtistDetails.followers.Total</p>
+                    </td>
+                </tr>
             </table>
 
         </td>
@@ -121,9 +123,7 @@
                 <td><a href="@Model.ArtistTopTracks.tracks[i].uri">Direct</a></td>
                 <td>@Model.ArtistTopTracks.tracks[i].popularity</td>
                 <td>@Model.ArtistTopTracks.tracks[i].album.name</td>
-                <td>@*@Model.ArtistTopTracks.tracks[i].album.album_type*@</td>
                 <td>@Model.ArtistTopTracks.tracks[i].album.DateOfAlbumRelease</td>
-@*                <td>@Model.ArtistTopTracks.tracks[i].album.available_markets.Count</td>*@
                 <td><a href="/Albums/Details/@Model.ArtistTopTracks.tracks[i].album.id"> <img src="@Model.ArtistTopTracks.tracks[i].album.images[2].url" /> </a></td>
             </tr>
         }
