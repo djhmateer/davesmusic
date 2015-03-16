@@ -137,20 +137,25 @@ namespace DavesMusic.Controllers {
                 distinctTop10.Add(track);
             }
 
-            var dictionaryOfNameAndAlbumID = new Dictionary<string, string>();
+           
+            var dictionaryOfNameAndAlbumIDAndNewTrackID = new Dictionary<string, Thing2>();
             // find track name in the earliest album
             foreach (var trackName in top10trackNamesDistinct) {
                 MultipleAlbums.Album originalAlbum = null;
 
                 var xxx = multiAlbumDetails3.Select(x => x.tracks.items.Where(yy => yy.name == trackName));
                 // Descending so last one, is the earliest one
-                var listOfTrackName = new List<string>();
+                var listOfTrackName = new List<Thing2>();
                 foreach (var album in multiAlbumDetails3.OrderByDescending(al => al.release_date)) {
                     foreach (var track in album.tracks.items) {
                         if (track.name.ToLower() == trackName.ToLower()) {
                             originalAlbum = album;
                         }
-                        listOfTrackName.Add(track.name);
+                        var t2 = new Thing2{
+                            AlbumID = album.id,
+                            TrackID = track.id
+                        };
+                        listOfTrackName.Add(t2);
                     }
                 }
                 // take off anything like (Remastered 2011)??
@@ -158,18 +163,29 @@ namespace DavesMusic.Controllers {
                 if (originalAlbum == null) {
                     // Eminem - guts over fear.. on album Shadyyxv (a compilation)
                     var asdf = distinctTop10.SingleOrDefault(x => x.name == trackName);
-                    dictionaryOfNameAndAlbumID.Add(trackName, asdf.album.id);
+                    var t2 = new Thing2{
+                            AlbumID = asdf.album.id,
+                            TrackID = asdf.id
+                        };
+                    dictionaryOfNameAndAlbumIDAndNewTrackID.Add(trackName, t2);
                 }
                 else {
-                    dictionaryOfNameAndAlbumID.Add(trackName, originalAlbum.id);
+                    // add the albums trackID rather than whatever it is at the moment (compilation perhaps)
+                    // want the last one added to the list
+                    //var t2 = listOfTrackName.LastOrDefault();
+                    var t2 = new Thing2{
+                        AlbumID = originalAlbum.id,
+                        TrackID = originalAlbum.tracks.items.FirstOrDefault(x => x.name.ToLower() == trackName.ToLower()).id
+                    };
+                    dictionaryOfNameAndAlbumIDAndNewTrackID.Add(trackName,t2);
                 }
             }
 
             // Wire up new album if needed
             foreach (var track in distinctTop10) {
                 var trackName = track.name;
-                var originalAlbumID = dictionaryOfNameAndAlbumID[trackName];
-                track.album.id = originalAlbumID;
+                track.album.id = dictionaryOfNameAndAlbumIDAndNewTrackID[trackName].AlbumID;
+                track.id = dictionaryOfNameAndAlbumIDAndNewTrackID[trackName].TrackID;
             }
 
             // Iterate through records in db, setting vm checked property for Admin - add to playlist
@@ -600,5 +616,10 @@ namespace DavesMusic.Controllers {
         public int Popularity { get; set; }
         public string Type { get; set; }
         public string Uri { get; set; }
+    }
+
+    class Thing2 {
+        public string AlbumID { get; set; }
+        public string TrackID { get; set; }
     }
 }
