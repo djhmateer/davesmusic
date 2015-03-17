@@ -1,109 +1,71 @@
 ﻿@model DavesMusic.Controllers.SearchViewModel
 
-@if (Model != null) {
-    if (Model.ArtistsResponse2 != null) {
-        <h2>@Model.ArtistsResponse2.term</h2>
-    }
-
-    if (Model.PlaylistsResponse != null) {
-        <h2>Playlists - @Model.PlaylistsResponse.term</h2>
-    }
-}
-else {
-    <br />
-    <br />
-    <br />
-}
-
-
-@*<form action="/Home/Search">
-    @if (String.IsNullOrEmpty(@Request["artist"]) && (String.IsNullOrEmpty(@Request["playlist"]))) {
-        <input id="artist" name="artist" type="text" placeholder="Muse" />
-    }
-    else {
-        <input id="artist" name="artist" type="text" />
-    }
-
-    <input type="hidden" name="offset" value=0>
-    <input type="hidden" name="isAPost" value=true>
-    <input type="submit" value="Search" />
-
-    <input id="playlist" name="playlist" type="text" />
-    <input type="submit" value="Search for Playlists" />
-</form>
-<br />
-<br />*@
-
-<p><a href="/Profiles/Me">User Details (login)</a></p>
-<p><a href="/Browse/NewReleases">New Releases (login)</a></p>
-<p><a href="/Browse/FeaturedPlaylists">Featured Playlists (login)</a></p>
+<h2>@Model.ArtistsResponse2.term</h2>
 
 @if (Model != null) {
+    if (Model.TrackSearchResponse != null) {
+        <h3>tracks</h3>
+        <table class="table">
+            @foreach (var item in Model.TrackSearchResponse.tracks.items) {
+                <tr>
+                    <td>
+                        <a href="/Artists/Details/@item.id">@item.name</a>
+                        <br />
+                        <a href="@item.uri">Open directly</a>
+
+                    </td>
+                    @if (item.album.images.Count() == 3) {
+                        <td>
+                            <a href="/Artists/Details/@item.id"><img src="@item.album.images[2].url" /></a>
+                        </td>
+                    }
+                    
+                    @*@if (item.album.images.Count() == 4) {
+                        <td>
+                            <a href="/Artists/Details/@item.id"><img src="@item.album.images[2].url" /></a>
+                        </td>
+                    }*@
+
+                   
+                </tr>
+            }
+        </table>
+    }
+
+
     if (Model.ArtistsResponse2 != null) {
+        <h3>albums</h3>
         <table class="table">
             @foreach (var item in Model.ArtistsResponse2.artists.items) {
                 <tr>
                     <td>
                         <a href="/Artists/Details/@item.id">@item.name</a>
                         <br />
-                        <a href="@item.external_urls.spotify">Open in Web Spotify</a>
-                        <br />
-                        Popularity: @item.popularity
-                        <br />
                         <a href="@item.uri">Open directly</a>
 
                     </td>
                     @if (item.images.Count == 4) {
                         <td>
-                            <a href="/Artists/Details/@item.id">
-                                <img src="@item.images[2].Url" />
-                            </a>
+                            <a href="/Artists/Details/@item.id"><img src="@item.images[2].Url" /></a>
                         </td>
                     }
 
                     @if (item.images.Count == 3) {
                         <td>
-                            <a href="/Artists/Details/@item.id">
-                                <img width="200" src="@item.images[1].Url" />
-                            </a>
+                            <a href="/Artists/Details/@item.id"><img src="@item.images[2].Url" /></a>
+                        </td>
+                    }
+                    
+                    @if (item.images.Count < 3 && item.images.Count  > 0) {
+                        <td>
+                            <a href="/Artists/Details/@item.id"><img src="@item.images[0].Url" /></a>
                         </td>
                     }
                 </tr>
             }
         </table>
     }
-
-    if (Model.PlaylistsResponse != null) {
-        <table class="table">
-            @foreach (var item in Model.PlaylistsResponse.playlists.items) {
-                <tr>
-                    <td>
-                        <a href="/Artists/Details/@item.id">@item.name</a>
-                        <br />
-                        <a href="/Artists/Details/@item.id">@item.owner.id</a>
-                        <br />
-                        <a href="@item.uri">Direct</a>
-
-                    </td>
-                    @if (item.images.Count == 4) {
-                        <td>
-                            <a href="/Playlists/Details/@item.id/@item.owner.id">
-                                <img src="@item.images[2].url" />
-                            </a>
-                        </td>
-                    }
-
-                    @if (item.images.Count == 3) {
-                        <td>
-                            <a href="/Playlists/Details/@item.id/@item.owner.id">
-                                <img width="200" src="@item.images[1].url" />
-                            </a>
-                        </td>
-                    }
-                </tr>
-            }
-        </table>
-    }
+   
 }
 
 

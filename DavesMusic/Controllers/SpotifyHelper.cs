@@ -58,25 +58,21 @@ namespace DavesMusic.Controllers {
             return result;
         }
 
-        //public class Thing2{
-        //    public string uris { get; set; }
-        //}
-
-        //public string CallSpotifyAddTracksToPlaylistQueryStringAPIPassingToken(string access_token, string url, string csvOfUris) {
-        //    //var p2 = new Thing2{uris = csvOfUris};
-        //    //var jsonString2 = serializer.Serialize(p2);
-        //    //var stringContent2 = new StringContent(jsonString2, Encoding.UTF8, "application/json");
-        //    var text = CallAPI(null, url);
-        //    return text;
-        //}
-
-
-        public string CallSpotifyAPISearch(string artistName, int offset) {
-            if (!String.IsNullOrWhiteSpace(artistName)) artistName = HttpUtility.UrlEncode(artistName);
-            var url = String.Format("https://api.spotify.com/v1/search?q={0}&offset={1}&limit=50&type=artist", artistName, offset);
+        public string CallSpotifyAPIArtistSearch(string searchTerm) {
+            if (!String.IsNullOrWhiteSpace(searchTerm)) searchTerm = HttpUtility.UrlEncode(searchTerm);
+            // add a wildcard to aid searching eg que* for queen
+            var url = String.Format("https://api.spotify.com/v1/search?q={0}&limit=50&type=artist", searchTerm);
             var text = CallAPI(null, url);
             return text;
         }
+
+        public string CallSpotifyAPITrackSearch(string searchTerm) {
+            if (!String.IsNullOrWhiteSpace(searchTerm)) searchTerm = HttpUtility.UrlEncode(searchTerm);
+            var url = String.Format("https://api.spotify.com/v1/search?q={0}&limit=5&type=track", searchTerm);
+            var text = CallAPI(null, url);
+            return text;
+        }
+        
 
 
         public string CallSpotifyAPISearchForPlaylist(string playlist) {

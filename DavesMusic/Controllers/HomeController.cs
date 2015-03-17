@@ -12,6 +12,86 @@ using System.Net.Http.Headers;
 using System.Web.Mvc;
 
 namespace DavesMusic.Controllers {
+
+    public class TrackSearchResponse {
+        public Tracks tracks { get; set; }
+
+        public class Tracks {
+            public string href { get; set; }
+            public Item[] items { get; set; }
+            public int limit { get; set; }
+            public string next { get; set; }
+            public int offset { get; set; }
+            public object previous { get; set; }
+            public int total { get; set; }
+        }
+
+        public class Item {
+            public Album album { get; set; }
+            public Artist[] artists { get; set; }
+            public string[] available_markets { get; set; }
+            public int disc_number { get; set; }
+            public int duration_ms { get; set; }
+            public bool _explicit { get; set; }
+            public External_Ids external_ids { get; set; }
+            public External_Urls1 external_urls { get; set; }
+            public string href { get; set; }
+            public string id { get; set; }
+            public string name { get; set; }
+            public int popularity { get; set; }
+            public string preview_url { get; set; }
+            public int track_number { get; set; }
+            public string type { get; set; }
+            public string uri { get; set; }
+        }
+
+        public class Album {
+            public string album_type { get; set; }
+            public string[] available_markets { get; set; }
+            public External_Urls external_urls { get; set; }
+            public string href { get; set; }
+            public string id { get; set; }
+            public Image[] images { get; set; }
+            public string name { get; set; }
+            public string type { get; set; }
+            public string uri { get; set; }
+        }
+
+        public class External_Urls {
+            public string spotify { get; set; }
+        }
+
+        public class Image {
+            public int height { get; set; }
+            public string url { get; set; }
+            public int width { get; set; }
+        }
+
+        public class External_Ids {
+            public string isrc { get; set; }
+        }
+
+        public class External_Urls1 {
+            public string spotify { get; set; }
+        }
+
+        public class Artist {
+            public External_Urls2 external_urls { get; set; }
+            public string href { get; set; }
+            public string id { get; set; }
+            public string name { get; set; }
+            public string type { get; set; }
+            public string uri { get; set; }
+        }
+
+        public class External_Urls2 {
+            public string spotify { get; set; }
+        }
+    }
+
+   
+
+
     public class HomeController : Controller {
         string connectionString = ConfigurationManager.ConnectionStrings["DavesMusicConnection2"].ConnectionString;
 
@@ -104,29 +184,28 @@ namespace DavesMusic.Controllers {
             return text;
         }
 
-        public ActionResult Search(string artist = "", int offset = 0, string playlist = "", bool isAPost = false) {
+        public ActionResult Search(string searchTerm = "", bool isAPost = false) {
             var spotifyHelper = new SpotifyHelper();
             var vm = new SearchViewModel();
-            // Searching for a playlist
-            if (playlist != "") {
-                string json2 = spotifyHelper.CallSpotifyAPISearchForPlaylist(playlist);
 
-                var result2 = JsonConvert.DeserializeObject<PlaylistsResponse>(json2);
-                result2.term = playlist;
-                vm.PlaylistsResponse = result2;
-                return View(vm);
-            }
-
-            if (isAPost && artist == "") artist = "Muse";
+            if (isAPost && searchTerm == "") searchTerm = "Muse";
 
             // Initial load of the page
-            if (artist == "") return View();
+            if (searchTerm == "") return View();
 
-            string json = spotifyHelper.CallSpotifyAPISearch(artist, offset);
+            // To aid searching eg que
+            searchTerm += "*";
+            vm.SearchTerm = searchTerm;
+
+            string json = spotifyHelper.CallSpotifyAPIArtistSearch(searchTerm);
             var result = JsonConvert.DeserializeObject<ArtistsResponse2>(json);
-            result.term = artist;
-
             vm.ArtistsResponse2 = result;
+
+            // eg fat bo* .. only get first 5
+            json = spotifyHelper.CallSpotifyAPITrackSearch(searchTerm);
+            var result2 = JsonConvert.DeserializeObject<TrackSearchResponse>(json);
+            vm.TrackSearchResponse = result2;
+
             return View(vm);
         }
 
@@ -294,7 +373,8 @@ namespace DavesMusic.Controllers {
                         command.Parameters.AddWithValue("@UserID2", userID);
                         command.Parameters.AddWithValue("@TrackID2", trackId);
                         command.ExecuteNonQuery();
-                    } else {
+                    }
+                    else {
                         command.CommandText =
                                String.Format("DELETE FROM UserPlaylists WHERE UserID = @UserID2 AND TrackID=@TrackID2");
                         command.Parameters.AddWithValue("@UserID2", userID);
@@ -427,8 +507,10 @@ namespace DavesMusic.Controllers {
     }
 
     public class SearchViewModel {
-        public PlaylistsResponse PlaylistsResponse { get; set; }
+        //public PlaylistsResponse PlaylistsResponse { get; set; }
         public ArtistsResponse2 ArtistsResponse2 { get; set; }
+        public TrackSearchResponse TrackSearchResponse { get; set; }
+        public String SearchTerm { get; set; }
     }
 
     public class PlaylistsResponse {
