@@ -9,14 +9,14 @@
             @foreach (var item in Model.TrackSearchResponse.tracks.items) {
                 <tr>
                     <td>
-                        <a href="/Artists/Details/@item.id">@item.name</a>
+                        <a href="/Albums/Details/@item.album.id">@item.name</a>
                         <br />
                         <a href="@item.uri">Open directly</a>
 
                     </td>
                     @if (item.album.images.Count() == 3) {
                         <td>
-                            <a href="/Artists/Details/@item.id"><img src="@item.album.images[2].url" /></a>
+                            <a href="/Albums/Details/@item.album.id"><img src="@item.album.images[2].url" /></a>
                         </td>
                     }
                     
