@@ -26,9 +26,12 @@
     @Html.HiddenFor(model => model.AlbumDetails.id)
     @Html.HiddenFor(model => model.AlbumDetails.artists[0].name)
     @Html.HiddenFor(model => model.AlbumDetails.artists[0].id)
-    @Html.HiddenFor(model => model.AlbumDetails.images[0].url)
-    @Html.HiddenFor(model => model.AlbumDetails.images[1].url)
-    @Html.HiddenFor(model => model.AlbumDetails.images[2].url)
+    
+    if (Model.AlbumDetails.images.Count > 0){
+        @Html.HiddenFor(model => model.AlbumDetails.images[0].url)
+        @Html.HiddenFor(model => model.AlbumDetails.images[1].url)
+        @Html.HiddenFor(model => model.AlbumDetails.images[2].url)
+    }
     @Html.HiddenFor(model => model.AlbumDetails.release_date)
     <h3>Tracks</h3>
     <div class="action">

@@ -115,7 +115,11 @@ namespace DavesMusic.Controllers {
             studioAlbums = studioAlbums.Where(x => !x.name.ToLower().Contains("live in"));
             studioAlbums = studioAlbums.Where(x => !x.name.ToLower().Contains("greatest hits"));
 
-            List<MultipleAlbums.Album> multiAlbumDetails3 = sh.CallSpotifyAPIMultipleAlbumDetails2(stopWatchResult, studioAlbums);
+            List<MultipleAlbums.Album> multiAlbumDetails3 = null;
+            // The exponents - have no albums (even before filtering)
+            if (studioAlbums.Count() > 0){
+                multiAlbumDetails3 = sh.CallSpotifyAPIMultipleAlbumDetails2(stopWatchResult,studioAlbums);
+            }
 
             // 2. Artists Top Tracks
             apiResult = apiHelper.CallSpotifyAPIArtistTopTracks(stopWatchResult, id);
@@ -226,30 +230,33 @@ namespace DavesMusic.Controllers {
                 }
             }
             csvStringOfAlbumIDs = csvStringOfAlbumIDs.TrimEnd(',');
+            APIResult apiResult2 = null;
+            // no albums
+            if (csvStringOfAlbumIDs.Length > 0){
+                apiResult2 = sh.CallSpotifyAPIMultipleAlbumDetails(stopWatchResult, csvStringOfAlbumIDs);
 
-            var apiResult2 = sh.CallSpotifyAPIMultipleAlbumDetails(stopWatchResult, csvStringOfAlbumIDs);
+                var multiAlbumDetails = JsonConvert.DeserializeObject<MultipleAlbums>(apiResult2.Json);
+                foreach (var album in multiAlbumDetails.albums){
+                    // get all associated albums in top10
+                    var albumInTop10s = distinctTop10.Where(x => x.album.id == album.id);
 
-            var multiAlbumDetails = JsonConvert.DeserializeObject<MultipleAlbums>(apiResult2.Json);
-            foreach (var album in multiAlbumDetails.albums) {
-                // get all associated albums in top10
-                var albumInTop10s = distinctTop10.Where(x => x.album.id == album.id);
+                    foreach (var album2 in albumInTop10s){
+                        album2.album.DateOfAlbumRelease = album.release_date;
+                        album2.album.name = album.name;
+                        album2.album.uri = album.uri;
 
-                foreach (var album2 in albumInTop10s) {
-                    album2.album.DateOfAlbumRelease = album.release_date;
-                    album2.album.name = album.name;
-                    album2.album.uri = album.uri;
+                        //images
+                        var images = new List<ArtistTopTracks.Image>();
+                        foreach (var image in album.images){
+                            var att = new ArtistTopTracks.Image();
+                            att.height = image.height;
+                            att.width = image.width;
+                            att.url = image.url;
+                            images.Add(att);
+                        }
 
-                    //images
-                    var images = new List<ArtistTopTracks.Image>();
-                    foreach (var image in album.images) {
-                        var att = new ArtistTopTracks.Image();
-                        att.height = image.height;
-                        att.width = image.width;
-                        att.url = image.url;
-                        images.Add(att);
+                        album2.album.images = images;
                     }
-
-                    album2.album.images = images;
                 }
             }
 
