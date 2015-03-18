@@ -17,6 +17,7 @@ namespace DavesMusic.Controllers {
             using (var connection = new SqlConnection(connectionString))
             using (var command = new SqlCommand(null, connection)) {
                 connection.Open();
+
                 // Tracks
                 foreach (var t in vm.ArtistTopTracks.tracks) {
                     if (t.Checked) {
@@ -73,6 +74,74 @@ namespace DavesMusic.Controllers {
                         }
                     }
                 }
+
+
+                // Singles
+                foreach (var t in vm.ArtistSingles.items) {
+                    if (t.Checked) {
+                        // Is it already there in the database?
+                        command.CommandText = String.Format("SELECT COUNT(*) FROM Tracks WHERE TrackID = '{0}'", t.id);
+                        command.CommandType = CommandType.Text;
+                        var result = command.ExecuteScalar().ToString();
+                        if (result == "0") {
+                            // Add track to db
+                            command.CommandText =
+                             "INSERT INTO Tracks (TrackID, TrackName, ArtistName, ArtistID, TrackPreviewURL, AlbumName," +
+                             "AlbumID, AlbumImageURL, AlbumDate) " +
+                             "VALUES (@TrackID, @TrackName,@ArtistName,@ArtistID,@TrackPreviewURL, @AlbumName, @AlbumID," +
+                             "@AlbumImageURL, @AlbumDate)";
+                            command.Parameters.Clear();
+                            command.Parameters.AddWithValue("@TrackID", t.id);
+                            command.Parameters.AddWithValue("@TrackName", t.name);
+                            command.Parameters.AddWithValue("@ArtistName", vm.ArtistDetails.Name);
+                            command.Parameters.AddWithValue("@ArtistID", vm.ArtistDetails.Id);
+                            
+                            //command.Parameters.AddWithValue("@TrackPreviewURL", t.preview_url);
+                            command.Parameters.AddWithValue("@TrackPreviewURL", "");
+
+                            ////command.Parameters.AddWithValue("@AlbumName", t.album.name);
+                            command.Parameters.AddWithValue("@AlbumName", "");
+
+                            ////command.Parameters.AddWithValue("@AlbumID", t.album.id);
+                            command.Parameters.AddWithValue("@AlbumID", "");
+
+                            command.Parameters.AddWithValue("@AlbumImageURL", t.images[2].url);
+                            //string dateOfAlbum = t.album.DateOfAlbumRelease;
+                            //DateTime d;
+                            //// Maybe its in 2000/01/01
+                            //bool r = DateTime.TryParse(dateOfAlbum, out d);
+                            //if (!r) {
+                            //    // Maybe its in the format 2000
+                            //    int year;
+                            //    if (Int32.TryParse(dateOfAlbum, out year)) {
+                            //        if (DateTime.TryParse(year + "/1/1", out d)) { }
+                            //        else {
+                            //            d = new DateTime(1900, 1, 1);
+                            //        }
+                            //    }
+                            //}
+
+                            ////command.Parameters.AddWithValue("@AlbumDate", d);
+                            command.Parameters.AddWithValue("@AlbumDate", new DateTime(1900, 1, 1));
+
+                            command.CommandType = CommandType.Text;
+                            command.ExecuteNonQuery();
+                        }
+                    }
+                    else {
+                        // If its been unchecked and is there in the database?
+                        command.CommandText = String.Format("SELECT COUNT(*) FROM Tracks WHERE TrackID = '{0}'", t.id);
+
+                        command.CommandType = CommandType.Text;
+                        var result = command.ExecuteScalar().ToString();
+                        if (result != "0") {
+                            command.CommandText = String.Format("DELETE FROM Tracks WHERE TrackID = '{0}'", t.id);
+                            command.CommandType = CommandType.Text;
+                            command.ExecuteNonQuery();
+                        }
+                    }
+                }
+
             }
 
             // Get data again as not saved, including Checked status
@@ -87,25 +156,16 @@ namespace DavesMusic.Controllers {
             return View(vm);
         }
 
-        private ArtistDetailsViewModel GetArtistDetailsViewModel(string id) {
-            var apiHelper = new SpotifyHelper();
+        private ArtistDetailsViewModel GetArtistDetailsViewModel(string id){
+            string artistID = id;
+            var sh = new SpotifyHelper();
             // 1. Get the Artist's details
-            var stopWatchResult = new StopWatchResult();
-            string json = apiHelper.CallSpotifyAPIArtist(stopWatchResult: stopWatchResult, artistCode: id);
-            ViewBag.Id = id;
+            string json = sh.CallSpotifyAPIArtist(artistID, null);
+            ViewBag.Id = artistID;
             var artistDetails = JsonConvert.DeserializeObject<ArtistDetails>(json);
 
-            var apiDebugList = new List<APIDebug>();
-            var apiDebug = new APIDebug {
-                APITime = String.Format("{0:0}", stopWatchResult.ElapsedTime.TotalMilliseconds),
-                APIURL = artistDetails.Href,
-                APITimeSpan = stopWatchResult.ElapsedTime
-            };
-            apiDebugList.Add(apiDebug);
-
-            // 4. All Artists albums - possibly more than 50!
-            var sh = new SpotifyHelper();
-            var apiResult = apiHelper.CallSpotifyAPIArtistAlbums(stopWatchResult, id);
+            // 2. All Artists albums - possibly more than 50!
+            var apiResult = sh.CallSpotifyAPIArtistAlbums(null, artistID);
             var artistAlbums = JsonConvert.DeserializeObject<ArtistAlbums>(apiResult.Json);
 
             // Want studio albums only - get rid of live albums and put into another bucket to display too
@@ -115,14 +175,17 @@ namespace DavesMusic.Controllers {
             studioAlbums = studioAlbums.Where(x => !x.name.ToLower().Contains("live in"));
             studioAlbums = studioAlbums.Where(x => !x.name.ToLower().Contains("greatest hits"));
 
+            // get rid of any dupes - eg Phil Collins has many albums called Tarzan....could use DistinctBy
+            studioAlbums = studioAlbums.GroupBy(x => x.name).Select(yy => yy.First());
+
             List<MultipleAlbums.Album> multiAlbumDetails3 = null;
             // The exponents - have no albums (even before filtering)
             if (studioAlbums.Count() > 0){
-                multiAlbumDetails3 = sh.CallSpotifyAPIMultipleAlbumDetails2(stopWatchResult,studioAlbums);
+                multiAlbumDetails3 = sh.CallSpotifyAPIMultipleAlbumDetails2(null,studioAlbums);
             }
 
-            // 2. Artists Top Tracks
-            apiResult = apiHelper.CallSpotifyAPIArtistTopTracks(stopWatchResult, id);
+            // 3. Artists Top Tracks
+            apiResult = sh.CallSpotifyAPIArtistTopTracks(null, artistID);
             var artistTopTracks = JsonConvert.DeserializeObject<ArtistTopTracks>(apiResult.Json);
 
             var tracks = artistTopTracks.tracks;
@@ -140,29 +203,30 @@ namespace DavesMusic.Controllers {
                 var track = top10.FirstOrDefault(x => x.name == trackName);
                 distinctTop10.Add(track);
             }
-
            
             var dictionaryOfNameAndAlbumIDAndNewTrackID = new Dictionary<string, Thing2>();
             // find track name in the earliest album
             foreach (var trackName in top10trackNamesDistinct) {
                 MultipleAlbums.Album originalAlbum = null;
 
-                var xxx = multiAlbumDetails3.Select(x => x.tracks.items.Where(yy => yy.name == trackName));
-                // Descending so last one, is the earliest one
-                var listOfTrackName = new List<Thing2>();
-                foreach (var album in multiAlbumDetails3.OrderByDescending(al => al.release_date)) {
-                    foreach (var track in album.tracks.items) {
-                        if (track.name.ToLower() == trackName.ToLower()) {
-                            originalAlbum = album;
+                // if there are any remaining albums for this artist (eg Brian May)
+                if (multiAlbumDetails3 != null ){
+                    var xxx = multiAlbumDetails3.Select(x => x.tracks.items.Where(yy => yy.name == trackName));
+                    // Descending so last one, is the earliest one
+                    var listOfTrackName = new List<Thing2>();
+                    foreach (var album in multiAlbumDetails3.OrderByDescending(al => al.release_date)){
+                        foreach (var track in album.tracks.items){
+                            if (track.name.ToLower() == trackName.ToLower()){
+                                originalAlbum = album;
+                            }
+                            var t2 = new Thing2{
+                                AlbumID = album.id,
+                                TrackID = track.id
+                            };
+                            listOfTrackName.Add(t2);
                         }
-                        var t2 = new Thing2{
-                            AlbumID = album.id,
-                            TrackID = track.id
-                        };
-                        listOfTrackName.Add(t2);
                     }
                 }
-                // take off anything like (Remastered 2011)??
 
                 if (originalAlbum == null) {
                     // Eminem - guts over fear.. on album Shadyyxv (a compilation)
@@ -176,7 +240,6 @@ namespace DavesMusic.Controllers {
                 else {
                     // add the albums trackID rather than whatever it is at the moment (compilation perhaps)
                     // want the last one added to the list
-                    //var t2 = listOfTrackName.LastOrDefault();
                     var t2 = new Thing2{
                         AlbumID = originalAlbum.id,
                         TrackID = originalAlbum.tracks.items.FirstOrDefault(x => x.name.ToLower() == trackName.ToLower()).id
@@ -215,13 +278,10 @@ namespace DavesMusic.Controllers {
                     }
                 }
             }
-            //artistTopTracks.tracks = deDupedTop10.ToList();
 
             // 3. Top10 tracks and get the date that this track/album was released - using GetMultipleAlbums
             var csvStringOfAlbumIDs = "";
             var listOfAlbumIDs = new List<string>();
-            //studioAlbums
-
             foreach (var track in distinctTop10) {
                 if (listOfAlbumIDs.Contains(track.album.id)) { }
                 else {
@@ -230,10 +290,10 @@ namespace DavesMusic.Controllers {
                 }
             }
             csvStringOfAlbumIDs = csvStringOfAlbumIDs.TrimEnd(',');
-            APIResult apiResult2 = null;
+            APIResult apiResult2;
             // no albums
             if (csvStringOfAlbumIDs.Length > 0){
-                apiResult2 = sh.CallSpotifyAPIMultipleAlbumDetails(stopWatchResult, csvStringOfAlbumIDs);
+                apiResult2 = sh.CallSpotifyAPIMultipleAlbumDetails(null, csvStringOfAlbumIDs);
 
                 var multiAlbumDetails = JsonConvert.DeserializeObject<MultipleAlbums>(apiResult2.Json);
                 foreach (var album in multiAlbumDetails.albums){
@@ -263,19 +323,14 @@ namespace DavesMusic.Controllers {
             artistTopTracks.tracks = distinctTop10.ToList();
 
             // 5. Artist's related Artists - top 7
-            apiResult = apiHelper.CallSpotifyAPIArtistRelated(stopWatchResult, id);
+            apiResult = sh.CallSpotifyAPIArtistRelated(null, artistID);
             var artistRelated = JsonConvert.DeserializeObject<ArtistRelated>(apiResult.Json);
             var y = artistRelated.artists.Take(15).ToList();
             artistRelated.artists = y;
-            apiDebug = new APIDebug {
-                APITime = String.Format("{0:0}", stopWatchResult.ElapsedTime.TotalMilliseconds),
-                APIURL = apiResult.Url,
-                APITimeSpan = stopWatchResult.ElapsedTime
-            };
-            apiDebugList.Add(apiDebug);
+           
 
             // 6. Biography (Echonest)
-            apiResult = apiHelper.CallEchonestAPIArtistBiography(stopWatchResult, id);
+            apiResult = sh.CallEchonestAPIArtistBiography(null, artistID);
             var artistBiography = JsonConvert.DeserializeObject<ArtistBiography>(apiResult.Json);
             if (artistBiography != null) {
                 // Just get last.fm and Wikipedia entries
@@ -285,30 +340,44 @@ namespace DavesMusic.Controllers {
                     artistBiography.response.biographies.Add(a);
                 }
             }
-            apiDebug = new APIDebug {
-                APITime = String.Format("{0:0}", stopWatchResult.ElapsedTime.TotalMilliseconds),
-                APIURL = apiResult.Url,
-                APITimeSpan = stopWatchResult.ElapsedTime
 
-            };
-            apiDebugList.Add(apiDebug);
+            // 7. Artists singles
+            apiResult = sh.CallSpotifyAPIArtistsSingles(artistID);
+            //var artistSingles = JsonConvert.DeserializeObject<ArtistDetails>(json);
+            ArtistAlbums artistSingles = JsonConvert.DeserializeObject<ArtistAlbums>(apiResult.Json);
 
-            // Get total time in API calls
-            var ts = new TimeSpan();
-            foreach (var apiDebug2 in apiDebugList) {
-                ts = ts + apiDebug2.APITimeSpan;
+            // Iterate through records in db, setting vm checked property for Admin - add to playlist
+            using (var connection = new SqlConnection(connectionString))
+            using (var command = new SqlCommand(null, connection)) {
+                connection.Open();
+                command.CommandText = String.Format("SELECT TrackID FROM Tracks");
+                command.CommandType = CommandType.Text;
+
+                var trackIDs = new List<string>();
+                using (var reader = command.ExecuteReader()) {
+                    while (reader.Read()) {
+                        var trackID = reader.GetString(reader.GetOrdinal("TrackID"));
+                        trackIDs.Add(trackID);
+                    }
+                }
+
+                foreach (var trackID in trackIDs) {
+                    // Is this track in the current artist Singles list?
+                    var track = artistSingles.items.FirstOrDefault(x => x.id == trackID);
+                    if (track != null) {
+                        track.Checked = true;
+                    }
+                }
             }
+
             var vm = new ArtistDetailsViewModel {
-                APIDebugList = apiDebugList,
                 ArtistDetails = artistDetails,
                 ArtistTopTracks = artistTopTracks,
-                //ArtistAlbums = artistAlbums,
-                //ArtistAlbums = multiAlbumDetails3,
                 ArtistAlbums = multiAlbumDetails3,
 
                 ArtistRelated = artistRelated,
                 ArtistBiography = artistBiography,
-                TotalTimeInMSOfAPICalls = String.Format("{0:0}", ts.TotalMilliseconds)
+                ArtistSingles = artistSingles
             };
             return vm;
         }
@@ -530,6 +599,8 @@ namespace DavesMusic.Controllers {
         public ArtistRelated ArtistRelated { get; set; }
         public ArtistBiography ArtistBiography { get; set; }
         public string TotalTimeInMSOfAPICalls { get; set; }
+        public ArtistAlbums ArtistSingles { get; set; }
+
     }
 
     public class ArtistTopTracks {

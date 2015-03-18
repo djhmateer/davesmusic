@@ -32,15 +32,6 @@
                     <td>
                         <a href="/Home/Search">Search</a>
 
-                        <button id="button" onclick=" toggle_visibility('debug'); ">Toggle</button>
-                        <!-- Debug Times-->
-                        <div id="debug" style="display: none">
-                            @foreach (var item in Model.APIDebugList) {
-                                <p>@item.APITime : @item.APIURL</p>
-                            }
-                            Total: @Model.TotalTimeInMSOfAPICalls ms
-                        </div>
-
                         <p><a href="@Model.ArtistDetails.Uri">Direct</a></p>
                         <p>Popularity: @Model.ArtistDetails.Popularity</p>
                         <p>Followers Total: @Model.ArtistDetails.followers.Total</p>
@@ -143,16 +134,12 @@
 
     <!-- Full list of Albums-->
     <h3>Studio Albums</h3>
-    <div class="action">
-        <button class="actionButton" type="submit">
-            <span>Admin - Add all to Top Tracks</span>
-        </button>
-    </div>
     <table class="table">
         @if (Model.ArtistAlbums != null) {
             for (int i = 0; i < Model.ArtistAlbums.Count; i++) {
                 @Html.HiddenFor(model => Model.ArtistAlbums[i].id)
                 @Html.HiddenFor(model => Model.ArtistAlbums[i].name)
+            
                 <tr>
                     <td>@Model.ArtistAlbums[i].name</td>
                     <td>@Html.EditorFor(model => Model.ArtistAlbums[i].Checked)</td>
@@ -162,6 +149,42 @@
                         <a href="/Albums/Details/@Model.ArtistAlbums[i].id">
                             @if (Model.ArtistAlbums[i].images.Count > 2) {
                                 <img src="@Model.ArtistAlbums[i].images[2].url" />
+                            }
+
+                        </a>
+                    </td>
+                </tr>
+            }
+        }
+    </table>
+
+    <!-- Singles -->
+    <h3>Singles</h3>
+    <div class="action">
+        <button class="actionButton" type="submit">
+            <span>Admin - Add/Remove Singles</span>
+        </button>
+    </div>
+    <table class="table">
+        @if (Model.ArtistSingles != null) {
+            for (int i = 0; i < Model.ArtistSingles.items.Count; i++) {
+                @Html.HiddenFor(model => Model.ArtistSingles.items[i].id)
+                @Html.HiddenFor(model => Model.ArtistSingles.items[i].name)
+
+                if (Model.ArtistSingles.items[i].images.Count > 0) {
+                    @Html.HiddenFor(model => Model.ArtistSingles.items[i].images[0].url)
+                    @Html.HiddenFor(model => Model.ArtistSingles.items[i].images[1].url)
+                    @Html.HiddenFor(model => Model.ArtistSingles.items[i].images[2].url)
+                }
+
+                <tr>
+                    <td>@Model.ArtistSingles.items[i].name</td>
+                    <td>@Html.EditorFor(model => Model.ArtistSingles.items[i].Checked)</td>
+                    <td><a href="@Model.ArtistSingles.items[i].uri">Direct</a></td>
+                    <td>
+                        <a href="/Albums/Details/@Model.ArtistSingles.items[i].id">
+                            @if (Model.ArtistSingles.items[i].images.Count > 2) {
+                                <img src="@Model.ArtistSingles.items[i].images[2].url" />
                             }
 
                         </a>

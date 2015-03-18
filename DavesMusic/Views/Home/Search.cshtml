@@ -14,19 +14,21 @@
                         <a href="@item.uri">Open directly</a>
 
                     </td>
+                    @if (item.album.images.Count() == 4) {
+                        <td>
+                            <a href="/Albums/Details/@item.album.id"><img src="@item.album.images[2].url" /></a>
+                        </td>
+                    }
                     @if (item.album.images.Count() == 3) {
                         <td>
                             <a href="/Albums/Details/@item.album.id"><img src="@item.album.images[2].url" /></a>
                         </td>
                     }
-                    
-                    @*@if (item.album.images.Count() == 4) {
+                    @if (item.album.images.Count() < 3 && item.album.images.Count() > 0) {
                         <td>
-                            <a href="/Artists/Details/@item.id"><img src="@item.album.images[2].url" /></a>
+                            <a href="/Albums/Details/@item.id"><img src="@item.album.images[0].url" /></a>
                         </td>
-                    }*@
-
-                   
+                    }
                 </tr>
             }
         </table>
@@ -55,8 +57,8 @@
                             <a href="/Artists/Details/@item.id"><img src="@item.images[2].Url" /></a>
                         </td>
                     }
-                    
-                    @if (item.images.Count < 3 && item.images.Count  > 0) {
+
+                    @if (item.images.Count < 3 && item.images.Count > 0) {
                         <td>
                             <a href="/Artists/Details/@item.id"><img src="@item.images[0].Url" /></a>
                         </td>
@@ -65,7 +67,7 @@
             }
         </table>
     }
-   
+
 }
 
 

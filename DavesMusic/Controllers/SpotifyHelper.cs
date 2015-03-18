@@ -68,7 +68,7 @@ namespace DavesMusic.Controllers {
 
         public string CallSpotifyAPITrackSearch(string searchTerm) {
             if (!String.IsNullOrWhiteSpace(searchTerm)) searchTerm = HttpUtility.UrlEncode(searchTerm);
-            var url = String.Format("https://api.spotify.com/v1/search?q={0}&limit=5&type=track", searchTerm);
+            var url = String.Format("https://api.spotify.com/v1/search?q={0}&limit=3&type=track", searchTerm);
             var text = CallAPI(null, url);
             return text;
         }
@@ -105,6 +105,16 @@ namespace DavesMusic.Controllers {
                 Url = url
             };
         }
+
+        public APIResult CallSpotifyAPIArtistsSingles(string artistID) {
+            var url = String.Format("https://api.spotify.com/v1/artists/{0}/albums?country=GB&album_type=single&limit=5", artistID);
+            var json = CallAPI(null, url);
+            return new APIResult {
+                Json = json,
+                Url = url
+            };
+        }
+        
 
         public APIResult CallSpotifyAPIAlbumDetails(StopWatchResult stopWatchResult, string id) {
             var url = String.Format("https://api.spotify.com/v1/albums/{0}", id);
