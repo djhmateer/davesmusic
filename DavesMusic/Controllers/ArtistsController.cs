@@ -95,7 +95,7 @@ namespace DavesMusic.Controllers {
                             command.Parameters.AddWithValue("@TrackName", t.name);
                             command.Parameters.AddWithValue("@ArtistName", vm.ArtistDetails.Name);
                             command.Parameters.AddWithValue("@ArtistID", vm.ArtistDetails.Id);
-                            
+
                             //command.Parameters.AddWithValue("@TrackPreviewURL", t.preview_url);
                             command.Parameters.AddWithValue("@TrackPreviewURL", "");
 
@@ -156,7 +156,7 @@ namespace DavesMusic.Controllers {
             return View(vm);
         }
 
-        private ArtistDetailsViewModel GetArtistDetailsViewModel(string id){
+        private ArtistDetailsViewModel GetArtistDetailsViewModel(string id) {
             string artistID = id;
             var sh = new SpotifyHelper();
             // 1. Get the Artist's details
@@ -178,10 +178,37 @@ namespace DavesMusic.Controllers {
             // get rid of any dupes - eg Phil Collins has many albums called Tarzan....could use DistinctBy
             studioAlbums = studioAlbums.GroupBy(x => x.name).Select(yy => yy.First());
 
+            //Queen
+            //if contains   (Deluxe
+            //  or Deluxe
+            // take start of the string before that…
+            // and check another album exists
+            var deluxeAlbums = studioAlbums.Where(x => x.name.ToLower().Contains("(deluxe"));
+            // check another album exists
+            foreach (var deluxeAlbum in deluxeAlbums){
+                var name = deluxeAlbum.name;
+                //var firstBit = name.Substring(0)
+                string[] res = name.Split(new string[] { "(Deluxe" }, StringSplitOptions.None);
+                var firstBit = res[0];
+
+                // does another album exist with this name but not the deluxe?
+                var anohterAlbum = studioAlbums.FirstOrDefault(x => x.name.ToLower().Trim() == firstBit.ToLower().Trim());
+                if (anohterAlbum != null){
+                    studioAlbums = studioAlbums.Where(x => x.id != anohterAlbum.id);
+                }
+
+                // does another album exist with this name but stuff in brackets
+                // eg Queen (Deluxe Edition..) and Queen (2011 Remaster)
+                var anohterAlbum2 = studioAlbums.FirstOrDefault(x => x.name.ToLower().Trim().Contains(firstBit.ToLower().Trim() + " ("));
+                if (anohterAlbum2 != null) {
+                    studioAlbums = studioAlbums.Where(x => x.id != anohterAlbum2.id);
+                }
+            }
+
             List<MultipleAlbums.Album> multiAlbumDetails3 = null;
             // The exponents - have no albums (even before filtering)
-            if (studioAlbums.Count() > 0){
-                multiAlbumDetails3 = sh.CallSpotifyAPIMultipleAlbumDetails2(null,studioAlbums);
+            if (studioAlbums.Count() > 0) {
+                multiAlbumDetails3 = sh.CallSpotifyAPIMultipleAlbumDetails2(null, studioAlbums);
             }
 
             // 3. Artists Top Tracks
@@ -203,23 +230,23 @@ namespace DavesMusic.Controllers {
                 var track = top10.FirstOrDefault(x => x.name == trackName);
                 distinctTop10.Add(track);
             }
-           
+
             var dictionaryOfNameAndAlbumIDAndNewTrackID = new Dictionary<string, Thing2>();
             // find track name in the earliest album
             foreach (var trackName in top10trackNamesDistinct) {
                 MultipleAlbums.Album originalAlbum = null;
 
                 // if there are any remaining albums for this artist (eg Brian May)
-                if (multiAlbumDetails3 != null ){
+                if (multiAlbumDetails3 != null) {
                     var xxx = multiAlbumDetails3.Select(x => x.tracks.items.Where(yy => yy.name == trackName));
                     // Descending so last one, is the earliest one
                     var listOfTrackName = new List<Thing2>();
-                    foreach (var album in multiAlbumDetails3.OrderByDescending(al => al.release_date)){
-                        foreach (var track in album.tracks.items){
-                            if (track.name.ToLower() == trackName.ToLower()){
+                    foreach (var album in multiAlbumDetails3.OrderByDescending(al => al.release_date)) {
+                        foreach (var track in album.tracks.items) {
+                            if (track.name.ToLower() == trackName.ToLower()) {
                                 originalAlbum = album;
                             }
-                            var t2 = new Thing2{
+                            var t2 = new Thing2 {
                                 AlbumID = album.id,
                                 TrackID = track.id
                             };
@@ -231,20 +258,20 @@ namespace DavesMusic.Controllers {
                 if (originalAlbum == null) {
                     // Eminem - guts over fear.. on album Shadyyxv (a compilation)
                     var asdf = distinctTop10.SingleOrDefault(x => x.name == trackName);
-                    var t2 = new Thing2{
-                            AlbumID = asdf.album.id,
-                            TrackID = asdf.id
-                        };
+                    var t2 = new Thing2 {
+                        AlbumID = asdf.album.id,
+                        TrackID = asdf.id
+                    };
                     dictionaryOfNameAndAlbumIDAndNewTrackID.Add(trackName, t2);
                 }
                 else {
                     // add the albums trackID rather than whatever it is at the moment (compilation perhaps)
                     // want the last one added to the list
-                    var t2 = new Thing2{
+                    var t2 = new Thing2 {
                         AlbumID = originalAlbum.id,
                         TrackID = originalAlbum.tracks.items.FirstOrDefault(x => x.name.ToLower() == trackName.ToLower()).id
                     };
-                    dictionaryOfNameAndAlbumIDAndNewTrackID.Add(trackName,t2);
+                    dictionaryOfNameAndAlbumIDAndNewTrackID.Add(trackName, t2);
                 }
             }
 
@@ -279,7 +306,7 @@ namespace DavesMusic.Controllers {
                 }
             }
 
-            // 3. Top10 tracks and get the date that this track/album was released - using GetMultipleAlbums
+            // 4. Artists top tracks and get the date that this track/album was released - using GetMultipleAlbums
             var csvStringOfAlbumIDs = "";
             var listOfAlbumIDs = new List<string>();
             foreach (var track in distinctTop10) {
@@ -292,22 +319,22 @@ namespace DavesMusic.Controllers {
             csvStringOfAlbumIDs = csvStringOfAlbumIDs.TrimEnd(',');
             APIResult apiResult2;
             // no albums
-            if (csvStringOfAlbumIDs.Length > 0){
+            if (csvStringOfAlbumIDs.Length > 0) {
                 apiResult2 = sh.CallSpotifyAPIMultipleAlbumDetails(null, csvStringOfAlbumIDs);
 
                 var multiAlbumDetails = JsonConvert.DeserializeObject<MultipleAlbums>(apiResult2.Json);
-                foreach (var album in multiAlbumDetails.albums){
+                foreach (var album in multiAlbumDetails.albums) {
                     // get all associated albums in top10
                     var albumInTop10s = distinctTop10.Where(x => x.album.id == album.id);
 
-                    foreach (var album2 in albumInTop10s){
+                    foreach (var album2 in albumInTop10s) {
                         album2.album.DateOfAlbumRelease = album.release_date;
                         album2.album.name = album.name;
                         album2.album.uri = album.uri;
 
                         //images
                         var images = new List<ArtistTopTracks.Image>();
-                        foreach (var image in album.images){
+                        foreach (var image in album.images) {
                             var att = new ArtistTopTracks.Image();
                             att.height = image.height;
                             att.width = image.width;
@@ -322,12 +349,12 @@ namespace DavesMusic.Controllers {
 
             artistTopTracks.tracks = distinctTop10.ToList();
 
-            // 5. Artist's related Artists - top 7
+            // 5. Artist's related Artists - top 15
             apiResult = sh.CallSpotifyAPIArtistRelated(null, artistID);
             var artistRelated = JsonConvert.DeserializeObject<ArtistRelated>(apiResult.Json);
             var y = artistRelated.artists.Take(15).ToList();
             artistRelated.artists = y;
-           
+
 
             // 6. Biography (Echonest)
             apiResult = sh.CallEchonestAPIArtistBiography(null, artistID);
