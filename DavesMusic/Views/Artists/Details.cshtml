@@ -127,7 +127,7 @@
                 <td>@Model.ArtistTopTracks.tracks[i].album.DateOfAlbumRelease</td>
                 <td>
                     <a href="/Albums/Details/@Model.ArtistTopTracks.tracks[i].album.id">
-                        @if (Model.ArtistTopTracks.tracks[i].album.images.Count > 0) {
+                        @if (Model.ArtistTopTracks.tracks[i].album.images.Count == 3) {
                             <img src="@Model.ArtistTopTracks.tracks[i].album.images[2].url" />
                         }
                         else {
