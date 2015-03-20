@@ -55,29 +55,32 @@
 </table>
 <h3>Biography</h3>
 
+@if (Model.ArtistBiography != null) {
+    if (Model.ArtistBiography.response.biographies != null) {
+        if (Model.ArtistBiography.response.biographies.Count > 0){
+            foreach (var item in Model.ArtistBiography.response.biographies){
+                if (item != null){
+                    <button id="button" onclick=" toggle_visibility('idOfElement'); ">Toggle</button>
+                    <div>
+                        @if (@item.text != null){
+                            if (item.url != null){
+                                <div id="idOfElement2" style="display: block; white-space: pre-line">
+                                    @if (@item.text.Length > 500){
+                                        @item.text.Substring(0, 500)
+                                    }
+                                    else{
+                                        @item.text
+                                    }
+                                </div>
 
-@if (Model.ArtistBiography.response.biographies.Count > 0) {
-    foreach (var item in Model.ArtistBiography.response.biographies) {
-        if (item != null) {
-            <button id="button" onclick=" toggle_visibility('idOfElement'); ">Toggle</button>
-            <div>
-                @if (@item.text != null) {
-                    if (item.url != null) {
-                        <div id="idOfElement2" style="display: block; white-space: pre-line">
-                            @if (@item.text.Length > 500) {
-                                @item.text.Substring(0, 500)
+                                <div id="idOfElement" style="display: none; white-space: pre-line">
+                                    @item.text - <a href="@item.url">@item.url</a>
+                                </div>
                             }
-                            else {
-                                @item.text
-                            }
-                        </div>
-
-                        <div id="idOfElement" style="display: none; white-space: pre-line">
-                            @item.text - <a href="@item.url">@item.url</a>
-                        </div>
-                    }
+                        }
+                    </div>
                 }
-            </div>
+            }
         }
     }
 }
@@ -102,7 +105,7 @@
             @Html.HiddenFor(model => Model.ArtistTopTracks.tracks[i].album.name)
             @Html.HiddenFor(model => Model.ArtistTopTracks.tracks[i].album.id)
             //Peter Gabriel has no images in one of his albums
-            if (Model.ArtistTopTracks.tracks[i].album.images.Count > 0) {
+            if (Model.ArtistTopTracks.tracks[i].album.images.Count == 3) {
                 @Html.HiddenFor(model => Model.ArtistTopTracks.tracks[i].album.images[0].url)
                 @Html.HiddenFor(model => Model.ArtistTopTracks.tracks[i].album.images[1].url)
                 @Html.HiddenFor(model => Model.ArtistTopTracks.tracks[i].album.images[2].url)
@@ -175,7 +178,7 @@
                 @Html.HiddenFor(model => Model.ArtistSingles.items[i].id)
                 @Html.HiddenFor(model => Model.ArtistSingles.items[i].name)
 
-                if (Model.ArtistSingles.items[i].images.Count > 0) {
+                if (Model.ArtistSingles.items[i].images.Count == 3) {
                     @Html.HiddenFor(model => Model.ArtistSingles.items[i].images[0].url)
                     @Html.HiddenFor(model => Model.ArtistSingles.items[i].images[1].url)
                     @Html.HiddenFor(model => Model.ArtistSingles.items[i].images[2].url)

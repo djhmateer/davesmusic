@@ -23,10 +23,12 @@ namespace DavesMusic
 
         void Application_Error(Object sender, EventArgs e) {
             var exception = Server.GetLastError();
+            
             if (exception == null)
                 return;
             ILog log = LogManager.GetLogger(typeof(MvcApplication));
             log.Error(exception.Message);
+            log.Error(Request.RawUrl);
             log.Error(exception.StackTrace);
             //var mail = new MailMessage { From = new MailAddress("automated@contoso.com") };
             //mail.To.Add(new MailAddress("administrator@contoso.com"));
