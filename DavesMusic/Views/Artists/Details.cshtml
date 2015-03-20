@@ -1,5 +1,9 @@
 ﻿@model DavesMusic.Controllers.ArtistDetailsViewModel
 
+@{
+    ViewBag.Title = Model.ArtistDetails.Name;
+}
+
 <script type="text/javascript">
     function toggle_visibility(id) {
         var e = document.getElementById(id);
@@ -139,7 +143,7 @@
             for (int i = 0; i < Model.ArtistAlbums.Count; i++) {
                 @Html.HiddenFor(model => Model.ArtistAlbums[i].id)
                 @Html.HiddenFor(model => Model.ArtistAlbums[i].name)
-            
+
                 <tr>
                     <td>@Model.ArtistAlbums[i].name</td>
                     <td>@Html.EditorFor(model => Model.ArtistAlbums[i].Checked)</td>

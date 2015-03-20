@@ -1,4 +1,8 @@
 ﻿@model DavesMusic.Controllers.AlbumDetailsViewModel
+           
+@{
+    ViewBag.Title = Model.AlbumDetails.name;
+}
 
 <h2>@Model.AlbumDetails.name</h2>
 <table>
