@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Web;
 using System.Web.Script.Serialization;
+using log4net;
 using Newtonsoft.Json;
 
 namespace DavesMusic.Controllers {
@@ -202,10 +203,11 @@ namespace DavesMusic.Controllers {
                     done = true;
                 }
                 catch (WebException ex) {
-                    Debug.WriteLine("Exception: " + ex.Message);
-                    Thread.Sleep(100);
+                    //ILog log = LogManager.GetLogger(typeof(MvcApplication));
+                    //log.Debug("CallAPI trap2: " + url + ex.Message);
+                    Thread.Sleep(200);
                     errorCount++;
-                    if (errorCount == 10)
+                    if (errorCount == 200) 
                         throw;
                 }
             }

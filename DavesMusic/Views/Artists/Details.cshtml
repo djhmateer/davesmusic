@@ -29,8 +29,14 @@
             <table>
                 <tr>
                     <td>
-                        @if (@Model.ArtistDetails.Images.Count > 0) {
+                        @if (@Model.ArtistDetails.Images.Count > 1){
                             <img src="@Model.ArtistDetails.Images[1].URL" width="300" />
+                        }
+                        else if (@Model.ArtistDetails.Images.Count == 1){
+                            <img src="@Model.ArtistDetails.Images[0].URL" width="300" />
+                        }
+                        else{
+                            // no image
                         }
                     </td>
                     <td>
