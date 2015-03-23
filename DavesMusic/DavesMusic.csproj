@@ -258,7 +258,6 @@
     <Content Include="Views\Users\Playlists.cshtml" />
     <Content Include="Views\Home\TopAlbums.cshtml" />
     <Content Include="Views\Home\TopTracks.cshtml" />
-    <Content Include="Views\Home\MyPlaylist.cshtml" />
     <Content Include="Views\Shared\_SearchPartial.cshtml" />
     <Content Include="Views\Home\SpeedTest.cshtml" />
     <Content Include="Views\Home\SpeedTestWithToken.cshtml" />

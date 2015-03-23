@@ -265,23 +265,6 @@ namespace DavesMusic.Controllers {
             return Redirect(returnURL);
         }
 
-        public ActionResult MyPlaylist() {
-            var returnURL = "/Home/MyPlaylist";
-            var ah = new AuthHelper();
-            var result = ah.DoAuth(returnURL, this);
-            if (result != null)
-                return Redirect(result);
-
-            var access_token = Session["AccessToken"].ToString();
-            var url2 = "https://api.spotify.com/v1/me";
-            var sh = new SpotifyHelper();
-            var result2 = sh.CallSpotifyAPIPassingToken(access_token, url2);
-
-            var meReponse = JsonConvert.DeserializeObject<MeResponse>(result2);
-            meReponse.access_token = access_token;
-            return View();
-        }
-
         public String AddOrRemoveTrack(string trackId) {
             // Insert into the database 
             var userID = Session["UserID"];

@@ -65,7 +65,7 @@ namespace DavesMusic.Controllers {
             // Does the playlist exist already for this user?
             var url4 = String.Format("https://api.spotify.com/v1/users/{0}/playlists", userId);
             var result4 = sh.CallSpotifyAPIPassingToken(access_token, url4);
-            var meReponse = JsonConvert.DeserializeObject<PlaylistDetails2>(result4);
+            var meReponse = JsonConvert.DeserializeObject<PlaylistSummaryViewModel>(result4);
             var currentPlaylistID = "";
             foreach (var thing in meReponse.items) {
                 if (thing.name == "A New Playlist") {

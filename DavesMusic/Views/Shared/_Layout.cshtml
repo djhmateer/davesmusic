@@ -12,7 +12,6 @@
 <body>
     <div class="navbar navbar-inverse navbar-fixed-top">
         <div class="container">
-            ou
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
                     <span class="icon-bar"></span>
@@ -25,8 +24,8 @@
                 </span>
             </div>
             <div class="navbar-collapse collapse">
-                <ul class="nav navbar-nav">
-                    <li>@*@Html.ActionLink("About", "About", "Home")*@</li>
+                <ul class="nav navbar-right">
+                    <li>@Html.ActionLink("My Profile", "Me", "Profiles")</li>
                     <li>@*@Html.ActionLink("My Playlist", "MyPlaylist", "Home")*@</li>
                     <li>@*@Html.Partial("_SearchPartial")*@</li>
                 </ul>

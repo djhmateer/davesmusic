@@ -1,17 +1,30 @@
-﻿@model DavesMusic.Controllers.PlaylistDetails2
+﻿@model DavesMusic.Controllers.PlaylistSummaryViewModel
 
-<h2>Playlist - @Model.total</h2>
+<h2>My Playlists (@Model.total)</h2>
 
-<table class="table">
-    @foreach (var item in Model.items) {
-        <tr>
-            <td><a href="/Playlists/Details/@item.id/@item.owner.id">@item.name</td>
-            @if (@item.images != null){
-                if (@item.images.Count != 0){
-                    <td><a href="/Playlists/Details/@item.id/@item.owner.id"><img src="@item.images[0].url" width="150" /></a></td>
+@using (Html.BeginForm()) {
+    <div class="action">
+        <button class="actionButton" type="submit">
+            <span>Add/Remove Playlists to your Spotify - Shuffler</span>
+        </button>
+    </div>
+    <p>Currently showing first 50 of your playlists.</p>
+    <table class="table">
+        @for (int i = 0; i < Model.items.Count; i++) {
+            @Html.HiddenFor(model => Model.items[i].id)
+            @Html.HiddenFor(model => Model.items[i].name)
+            @Html.HiddenFor(model => Model.items[i].owner.id)
+            <tr>
+                <td><a href="/Playlists/Details/@Model.items[i].id/@Model.items[i].owner.id">@Model.items[i].name</a></td>
+                <td>@Html.EditorFor(model => @Model.items[i].Checked)</td>
+
+                @if (@Model.items[i].images != null) {
+                    if (@Model.items[i].images.Count != 0) {
+                        <td><a href="/Playlists/Details/@Model.items[i].id/@Model.items[i].owner.id"><img src="@Model.items[i].images[0].url" width="50" /></a></td>
+                    }
                 }
-            }
-        </tr>
-    }
-</table>
+            </tr>
+        }
+    </table>
+}
 

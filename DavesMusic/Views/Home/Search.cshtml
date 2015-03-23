@@ -8,7 +8,7 @@
 @if (Model != null) {
     <h2>@Model.ArtistsResponse2.term</h2>
     if (Model.TrackSearchResponse != null) {
-        <h3>tracks</h3>
+        <h3>Tracks</h3>
         <table class="table">
             @foreach (var item in Model.TrackSearchResponse.tracks.items) {
                 <tr>
@@ -40,7 +40,7 @@
 
 
     if (Model.ArtistsResponse2 != null) {
-        <h3>albums</h3>
+        <h3>Artists</h3>
         <table class="table">
             @foreach (var item in Model.ArtistsResponse2.artists.items) {
                 <tr>
