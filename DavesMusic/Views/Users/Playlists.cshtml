@@ -15,7 +15,7 @@
             @Html.HiddenFor(model => Model.items[i].name)
             @Html.HiddenFor(model => Model.items[i].owner.id)
             <tr>
-                <td><a href="/Playlists/Details/@Model.items[i].id/@Model.items[i].owner.id">@Model.items[i].name</a></td>
+                <td><a href="/Playlists/Details/@Model.items[i].id/@Model.items[i].owner.id">@Model.items[i].name</a>  (@Model.items[i].tracks.total)</td>
                 <td>@Html.EditorFor(model => @Model.items[i].Checked)</td>
 
                 @if (@Model.items[i].images != null) {

@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -10,8 +12,6 @@ using System.Text;
 using System.Threading;
 using System.Web;
 using System.Web.Script.Serialization;
-using log4net;
-using Newtonsoft.Json;
 
 namespace DavesMusic.Controllers {
 
@@ -24,6 +24,14 @@ namespace DavesMusic.Controllers {
             var result = httpResponse.Result.Content.ReadAsStringAsync().Result;
             return result;
         }
+
+        //public async Task<string> CallSpotifyAPIAsyncPassingToken(string access_token, string url) {
+        //    var client = new HttpClient();
+        //    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", access_token);
+        //    var httpResponse = client.GetAsync(url);
+        //    var result = httpResponse.Result.Content.ReadAsStringAsync();
+        //    return result;
+        //}
 
         public string CallSpotifyPostAPIPassingToken(string access_token, string url) {
             var client = new HttpClient();

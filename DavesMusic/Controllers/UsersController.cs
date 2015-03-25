@@ -4,10 +4,117 @@ using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web.Mvc;
 using Newtonsoft.Json;
 
 namespace DavesMusic.Controllers {
+
+    public class Thing {
+            public string href { get; set; }
+            public Item[] items { get; set; }
+            public int limit { get; set; }
+            public string next { get; set; }
+            public int offset { get; set; }
+            public string previous { get; set; }
+            public int total { get; set; }
+
+        public class Item {
+            public DateTime added_at { get; set; }
+            public Added_By added_by { get; set; }
+            public bool is_local { get; set; }
+            public Track track { get; set; }
+        }
+
+        public class Added_By {
+            public External_Urls external_urls { get; set; }
+            public string href { get; set; }
+            public string id { get; set; }
+            public string type { get; set; }
+            public string uri { get; set; }
+        }
+
+        public class External_Urls {
+            public string spotify { get; set; }
+        }
+
+        public class Track {
+            public Album album { get; set; }
+            public Artist[] artists { get; set; }
+            public string[] available_markets { get; set; }
+            public int disc_number { get; set; }
+            public int duration_ms { get; set; }
+            public bool _explicit { get; set; }
+            public External_Ids external_ids { get; set; }
+            public External_Urls2 external_urls { get; set; }
+            public string href { get; set; }
+            public string id { get; set; }
+            public string name { get; set; }
+            public int popularity { get; set; }
+            public string preview_url { get; set; }
+            public int track_number { get; set; }
+            public string type { get; set; }
+            public string uri { get; set; }
+            public Linked_From linked_from { get; set; }
+        }
+
+        public class Album {
+            public string album_type { get; set; }
+            public string[] available_markets { get; set; }
+            public External_Urls1 external_urls { get; set; }
+            public string href { get; set; }
+            public string id { get; set; }
+            public Image[] images { get; set; }
+            public string name { get; set; }
+            public string type { get; set; }
+            public string uri { get; set; }
+        }
+
+        public class External_Urls1 {
+            public string spotify { get; set; }
+        }
+
+        public class Image {
+            public int height { get; set; }
+            public string url { get; set; }
+            public int width { get; set; }
+        }
+
+        public class External_Ids {
+            public string isrc { get; set; }
+        }
+
+        public class External_Urls2 {
+            public string spotify { get; set; }
+        }
+
+        public class Linked_From {
+            public External_Urls3 external_urls { get; set; }
+            public string href { get; set; }
+            public string id { get; set; }
+            public string type { get; set; }
+            public string uri { get; set; }
+        }
+
+        public class External_Urls3 {
+            public string spotify { get; set; }
+        }
+
+        public class Artist {
+            public External_Urls4 external_urls { get; set; }
+            public string href { get; set; }
+            public string id { get; set; }
+            public string name { get; set; }
+            public string type { get; set; }
+            public string uri { get; set; }
+        }
+
+        public class External_Urls4 {
+            public string spotify { get; set; }
+        }
+
+    }
+
     public class UsersController : Controller {
         string connectionString = ConfigurationManager.ConnectionStrings["DavesMusicConnection2"].ConnectionString;
 
@@ -37,25 +144,21 @@ namespace DavesMusic.Controllers {
 
 
         [HttpPost]
-        public ActionResult Playlists(PlaylistSummaryViewModel vm, string id){
+        public ActionResult Playlists(PlaylistSummaryViewModel vm, string id) {
             var userId = id;
+            var access_token = Session["AccessToken"].ToString();
+            var sh = new SpotifyHelper();
 
             // Create/Update playlist in Spotify
             // like /Playlists/Follow
 
-            var access_token = Session["AccessToken"].ToString();
-
-            var sh = new SpotifyHelper();
             // Does the playlist exist already for this user?
             var url4 = String.Format("https://api.spotify.com/v1/users/{0}/playlists", userId);
             var result4 = sh.CallSpotifyAPIPassingToken(access_token, url4);
             var meReponse = JsonConvert.DeserializeObject<PlaylistSummaryViewModel>(result4);
             var currentPlaylistID = "";
-            foreach (var thing in meReponse.items) {
-                if (thing.name == "Shuffler") {
-                    currentPlaylistID = thing.id;
-                }
-            }
+            var shuffler = meReponse.items.FirstOrDefault(x => x.name == "Shuffler");
+            if (shuffler != null) currentPlaylistID = shuffler.id;
 
             // If not playlist create one
             if (currentPlaylistID == "") {
@@ -67,17 +170,37 @@ namespace DavesMusic.Controllers {
 
             // Go through each Checked playlist and add to Shuffler list
             var listOfTrackIDs = new List<String>();
-            foreach (var playlist in vm.items){
+            foreach (var playlist in vm.items) {
                 var ownerId = playlist.owner.id;
                 var playlistId = playlist.id;
-                if (playlist.Checked){
-                    // Get the details of the playlist ie the tracks - default limit is 100
+                if (playlist.Checked) {
+                    // Get the details of the playlist ie the tracks - default return limit is 100
                     var url2 = String.Format("https://api.spotify.com/v1/users/{0}/playlists/{1}", ownerId, playlistId);
                     var result2 = sh.CallSpotifyAPIPassingToken(access_token, url2);
                     var meReponse2 = JsonConvert.DeserializeObject<PlaylistDetails>(result2);
                     // add tracks to list
                     foreach (var item in meReponse2.tracks.items) {
                         listOfTrackIDs.Add(item.track.id);
+                    }
+
+                    // are there more playlist tracks to come from Spotify?
+                    if (meReponse2.tracks.total > 100) {
+                        var recordsPerPage = 100;
+                        var total = meReponse2.tracks.total;
+                        int numberOfTimesToLoop = (total + recordsPerPage - 1) / recordsPerPage;
+                        int offset = 100;
+                        for (int i = 0; i < numberOfTimesToLoop; i++) {
+                            // used to be no: tracks
+                            var url5 = String.Format("https://api.spotify.com/v1/users/{0}/playlists/{1}/tracks?limit=100&offset={2}", ownerId, playlistId, offset);
+                            offset += 100;
+                            var result5 = sh.CallSpotifyAPIPassingToken(access_token, url5);
+                            //Task<string> t = sh.CallSpotifyAPIAsyncPassingToken(access_token, url5);
+
+                            var meReponse5 = JsonConvert.DeserializeObject<Thing>(result5);
+                            foreach (var item in meReponse5.items) {
+                                listOfTrackIDs.Add(item.track.id);
+                            }
+                        }
                     }
                 }
             }
