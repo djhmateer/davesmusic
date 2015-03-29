@@ -25,13 +25,19 @@ namespace DavesMusic.Controllers {
             return result;
         }
 
-        //public async Task<string> CallSpotifyAPIAsyncPassingToken(string access_token, string url) {
-        //    var client = new HttpClient();
-        //    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", access_token);
-        //    var httpResponse = client.GetAsync(url);
-        //    var result = httpResponse.Result.Content.ReadAsStringAsync();
-        //    return result;
-        //}
+
+        public async Task<string> CallSpotifyAPIPassingTokenPlaylistsAsync(string access_token, string url) {
+            var client = new HttpClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", access_token);
+            HttpResponseMessage httpResponse = await client.GetAsync(url);
+            string result = await httpResponse.Content.ReadAsStringAsync();
+
+            // how many records?
+            var meReponse2 = JsonConvert.DeserializeObject<PlaylistDetails>(result);
+
+            return result;
+        }
+       
 
         public string CallSpotifyPostAPIPassingToken(string access_token, string url) {
             var client = new HttpClient();

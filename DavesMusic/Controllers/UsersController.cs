@@ -4,6 +4,7 @@ using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using Newtonsoft.Json;
@@ -145,6 +146,8 @@ namespace DavesMusic.Controllers {
 
         [HttpPost]
         public ActionResult Playlists(PlaylistSummaryViewModel vm, string id) {
+            ServicePointManager.DefaultConnectionLimit = 5;
+
             var userId = id;
             var access_token = Session["AccessToken"].ToString();
             var sh = new SpotifyHelper();
@@ -170,13 +173,17 @@ namespace DavesMusic.Controllers {
 
             // Go through each Checked playlist and add to Shuffler list
             var listOfTrackIDs = new List<String>();
+            
             foreach (var playlist in vm.items) {
                 var ownerId = playlist.owner.id;
                 var playlistId = playlist.id;
                 if (playlist.Checked) {
-                    // Get the details of the playlist ie the tracks - default return limit is 100
+                    // Get the details of the playlist ie the tracks - default return limit is 100 ***HERE***
                     var url2 = String.Format("https://api.spotify.com/v1/users/{0}/playlists/{1}", ownerId, playlistId);
                     var result2 = sh.CallSpotifyAPIPassingToken(access_token, url2);
+                    //var result22 = sh.CallSpotifyAPIPassingTokenPlaylistsAsync(access_token, url2);
+                    //result22.Wait();
+                    //var result2 = result22.Result;
                     var meReponse2 = JsonConvert.DeserializeObject<PlaylistDetails>(result2);
                     // add tracks to list
                     foreach (var item in meReponse2.tracks.items) {
