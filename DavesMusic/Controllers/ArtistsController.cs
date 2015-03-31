@@ -1,4 +1,8 @@
 ﻿using System.Data;
+using System.Diagnostics;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -148,6 +152,80 @@ namespace DavesMusic.Controllers {
             var vm2 = GetArtistDetailsViewModel(id);
 
             return View(vm2);
+        }
+
+        string Actual(DateTime time) {
+            return (DateTime.Now - time).TotalMilliseconds.ToString();
+        }
+
+
+
+        async Task<string> CallAPI(int i, string artistID) {
+            int offset = 0;
+            if (i == 0) offset = 0;
+            if (i == 0) offset = 50;
+            if (i == 0) offset = 100;
+
+            var url = String.Format("https://api.spotify.com/v1/artists/{0}/albums?country=GB&album_type=album&offset={1}&limit=50", artistID, offset);
+
+            var time = DateTime.Now;
+            string result;
+            using (var client = new HttpClient()) {
+                // ConfigureAwat - do not capture the current ASP.NET request context
+                var response = await client.GetAsync(url).ConfigureAwait(false);
+
+                // Not on the original context here, instead we're running on the thread pool
+                response.EnsureSuccessStatusCode();
+                result = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            }
+            Debug.WriteLine(Actual(time), "After " + i);
+            return result;
+        }
+
+        public async Task<ActionResult> Details2(string id) {
+            // get all albums async
+            var artistID = id;
+            var sh = new SpotifyHelper();
+           
+            // call API synchronously once to get the total number of calls I need to do?
+            var apiResult = sh.CallSpotifyAPIArtistAlbums(null, artistID);
+            ArtistAlbums artistAlbums = JsonConvert.DeserializeObject<ArtistAlbums>(apiResult.Json);
+            int total = artistAlbums.total;
+
+            var recordsPerPage = 50;
+            var records = total;
+            int numberOfTimesToLoop = (records + recordsPerPage - 1) / recordsPerPage;
+
+            var sw = new Stopwatch();
+            sw.Start();
+
+            ServicePointManager.DefaultConnectionLimit = 5;
+            int n = numberOfTimesToLoop;
+            var tasks = new Task<string>[n];
+            for (int i = 0; i < n; i++) {
+                tasks[i] = CallAPI(i, artistID);
+            }
+
+            for (int i = 0; i < n; i++) {
+                await tasks[i];
+            }
+            Debug.WriteLine(sw.ElapsedMilliseconds, "After all async tasks");
+
+            // combine results
+            var itemsList = new List<ArtistAlbums.Item>();
+            int total2 = 0;
+            for (int i = 0; i < n; i++){
+                ArtistAlbums albums = JsonConvert.DeserializeObject<ArtistAlbums>(tasks[i].Result);
+                foreach (var item in albums.items){
+                    itemsList.Add(item);
+                }
+                total2 = albums.total;
+            }
+            var albums2 = new ArtistAlbums();
+            albums2.items = itemsList;
+            albums2.total = total2;
+
+            return View(albums2);
         }
 
         [HttpGet]
@@ -396,6 +474,8 @@ namespace DavesMusic.Controllers {
                     }
                 }
             }
+
+            // All albums (async)
 
             var vm = new ArtistDetailsViewModel {
                 ArtistDetails = artistDetails,

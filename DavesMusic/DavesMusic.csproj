@@ -262,6 +262,7 @@
     <Content Include="Views\Home\SpeedTest.cshtml" />
     <Content Include="Views\Home\SpeedTestWithToken.cshtml" />
     <Content Include="Views\Home\Error.cshtml" />
+    <Content Include="Views\Artists\Details2.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
