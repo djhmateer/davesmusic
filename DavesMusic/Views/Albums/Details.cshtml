@@ -10,7 +10,7 @@
         @if (@Model.AlbumDetails.images.Count > 1){
             <img src="@Model.AlbumDetails.images[1].url" />
         }
-        else {
+        else if (@Model.AlbumDetails.images.Count == 1) {
             <img src="@Model.AlbumDetails.images[0].url" />
         }
     </td>
@@ -39,7 +39,7 @@
         @Html.HiddenFor(model => model.AlbumDetails.images[1].url)
         @Html.HiddenFor(model => model.AlbumDetails.images[2].url)
     }
-    else {
+    else if (Model.AlbumDetails.images.Count > 0) {
         @Html.HiddenFor(model => model.AlbumDetails.images[0].url)
     }
     @Html.HiddenFor(model => model.AlbumDetails.release_date)
