@@ -25,17 +25,92 @@ namespace DavesMusic.Controllers {
             return result;
         }
 
+        string Actual(DateTime time) {
+            return (DateTime.Now - time).TotalMilliseconds.ToString();
+        }
 
-        public async Task<string> CallSpotifyAPIPassingTokenPlaylistsAsync(string access_token, string url) {
-            var client = new HttpClient();
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", access_token);
-            HttpResponseMessage httpResponse = await client.GetAsync(url);
-            string result = await httpResponse.Content.ReadAsStringAsync();
+        async Task<string> CallAPI(int i, string access_token, string ownerId, string playlistId) {
+            int offset = 0;
+            if (i == 0) offset = 0;
+            if (i == 1) offset = 100;
+            if (i == 2) offset = 200;
 
-            // how many records?
-            var meReponse2 = JsonConvert.DeserializeObject<PlaylistDetails>(result);
+            var url = String.Format("https://api.spotify.com/v1/users/{0}/playlists/{1}?market=GB&limit=100&offset={2}", ownerId, playlistId, offset);
+            Debug.WriteLine(url, i);
 
+            var time = DateTime.Now;
+            string result;
+            using (var client = new HttpClient()) {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", access_token);
+                // ConfigureAwat - do not capture the current ASP.NET request context
+                var response = await client.GetAsync(url).ConfigureAwait(false);
+
+                // Not on the original context here, instead we're running on the thread pool
+                response.EnsureSuccessStatusCode();
+                result = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            }
+            Debug.WriteLine(Actual(time), "After " + i);
+            // problem is we're getting the same result back!!!!!**HERE** both time.
             return result;
+        }
+
+        public async Task<PlaylistDetails> CallSpotifyAPIPassingTokenPlaylistsAsync(string access_token, string ownerId, string playlistId) {
+            // get tracks from a playlist - async if necessary
+            var url = String.Format("https://api.spotify.com/v1/users/{0}/playlists/{1}", ownerId, playlistId);
+
+            // call API synchronously once to get the total number of calls I need to do
+            var apiResult = CallSpotifyAPIPassingToken(access_token, url);
+            PlaylistDetails playlistDetails = JsonConvert.DeserializeObject<PlaylistDetails>(apiResult);
+            int total = playlistDetails.tracks.total;
+
+            var recordsPerPage = 100;
+            var records = total;
+            int numberOfTimesToLoop = (records + recordsPerPage - 1) / recordsPerPage;
+
+            if (numberOfTimesToLoop == 1) {
+                // don't need to do more calls
+                return playlistDetails;
+            }
+            var sw = new Stopwatch();
+            sw.Start();
+
+            ServicePointManager.DefaultConnectionLimit = 5;
+            int n = numberOfTimesToLoop;
+            var tasks = new Task<string>[n];
+            for (int i = 0; i < n; i++) {
+                tasks[i] = CallAPI(i, access_token, ownerId,playlistId);
+            }
+
+            await Task.WhenAll(tasks);
+            Debug.WriteLine(sw.ElapsedMilliseconds, "After all async tasks");
+
+            // combine results
+            var items = new List<PlaylistDetails.Item>();
+            int total2 = 0;
+            for (int i = 0; i < n; i++) {
+                PlaylistDetails playlistDetails2 = JsonConvert.DeserializeObject<PlaylistDetails>(tasks[i].Result);
+                foreach (var item in playlistDetails2.tracks.items) {
+                    items.Add(item);
+                }
+                total2 = playlistDetails2.tracks.total;
+            }
+            var playlistDetails3 = new PlaylistDetails();
+            var tracks = new PlaylistDetails.Tracks();
+            tracks.items = items;
+            playlistDetails3.tracks = tracks;
+            playlistDetails3.tracks.total = total2;
+
+            return playlistDetails3;
+            
+            //var client = new HttpClient();
+            //client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", access_token);
+            //HttpResponseMessage httpResponse = await client.GetAsync(url);
+            //string result = await httpResponse.Content.ReadAsStringAsync();
+
+            //// how many records?
+            //var meReponse2 = JsonConvert.DeserializeObject<PlaylistDetails>(result);
+
+            //return result;
         }
        
 

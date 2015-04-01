@@ -263,6 +263,9 @@
     <Content Include="Views\Home\SpeedTestWithToken.cshtml" />
     <Content Include="Views\Home\Error.cshtml" />
     <Content Include="Views\Artists\Details2.cshtml" />
+    <Content Include="thing.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

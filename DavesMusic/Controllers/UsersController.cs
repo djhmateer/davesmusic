@@ -143,9 +143,8 @@ namespace DavesMusic.Controllers {
             return vm;
         }
 
-
         [HttpPost]
-        public ActionResult Playlists(PlaylistSummaryViewModel vm, string id) {
+        public async Task<ActionResult> Playlists(PlaylistSummaryViewModel vm, string id) {
             ServicePointManager.DefaultConnectionLimit = 5;
 
             var userId = id;
@@ -179,36 +178,36 @@ namespace DavesMusic.Controllers {
                 var playlistId = playlist.id;
                 if (playlist.Checked) {
                     // Get the details of the playlist ie the tracks - default return limit is 100 ***HERE***
-                    var url2 = String.Format("https://api.spotify.com/v1/users/{0}/playlists/{1}", ownerId, playlistId);
-                    var result2 = sh.CallSpotifyAPIPassingToken(access_token, url2);
-                    //var result22 = sh.CallSpotifyAPIPassingTokenPlaylistsAsync(access_token, url2);
+                    //var url2 = String.Format("https://api.spotify.com/v1/users/{0}/playlists/{1}", ownerId, playlistId);
+                    //var result2 = sh.CallSpotifyAPIPassingToken(access_token, url2);
+                    PlaylistDetails result22 = await sh.CallSpotifyAPIPassingTokenPlaylistsAsync(access_token, ownerId, playlistId);
                     //result22.Wait();
                     //var result2 = result22.Result;
-                    var meReponse2 = JsonConvert.DeserializeObject<PlaylistDetails>(result2);
+                    //var meReponse2 = JsonConvert.DeserializeObject<PlaylistDetails>(result22);
                     // add tracks to list
-                    foreach (var item in meReponse2.tracks.items) {
+                    foreach (var item in result22.tracks.items) {
                         listOfTrackIDs.Add(item.track.id);
                     }
 
                     // are there more playlist tracks to come from Spotify?
-                    if (meReponse2.tracks.total > 100) {
-                        var recordsPerPage = 100;
-                        var total = meReponse2.tracks.total;
-                        int numberOfTimesToLoop = (total + recordsPerPage - 1) / recordsPerPage;
-                        int offset = 100;
-                        for (int i = 0; i < numberOfTimesToLoop; i++) {
-                            // used to be no: tracks
-                            var url5 = String.Format("https://api.spotify.com/v1/users/{0}/playlists/{1}/tracks?limit=100&offset={2}", ownerId, playlistId, offset);
-                            offset += 100;
-                            var result5 = sh.CallSpotifyAPIPassingToken(access_token, url5);
-                            //Task<string> t = sh.CallSpotifyAPIAsyncPassingToken(access_token, url5);
+                    //if (meReponse2.tracks.total > 100) {
+                    //    var recordsPerPage = 100;
+                    //    var total = meReponse2.tracks.total;
+                    //    int numberOfTimesToLoop = (total + recordsPerPage - 1) / recordsPerPage;
+                    //    int offset = 100;
+                    //    for (int i = 0; i < numberOfTimesToLoop; i++) {
+                    //        // used to be no: tracks
+                    //        var url5 = String.Format("https://api.spotify.com/v1/users/{0}/playlists/{1}/tracks?limit=100&offset={2}", ownerId, playlistId, offset);
+                    //        offset += 100;
+                    //        var result5 = sh.CallSpotifyAPIPassingToken(access_token, url5);
+                    //        //Task<string> t = sh.CallSpotifyAPIAsyncPassingToken(access_token, url5);
 
-                            var meReponse5 = JsonConvert.DeserializeObject<Thing>(result5);
-                            foreach (var item in meReponse5.items) {
-                                listOfTrackIDs.Add(item.track.id);
-                            }
-                        }
-                    }
+                    //        var meReponse5 = JsonConvert.DeserializeObject<Thing>(result5);
+                    //        foreach (var item in meReponse5.items) {
+                    //            listOfTrackIDs.Add(item.track.id);
+                    //        }
+                    //    }
+                    //}
                 }
             }
 

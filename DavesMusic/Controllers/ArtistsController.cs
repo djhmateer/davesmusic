@@ -158,13 +158,11 @@ namespace DavesMusic.Controllers {
             return (DateTime.Now - time).TotalMilliseconds.ToString();
         }
 
-
-
         async Task<string> CallAPI(int i, string artistID) {
             int offset = 0;
             if (i == 0) offset = 0;
-            if (i == 0) offset = 50;
-            if (i == 0) offset = 100;
+            if (i == 1) offset = 50;
+            if (i == 2) offset = 100;
 
             var url = String.Format("https://api.spotify.com/v1/artists/{0}/albums?country=GB&album_type=album&offset={1}&limit=50", artistID, offset);
 
@@ -187,7 +185,7 @@ namespace DavesMusic.Controllers {
             var artistID = id;
             var sh = new SpotifyHelper();
            
-            // call API synchronously once to get the total number of calls I need to do?
+            // call API synchronously once to get the total number of calls I need to do
             var apiResult = sh.CallSpotifyAPIArtistAlbums(null, artistID);
             ArtistAlbums artistAlbums = JsonConvert.DeserializeObject<ArtistAlbums>(apiResult.Json);
             int total = artistAlbums.total;
@@ -196,6 +194,10 @@ namespace DavesMusic.Controllers {
             var records = total;
             int numberOfTimesToLoop = (records + recordsPerPage - 1) / recordsPerPage;
 
+            if (numberOfTimesToLoop == 1){
+                // don't need to do more calls
+                return View(artistAlbums);
+            }
             var sw = new Stopwatch();
             sw.Start();
 
@@ -206,9 +208,7 @@ namespace DavesMusic.Controllers {
                 tasks[i] = CallAPI(i, artistID);
             }
 
-            for (int i = 0; i < n; i++) {
-                await tasks[i];
-            }
+            await Task.WhenAll(tasks);
             Debug.WriteLine(sw.ElapsedMilliseconds, "After all async tasks");
 
             // combine results
