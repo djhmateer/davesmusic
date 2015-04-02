@@ -12,13 +12,13 @@ using Newtonsoft.Json;
 namespace DavesMusic.Controllers {
 
     public class Thing {
-            public string href { get; set; }
-            public Item[] items { get; set; }
-            public int limit { get; set; }
-            public string next { get; set; }
-            public int offset { get; set; }
-            public string previous { get; set; }
-            public int total { get; set; }
+        public string href { get; set; }
+        public Item[] items { get; set; }
+        public int limit { get; set; }
+        public string next { get; set; }
+        public int offset { get; set; }
+        public string previous { get; set; }
+        public int total { get; set; }
 
         public class Item {
             public DateTime added_at { get; set; }
@@ -172,196 +172,36 @@ namespace DavesMusic.Controllers {
 
             // Go through each Checked playlist and add to Shuffler list
             var listOfTrackIDs = new List<String>();
-            
+
             foreach (var playlist in vm.items) {
                 var ownerId = playlist.owner.id;
                 var playlistId = playlist.id;
                 if (playlist.Checked) {
-                    // Get the details of the playlist ie the tracks - default return limit is 100 ***HERE***
-                    //var url2 = String.Format("https://api.spotify.com/v1/users/{0}/playlists/{1}", ownerId, playlistId);
-                    //var result2 = sh.CallSpotifyAPIPassingToken(access_token, url2);
-                    PlaylistDetails result22 = await sh.CallSpotifyAPIPassingTokenPlaylistsAsync(access_token, ownerId, playlistId);
-                    //result22.Wait();
-                    //var result2 = result22.Result;
-                    //var meReponse2 = JsonConvert.DeserializeObject<PlaylistDetails>(result22);
+                    // Get the details of the playlist ie the tracks 
+                    PlaylistTracks result22 = await sh.CallSpotifyAPIPassingTokenPlaylistsAsync(access_token, ownerId, playlistId);
                     // add tracks to list
-                    foreach (var item in result22.tracks.items) {
+                    foreach (var item in result22.items) {
                         listOfTrackIDs.Add(item.track.id);
                     }
-
-                    // are there more playlist tracks to come from Spotify?
-                    //if (meReponse2.tracks.total > 100) {
-                    //    var recordsPerPage = 100;
-                    //    var total = meReponse2.tracks.total;
-                    //    int numberOfTimesToLoop = (total + recordsPerPage - 1) / recordsPerPage;
-                    //    int offset = 100;
-                    //    for (int i = 0; i < numberOfTimesToLoop; i++) {
-                    //        // used to be no: tracks
-                    //        var url5 = String.Format("https://api.spotify.com/v1/users/{0}/playlists/{1}/tracks?limit=100&offset={2}", ownerId, playlistId, offset);
-                    //        offset += 100;
-                    //        var result5 = sh.CallSpotifyAPIPassingToken(access_token, url5);
-                    //        //Task<string> t = sh.CallSpotifyAPIAsyncPassingToken(access_token, url5);
-
-                    //        var meReponse5 = JsonConvert.DeserializeObject<Thing>(result5);
-                    //        foreach (var item in meReponse5.items) {
-                    //            listOfTrackIDs.Add(item.track.id);
-                    //        }
-                    //    }
-                    //}
                 }
             }
 
             // Get first 100 tracks and put into a csv string
-            string csvOfUris = "";
-            var first100 = listOfTrackIDs.Take(100);
-            foreach (var trackID in first100) {
-                csvOfUris += "spotify:track:" + trackID + ",";
-            }
-            csvOfUris = csvOfUris.TrimEnd(',');
+            //string csvOfUris = "";
+            //var first100 = listOfTrackIDs.Take(100);
+            //foreach (var trackID in listOfTrackIDs) {
+            //    csvOfUris += "spotify:track:" + trackID + ",";
+            //}
+            //csvOfUris = csvOfUris.TrimEnd(',');
 
-            var url3 = String.Format("https://api.spotify.com/v1/users/{0}/playlists/{1}/tracks?uris={2}", userId,
-                currentPlaylistID, csvOfUris);
+            //var url3 = String.Format("https://api.spotify.com/v1/users/{0}/playlists/{1}/tracks?uris={2}", userId, currentPlaylistID, csvOfUris);
 
             // this will replace
-            var result3 = sh.CallSpotifyPutAPIPassingToken(access_token, url3);
+            //var result3 = sh.CallSpotifyPutAPIPassingToken(access_token, url3);
+            var result3 = await sh.CallSpotifyPutAPIPassingTokenSendTracksAsync(access_token, userId, currentPlaylistID, listOfTrackIDs);
 
 
-
-            //var url2 = String.Format("https://api.spotify.com/v1/users/{0}/playlists/{1}/followers", ownerId, playlistId);
-            //var result2 = sh.CallSpotifyPutAPIPassingToken(access_token, url2);
-
-            // id is ArtistID
-            //using (var connection = new SqlConnection(connectionString))
-            //using (var command = new SqlCommand(null, connection)) {
-            //    connection.Open();
-
-            //    // Tracks
-            //    foreach (var t in vm.ArtistTopTracks.tracks) {
-            //        if (t.Checked) {
-            //            // Is it already there in the database?
-            //            command.CommandText = String.Format("SELECT COUNT(*) FROM Tracks WHERE TrackID = '{0}'", t.id);
-            //            command.CommandType = CommandType.Text;
-            //            var result = command.ExecuteScalar().ToString();
-            //            if (result == "0") {
-            //                // Add track to db
-            //                command.CommandText =
-            //                 "INSERT INTO Tracks (TrackID, TrackName, ArtistName, ArtistID, TrackPreviewURL, AlbumName," +
-            //                 "AlbumID, AlbumImageURL, AlbumDate) " +
-            //                 "VALUES (@TrackID, @TrackName,@ArtistName,@ArtistID,@TrackPreviewURL, @AlbumName, @AlbumID," +
-            //                 "@AlbumImageURL, @AlbumDate)";
-            //                command.Parameters.Clear();
-            //                command.Parameters.AddWithValue("@TrackID", t.id);
-            //                command.Parameters.AddWithValue("@TrackName", t.name);
-            //                command.Parameters.AddWithValue("@ArtistName", vm.ArtistDetails.Name);
-            //                command.Parameters.AddWithValue("@ArtistID", vm.ArtistDetails.Id);
-            //                command.Parameters.AddWithValue("@TrackPreviewURL", t.preview_url);
-            //                command.Parameters.AddWithValue("@AlbumName", t.album.name);
-            //                command.Parameters.AddWithValue("@AlbumID", t.album.id);
-            //                command.Parameters.AddWithValue("@AlbumImageURL", t.album.images[2].url);
-            //                string dateOfAlbum = t.album.DateOfAlbumRelease;
-            //                DateTime d;
-            //                // Maybe its in 2000/01/01
-            //                bool r = DateTime.TryParse(dateOfAlbum, out d);
-            //                if (!r) {
-            //                    // Maybe its in the format 2000
-            //                    int year;
-            //                    if (Int32.TryParse(dateOfAlbum, out year)) {
-            //                        if (DateTime.TryParse(year + "/1/1", out d)) { }
-            //                        else {
-            //                            d = new DateTime(1900, 1, 1);
-            //                        }
-            //                    }
-            //                }
-
-            //                command.Parameters.AddWithValue("@AlbumDate", d);
-            //                command.CommandType = CommandType.Text;
-            //                command.ExecuteNonQuery();
-            //            }
-            //        }
-            //        else {
-            //            // If its been unchecked and is there in the database?
-            //            command.CommandText = String.Format("SELECT COUNT(*) FROM Tracks WHERE TrackID = '{0}'", t.id);
-
-            //            command.CommandType = CommandType.Text;
-            //            var result = command.ExecuteScalar().ToString();
-            //            if (result != "0") {
-            //                command.CommandText = String.Format("DELETE FROM Tracks WHERE TrackID = '{0}'", t.id);
-            //                command.CommandType = CommandType.Text;
-            //                command.ExecuteNonQuery();
-            //            }
-            //        }
-            //    }
-
-
-            //    // Singles
-            //    foreach (var t in vm.ArtistSingles.items) {
-            //        if (t.Checked) {
-            //            // Is it already there in the database?
-            //            command.CommandText = String.Format("SELECT COUNT(*) FROM Tracks WHERE TrackID = '{0}'", t.id);
-            //            command.CommandType = CommandType.Text;
-            //            var result = command.ExecuteScalar().ToString();
-            //            if (result == "0") {
-            //                // Add track to db
-            //                command.CommandText =
-            //                 "INSERT INTO Tracks (TrackID, TrackName, ArtistName, ArtistID, TrackPreviewURL, AlbumName," +
-            //                 "AlbumID, AlbumImageURL, AlbumDate) " +
-            //                 "VALUES (@TrackID, @TrackName,@ArtistName,@ArtistID,@TrackPreviewURL, @AlbumName, @AlbumID," +
-            //                 "@AlbumImageURL, @AlbumDate)";
-            //                command.Parameters.Clear();
-            //                command.Parameters.AddWithValue("@TrackID", t.id);
-            //                command.Parameters.AddWithValue("@TrackName", t.name);
-            //                command.Parameters.AddWithValue("@ArtistName", vm.ArtistDetails.Name);
-            //                command.Parameters.AddWithValue("@ArtistID", vm.ArtistDetails.Id);
-
-            //                //command.Parameters.AddWithValue("@TrackPreviewURL", t.preview_url);
-            //                command.Parameters.AddWithValue("@TrackPreviewURL", "");
-
-            //                ////command.Parameters.AddWithValue("@AlbumName", t.album.name);
-            //                command.Parameters.AddWithValue("@AlbumName", "");
-
-            //                ////command.Parameters.AddWithValue("@AlbumID", t.album.id);
-            //                command.Parameters.AddWithValue("@AlbumID", "");
-
-            //                command.Parameters.AddWithValue("@AlbumImageURL", t.images[2].url);
-            //                //string dateOfAlbum = t.album.DateOfAlbumRelease;
-            //                //DateTime d;
-            //                //// Maybe its in 2000/01/01
-            //                //bool r = DateTime.TryParse(dateOfAlbum, out d);
-            //                //if (!r) {
-            //                //    // Maybe its in the format 2000
-            //                //    int year;
-            //                //    if (Int32.TryParse(dateOfAlbum, out year)) {
-            //                //        if (DateTime.TryParse(year + "/1/1", out d)) { }
-            //                //        else {
-            //                //            d = new DateTime(1900, 1, 1);
-            //                //        }
-            //                //    }
-            //                //}
-
-            //                ////command.Parameters.AddWithValue("@AlbumDate", d);
-            //                command.Parameters.AddWithValue("@AlbumDate", new DateTime(1900, 1, 1));
-
-            //                command.CommandType = CommandType.Text;
-            //                command.ExecuteNonQuery();
-            //            }
-            //        }
-            //        else {
-            //            // If its been unchecked and is there in the database?
-            //            command.CommandText = String.Format("SELECT COUNT(*) FROM Tracks WHERE TrackID = '{0}'", t.id);
-
-            //            command.CommandType = CommandType.Text;
-            //            var result = command.ExecuteScalar().ToString();
-            //            if (result != "0") {
-            //                command.CommandText = String.Format("DELETE FROM Tracks WHERE TrackID = '{0}'", t.id);
-            //                command.CommandType = CommandType.Text;
-            //                command.ExecuteNonQuery();
-            //            }
-            //        }
-            //    }
-
-            //}
-
-            //// Get data again as not saved, including Checked status
+            // Get data again as not saved, including Checked status
             var vm2 = GetPlaylistDetailsViewModel(id);
             return View(vm2);
         }
