@@ -1,4 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using System.Data;
+using System.Data.Common;
+using Dapper;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -10,8 +13,25 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web.Mvc;
+using StackExchange.Profiling;
 
 namespace DavesMusic.Controllers {
+
+    // used for SimpleCRUD
+    [Table("Tracks")]
+    public class Track {
+        public int Id { get; set; }
+        public string TrackID { get; set; }
+        public string TrackName { get; set; }
+        public string ArtistName { get; set; }
+        public string ArtistID { get; set; }
+        public string TrackPreviewURL { get; set; }
+        public string AlbumName { get; set; }
+        public string AlbumID{ get; set; }
+        public string AlbumImageURL{ get; set; }
+        public DateTime AlbumDate{ get; set; }
+
+    }
 
     public class HomeController : Controller {
         string connectionString = ConfigurationManager.ConnectionStrings["DavesMusicConnection2"].ConnectionString;
@@ -172,39 +192,58 @@ namespace DavesMusic.Controllers {
         public ActionResult Error(){
             return View();
         }
+
+        private IDbConnection GetOpenConnection() {
+            //IDbConnection cnn = new SqlConnection(ConfigurationManager.ConnectionStrings["contactsDB"].ConnectionString);
+            //DbConnection cnn = new SqlConnection(ConfigurationManager.ConnectionStrings["contactsDB"].ConnectionString);
+            DbConnection cnn = new SqlConnection(connectionString);
+            cnn.Open();
+
+            // wrap the connection with a profiling connection that tracks timings 
+            return new StackExchange.Profiling.Data.ProfiledDbConnection(cnn, MiniProfiler.Current);
+            //return connection;
+        }
+
+        // The current homepage
         public ActionResult TopTracks() {
             var vm = new List<SongsVM>();
-            using (var connection = new SqlConnection(connectionString))
-            using (var command = new SqlCommand(null, connection)) {
-                connection.Open();
-                command.CommandText = String.Format("SELECT ArtistName, TrackID, TrackName," +
-                " ArtistID, TrackPreviewURL, AlbumName, AlbumID, AlbumImageURL, AlbumDate FROM Tracks" +
-                " ORDER BY AlbumDate desc");
-                using (var reader = command.ExecuteReader()) {
-                    while (reader.Read()) {
-                        var trackID = reader.GetString(reader.GetOrdinal("TrackID"));
-                        var trackName = reader.GetString(reader.GetOrdinal("TrackName"));
-                        var artistName = reader.GetString(reader.GetOrdinal("ArtistName"));
-                        var artistID = reader.GetString(reader.GetOrdinal("ArtistID"));
-                        var trackPreviewURL = reader.GetString(reader.GetOrdinal("TrackPreviewURL"));
-                        var albumName = reader.GetString(reader.GetOrdinal("AlbumName"));
-                        var albumID = reader.GetString(reader.GetOrdinal("AlbumID"));
-                        var albumImageURL = reader.GetString(reader.GetOrdinal("AlbumImageURL"));
-                        DateTime albumDate = reader.GetDateTime(reader.GetOrdinal("AlbumDate"));
-                        var songsVM = new SongsVM {
-                            TrackID = trackID,
-                            TrackName = trackName,
-                            ArtistName = artistName,
-                            ArtistID = artistID,
-                            TrackPreviewURL = trackPreviewURL,
-                            AlbumName = albumName,
-                            AlbumID = albumID,
-                            AlbumImageURL = albumImageURL,
-                            AlbumDate = albumDate
-                        };
-                        vm.Add(songsVM);
-                    }
+            //using (SqlConnection connection = new SqlConnection(connectionString))
+            //using (var command = new SqlCommand(null, connection)) {
+            using (IDbConnection db = GetOpenConnection()) {
+                var listOfTracks = db.GetList<Track>();
+
+                foreach (var track in listOfTracks) {
+                    var songsVM = new SongsVM {
+                        TrackID = track.TrackID,
+                        TrackName = track.TrackName,
+                        ArtistName = track.ArtistName,
+                        ArtistID = track.ArtistID,
+                        TrackPreviewURL = track.TrackPreviewURL,
+                        AlbumName = track.AlbumName,
+                        AlbumID = track.AlbumID,
+                        AlbumImageURL = track.AlbumImageURL,
+                        AlbumDate = track.AlbumDate
+                    };
+                    vm.Add(songsVM); 
                 }
+                //connection.Open();
+                //command.CommandText = String.Format("SELECT ArtistName, TrackID, TrackName," +
+                //" ArtistID, TrackPreviewURL, AlbumName, AlbumID, AlbumImageURL, AlbumDate FROM Tracks" +
+                //" ORDER BY AlbumDate desc");
+                //using (var reader = command.ExecuteReader()) {
+                //    while (reader.Read()) {
+                //        var trackID = reader.GetString(reader.GetOrdinal("TrackID"));
+                //        var trackName = reader.GetString(reader.GetOrdinal("TrackName"));
+                //        var artistName = reader.GetString(reader.GetOrdinal("ArtistName"));
+                //        var artistID = reader.GetString(reader.GetOrdinal("ArtistID"));
+                //        var trackPreviewURL = reader.GetString(reader.GetOrdinal("TrackPreviewURL"));
+                //        var albumName = reader.GetString(reader.GetOrdinal("AlbumName"));
+                //        var albumID = reader.GetString(reader.GetOrdinal("AlbumID"));
+                //        var albumImageURL = reader.GetString(reader.GetOrdinal("AlbumImageURL"));
+                //        DateTime albumDate = reader.GetDateTime(reader.GetOrdinal("AlbumDate"));
+               
+                //    }
+                //}
             }
             // It is possible to be on this page without logging in - user clicks via LoginRedirect to come back here
             if (Session["AccessToken"] != null) {
