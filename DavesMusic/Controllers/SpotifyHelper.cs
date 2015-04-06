@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading;
 using System.Web;
 using System.Web.Script.Serialization;
+using StackExchange.Profiling;
 
 namespace DavesMusic.Controllers {
 
@@ -197,10 +198,16 @@ namespace DavesMusic.Controllers {
             return text;
         }
 
+        MiniProfiler mp = MiniProfiler.Current;
+
         public string CallSpotifyAPIArtist(string artistCode, StopWatchResult stopWatchResult) {
             var url = String.Format("https://api.spotify.com/v1/artists/{0}", artistCode);
-            var json = CallAPI(stopWatchResult, url);
-            return json;
+
+            //using (mp.Step("CallSpotifyAPIArtist"))
+            using (mp.CustomTiming("http", url)) {
+                var json = CallAPI(stopWatchResult, url);
+                return json;
+            }
         }
 
         public APIResult CallSpotifyAPIArtistTopTracks(StopWatchResult stopWatchResult, string artistCode) {
@@ -214,11 +221,13 @@ namespace DavesMusic.Controllers {
 
         public APIResult CallSpotifyAPIArtistAlbums(StopWatchResult stopWatchResult, string artistCode) {
             var url = String.Format("https://api.spotify.com/v1/artists/{0}/albums?country=GB&album_type=album&limit=50", artistCode);
-            var json = CallAPI(stopWatchResult, url);
-            return new APIResult {
-                Json = json,
-                Url = url
-            };
+            using (mp.CustomTiming("http", url)){
+                var json = CallAPI(stopWatchResult, url);
+                return new APIResult{
+                    Json = json,
+                    Url = url
+                };
+            }
         }
 
         public APIResult CallSpotifyAPIArtistsSingles(string artistID) {

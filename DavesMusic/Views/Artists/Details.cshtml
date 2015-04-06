@@ -1,8 +1,6 @@
 ﻿@model DavesMusic.Controllers.ArtistDetailsViewModel
 
-@{
-    ViewBag.Title = Model.ArtistDetails.Name;
-}
+@{ViewBag.Title = Model.ArtistDetails.Name;}
 
 <script type="text/javascript">
     function toggle_visibility(id) {
@@ -34,9 +32,6 @@
                         }
                         else if (@Model.ArtistDetails.Images.Count == 1){
                             <img src="@Model.ArtistDetails.Images[0].URL" width="300" />
-                        }
-                        else{
-                            // no image
                         }
                     </td>
                     <td>
@@ -122,7 +117,7 @@
                 <td>@Model.ArtistTopTracks.tracks[i].name</td>
                 <td>@Html.EditorFor(model => Model.ArtistTopTracks.tracks[i].Checked)</td>
                 <td>
-                    <audio controls style="width: 150px; display: block;">
+                    <audio controls style="width: 150px; display: block;" preload="none">
                         <source src="@Model.ArtistTopTracks.tracks[i].preview_url" type="audio/mpeg">
                         <p>Ooops - please use a more up to date browser so you can preview songs</p>
                     </audio>

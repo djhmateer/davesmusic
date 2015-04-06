@@ -1,10 +1,9 @@
-﻿using System.Data;
-using System.Data.Common;
-using Dapper;
+﻿using Dapper;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.IO;
@@ -13,26 +12,8 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web.Mvc;
-using StackExchange.Profiling;
 
 namespace DavesMusic.Controllers {
-
-    // used for SimpleCRUD
-    [Table("Tracks")]
-    public class Track {
-        public int Id { get; set; }
-        public string TrackID { get; set; }
-        public string TrackName { get; set; }
-        public string ArtistName { get; set; }
-        public string ArtistID { get; set; }
-        public string TrackPreviewURL { get; set; }
-        public string AlbumName { get; set; }
-        public string AlbumID{ get; set; }
-        public string AlbumImageURL{ get; set; }
-        public DateTime AlbumDate{ get; set; }
-
-    }
-
     public class HomeController : Controller {
         string connectionString = ConfigurationManager.ConnectionStrings["DavesMusicConnection2"].ConnectionString;
 
@@ -188,63 +169,17 @@ namespace DavesMusic.Controllers {
             return View(a);
         }
 
-
         public ActionResult Error(){
             return View();
         }
 
-        private IDbConnection GetOpenConnection() {
-            //IDbConnection cnn = new SqlConnection(ConfigurationManager.ConnectionStrings["contactsDB"].ConnectionString);
-            //DbConnection cnn = new SqlConnection(ConfigurationManager.ConnectionStrings["contactsDB"].ConnectionString);
-            DbConnection cnn = new SqlConnection(connectionString);
-            cnn.Open();
-
-            // wrap the connection with a profiling connection that tracks timings 
-            return new StackExchange.Profiling.Data.ProfiledDbConnection(cnn, MiniProfiler.Current);
-            //return connection;
-        }
-
-        // The current homepage
+        // The homepage
         public ActionResult TopTracks() {
-            var vm = new List<SongsVM>();
-            //using (SqlConnection connection = new SqlConnection(connectionString))
-            //using (var command = new SqlCommand(null, connection)) {
-            using (IDbConnection db = GetOpenConnection()) {
-                var listOfTracks = db.GetList<Track>();
-
-                foreach (var track in listOfTracks) {
-                    var songsVM = new SongsVM {
-                        TrackID = track.TrackID,
-                        TrackName = track.TrackName,
-                        ArtistName = track.ArtistName,
-                        ArtistID = track.ArtistID,
-                        TrackPreviewURL = track.TrackPreviewURL,
-                        AlbumName = track.AlbumName,
-                        AlbumID = track.AlbumID,
-                        AlbumImageURL = track.AlbumImageURL,
-                        AlbumDate = track.AlbumDate
-                    };
-                    vm.Add(songsVM); 
-                }
-                //connection.Open();
-                //command.CommandText = String.Format("SELECT ArtistName, TrackID, TrackName," +
-                //" ArtistID, TrackPreviewURL, AlbumName, AlbumID, AlbumImageURL, AlbumDate FROM Tracks" +
-                //" ORDER BY AlbumDate desc");
-                //using (var reader = command.ExecuteReader()) {
-                //    while (reader.Read()) {
-                //        var trackID = reader.GetString(reader.GetOrdinal("TrackID"));
-                //        var trackName = reader.GetString(reader.GetOrdinal("TrackName"));
-                //        var artistName = reader.GetString(reader.GetOrdinal("ArtistName"));
-                //        var artistID = reader.GetString(reader.GetOrdinal("ArtistID"));
-                //        var trackPreviewURL = reader.GetString(reader.GetOrdinal("TrackPreviewURL"));
-                //        var albumName = reader.GetString(reader.GetOrdinal("AlbumName"));
-                //        var albumID = reader.GetString(reader.GetOrdinal("AlbumID"));
-                //        var albumImageURL = reader.GetString(reader.GetOrdinal("AlbumImageURL"));
-                //        DateTime albumDate = reader.GetDateTime(reader.GetOrdinal("AlbumDate"));
-               
-                //    }
-                //}
+            var vm = new List<TopTracksVM>();
+            using (var db = DBHelper.GetOpenConnection()) {
+                vm = db.GetList<TopTracksVM>().ToList();
             }
+
             // It is possible to be on this page without logging in - user clicks via LoginRedirect to come back here
             if (Session["AccessToken"] != null) {
                 ViewBag.access_token = Session["AccessToken"].ToString();
@@ -266,19 +201,10 @@ namespace DavesMusic.Controllers {
                 ViewBag.user_id = Session["UserID"];
 
                 // Find out what the user has already added to their playlist
-                var listTracksAlreadyAdded = new List<string>();
+                List<string> listTracksAlreadyAdded;
                 var userID = Session["UserID"];
-                using (var connection = new SqlConnection(connectionString))
-                using (var command = new SqlCommand(null, connection)) {
-                    connection.Open();
-                    command.CommandText = String.Format("SELECT TrackID FROM UserPlaylists WHERE UserID = @UserID");
-                    command.Parameters.AddWithValue("@UserID", userID);
-                    using (var reader = command.ExecuteReader()) {
-                        while (reader.Read()) {
-                            var trackID = reader.GetString(reader.GetOrdinal("TrackID"));
-                            listTracksAlreadyAdded.Add(trackID);
-                        }
-                    }
+                using (IDbConnection db = DBHelper.GetOpenConnection()){
+                    listTracksAlreadyAdded = db.Query<string>("SELECT TrackID FROM UserPlaylists WHERE UserID = @UserID", new {@UserID = userID}).ToList();
                 }
 
                 foreach (var track in vm) {
@@ -338,18 +264,36 @@ namespace DavesMusic.Controllers {
         }
     }
 
-    public class SongsVM {
+    // used for SimpleCRUD
+    [Table("Tracks")]
+    public class TopTracksVM {
+        public int Id { get; set; }
         public string TrackID { get; set; }
         public string TrackName { get; set; }
         public string ArtistName { get; set; }
-        public bool AddedInUserPlaylist { get; set; }
         public string ArtistID { get; set; }
         public string TrackPreviewURL { get; set; }
         public string AlbumName { get; set; }
         public string AlbumID { get; set; }
         public string AlbumImageURL { get; set; }
         public DateTime AlbumDate { get; set; }
+        [Editable(false)]
+        public bool AddedInUserPlaylist { get; set; }
     }
+
+    //public class SongsVM {
+    //    public int Id { get; set; }
+    //    public string TrackID { get; set; }
+    //    public string TrackName { get; set; }
+    //    public string ArtistName { get; set; }
+    //    public bool AddedInUserPlaylist { get; set; }
+    //    public string ArtistID { get; set; }
+    //    public string TrackPreviewURL { get; set; }
+    //    public string AlbumName { get; set; }
+    //    public string AlbumID { get; set; }
+    //    public string AlbumImageURL { get; set; }
+    //    public DateTime AlbumDate { get; set; }
+    //}
 
     public class MeResponse {
         public class ExternalUrls {
@@ -383,7 +327,7 @@ namespace DavesMusic.Controllers {
         public string refresh_token { get; set; }
 
         public AuthenticationToken ToPOCO() {
-            AuthenticationToken token = new AuthenticationToken();
+            var token = new AuthenticationToken();
             token.AccessToken = this.access_token;
             token.ExpiresOn = DateTime.Now.AddSeconds(this.expires_in);
             token.RefreshToken = this.refresh_token;

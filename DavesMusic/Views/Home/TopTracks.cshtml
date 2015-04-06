@@ -1,8 +1,6 @@
-﻿@model List<DavesMusic.Controllers.SongsVM>
+﻿@model List<DavesMusic.Controllers.TopTracksVM>
 
-@{
-    ViewBag.Title = "Recommended Top Tracks";
-}
+@{ ViewBag.Title = "Recommended Top Tracks"; }
 
 <script type="text/javascript" src="../../Scripts/jquery-1.10.2.min.js"></script>
 <script type="text/javascript">
@@ -37,8 +35,8 @@
                 $('#le-alert').show();
                 $("#message").html(messageToDisplay);
             }
-            ).fail(function( jqXHR, textStatus ) {
-                alert( "Sorry request failed: " + textStatus );
+            ).fail(function (jqXHR, textStatus) {
+                alert("Sorry request failed: " + textStatus);
             }
         );
     }
@@ -50,25 +48,8 @@
     <p>Please <a href="/Home/LoginRedirect/">login</a> to Spotify so I know where to send your awesome musical choices!</p>
 }
 else {
-    @*<p>Hi: @ViewBag.user_id</p>*@
     <p><a href="/Playlists/Create/">Create/Update this playlist in Spotify</a></p>
 }
-
-@*<table>
-    @foreach (var item in Model) {
-        <tr>
-            <td>@item.TrackName</td>
-            <td>@item.ArtistName</td>
-
-            @if (item.AddedInPlaylist) {
-                <td><button id="@item.TrackID" style="margin-left: 50px" onclick="addTrack('@item.TrackID')">Delete</button></td>
-            }
-            else {
-                <td><button id="@item.TrackID" onclick="addTrack('@item.TrackID')">Add</button></td>
-            }
-        </tr>
-    }
-</table>*@
 
 <table class="table">
     @for (int i = 0; i < Model.Count; i++) {
@@ -79,7 +60,7 @@ else {
             <td>@Model[i].TrackName</td>
             <td>@Model[i].AlbumDate.ToString("yyyy")</td>
             <td>
-                <audio controls style="width: 150px; display: block;">
+                <audio controls style="width: 150px; display: block;" preload="none">
                     <source src="@Model[i].TrackPreviewURL" type="audio/mpeg">
                     <p>Ooops - please use a more up to date browser so you can preview songs</p>
                 </audio>

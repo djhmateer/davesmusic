@@ -61,7 +61,7 @@
                 <td>@Html.EditorFor(model => Model.AlbumDetails.tracks.items[i].Checked)</td>
 
                 <td>
-                    <audio controls="controls" style="width: 150px; display: block;">
+                    <audio controls="controls" style="width: 150px; display: block;" preload="none">
                         <source src="@Model.AlbumDetails.tracks.items[i].preview_url" type="audio/mpeg">
                         <p>Ooops - please use a more up to date browser so you can preview songs</p>
                     </audio>

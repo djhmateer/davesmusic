@@ -1,18 +1,21 @@
-﻿using System.Data;
-using System.Diagnostics;
-using System.Net;
-using System.Net.Http;
-using System.Threading.Tasks;
+﻿using System.Threading;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Data;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 using System.Web.Mvc;
+using StackExchange.Profiling;
 
 namespace DavesMusic.Controllers {
     public class ArtistsController : Controller {
+        MiniProfiler profiler = MiniProfiler.Current;
         string connectionString = ConfigurationManager.ConnectionStrings["DavesMusicConnection2"].ConnectionString;
 
         [HttpPost]
@@ -235,10 +238,15 @@ namespace DavesMusic.Controllers {
         }
 
         private ArtistDetailsViewModel GetArtistDetailsViewModel(string id) {
+
             string artistID = id;
             var sh = new SpotifyHelper();
             // 1. Get the Artist's details
-            string json = sh.CallSpotifyAPIArtist(artistID, null);
+            string json;
+            using (profiler.Step("Getting Artist details from Spotify")) {
+                json = sh.CallSpotifyAPIArtist(artistID, null);
+            }
+           
             ViewBag.Id = artistID;
             var artistDetails = JsonConvert.DeserializeObject<ArtistDetails>(json);
 
