@@ -8,6 +8,7 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using Newtonsoft.Json;
+using StackExchange.Profiling;
 
 namespace DavesMusic.Controllers {
 
@@ -118,6 +119,7 @@ namespace DavesMusic.Controllers {
 
     public class UsersController : Controller {
         string connectionString = ConfigurationManager.ConnectionStrings["DavesMusicConnection2"].ConnectionString;
+        MiniProfiler profiler = MiniProfiler.Current;
 
         public ActionResult Playlists(string id) {
             var returnURL = "/Users/Playlists";
@@ -136,9 +138,12 @@ namespace DavesMusic.Controllers {
             // 50 at a time
             var url2 = String.Format("https://api.spotify.com/v1/users/{0}/playlists?limit=50", id);
             var sh = new SpotifyHelper();
-            var result2 = sh.CallSpotifyAPIPassingToken(access_token, url2);
+            string json;
+            using (profiler.Step("Get Users Playlist Details (50 at the moment)")){
+                json = sh.CallSpotifyAPIPassingToken(access_token, url2);
+            }
 
-            var vm = JsonConvert.DeserializeObject<PlaylistSummaryViewModel>(result2);
+            var vm = JsonConvert.DeserializeObject<PlaylistSummaryViewModel>(json);
             vm.access_token = access_token;
             return vm;
         }
@@ -156,7 +161,10 @@ namespace DavesMusic.Controllers {
 
             // Does the playlist exist already for this user?
             var url4 = String.Format("https://api.spotify.com/v1/users/{0}/playlists", userId);
-            var result4 = sh.CallSpotifyAPIPassingToken(access_token, url4);
+            string result4;
+            using (profiler.Step("POST - Does the Shuffler playlist exist already for this user")) {
+                result4 = sh.CallSpotifyAPIPassingToken(access_token, url4);
+            }
             var meReponse = JsonConvert.DeserializeObject<PlaylistSummaryViewModel>(result4);
             var currentPlaylistID = "";
             var shuffler = meReponse.items.FirstOrDefault(x => x.name == "Shuffler");
@@ -165,7 +173,10 @@ namespace DavesMusic.Controllers {
             // If not playlist create one
             if (currentPlaylistID == "") {
                 var url2 = String.Format("https://api.spotify.com/v1/users/{0}/playlists", userId);
-                var result2 = sh.CallSpotifyCreatePlaylistPostAPIPassingToken(access_token, url2, "Shuffler");
+                string result2;
+                using (profiler.Step("POST - Creating Shuffler playlist")){
+                    result2 = sh.CallSpotifyCreatePlaylistPostAPIPassingToken(access_token, url2, "Shuffler");
+                }
                 var playlistReturn = JsonConvert.DeserializeObject<CreatePlaylistReturn>(result2);
                 currentPlaylistID = playlistReturn.id;
             }
@@ -178,7 +189,10 @@ namespace DavesMusic.Controllers {
                 var playlistId = playlist.id;
                 if (playlist.Checked) {
                     // Get the details of the playlist ie the tracks 
-                    PlaylistTracks result22 = await sh.CallSpotifyAPIPassingTokenPlaylistsAsync(access_token, ownerId, playlistId);
+                    PlaylistTracks result22;
+                    using (profiler.Step("POST - Async.. Get details of the playlist ie the tracks.. 50 at a time")){
+                        result22 = await sh.CallSpotifyAPIPassingTokenPlaylistsAsync(access_token, ownerId, playlistId);
+                    }
                     // add tracks to list
                     foreach (var item in result22.items) {
                         listOfTrackIDs.Add(item.track.id);

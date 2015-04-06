@@ -20,7 +20,6 @@
 </script>
 
 <h2>@Model.ArtistDetails.Name</h2>
-
 <table>
     <tr>
         <td>
@@ -150,7 +149,7 @@
 
                 <tr>
                     <td>@Model.ArtistAlbums[i].name</td>
-                    <td>@Html.EditorFor(model => Model.ArtistAlbums[i].Checked)</td>
+                    @*<td>@Html.EditorFor(model => Model.ArtistAlbums[i].Checked)</td>*@
                     <td><a href="@Model.ArtistAlbums[i].uri">Direct</a></td>
                     <td>@Model.ArtistAlbums[i].release_date</td>
                     <td>

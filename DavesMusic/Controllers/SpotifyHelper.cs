@@ -17,13 +17,17 @@ using StackExchange.Profiling;
 namespace DavesMusic.Controllers {
 
     public class SpotifyHelper {
+        MiniProfiler mp = MiniProfiler.Current;
+        //static MiniProfiler mps = MiniProfiler.Current;
 
         public string CallSpotifyAPIPassingToken(string access_token, string url) {
-            var client = new HttpClient();
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", access_token);
-            var httpResponse = client.GetAsync(url);
-            var result = httpResponse.Result.Content.ReadAsStringAsync().Result;
-            return result;
+            using (mp.CustomTiming("http", url)) {
+                var client = new HttpClient();
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", access_token);
+                var httpResponse = client.GetAsync(url);
+                var result = httpResponse.Result.Content.ReadAsStringAsync().Result;
+                return result;
+            }
         }
 
         string Actual(DateTime time) {
@@ -35,19 +39,22 @@ namespace DavesMusic.Controllers {
             var url = String.Format("https://api.spotify.com/v1/users/{0}/playlists/{1}/tracks?offset={2}&limit=100&market=GB", ownerId, playlistId, offset);
 
             var time = DateTime.Now;
-            string result;
-            using (var client = new HttpClient()) {
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", access_token);
-                // ConfigureAwat - do not capture the current ASP.NET request context
-                var response = await client.GetAsync(url).ConfigureAwait(false);
+            using (mp.CustomTiming("http", url)){
 
-                // Not on the original context here, instead we're running on the thread pool
-                response.EnsureSuccessStatusCode();
-                result = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                string result;
+                using (var client = new HttpClient()){
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", access_token);
+                    // ConfigureAwat - do not capture the current ASP.NET request context
+                    var response = await client.GetAsync(url).ConfigureAwait(false);
+
+                    // Not on the original context here, instead we're running on the thread pool
+                    response.EnsureSuccessStatusCode();
+                    result = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                }
+                Debug.WriteLine(url, offset);
+                Debug.WriteLine(Actual(time), "After " + offset + ": " + result.Substring(400, 1800));
+                return result;
             }
-            Debug.WriteLine(url, offset);
-            Debug.WriteLine(Actual(time), "After " + offset + ": " + result.Substring(400,1800));
-            return result;
         }
 
         public async Task<PlaylistTracks> CallSpotifyAPIPassingTokenPlaylistsAsync(string access_token, string ownerId, string playlistId) {
@@ -55,7 +62,11 @@ namespace DavesMusic.Controllers {
             var url = String.Format("https://api.spotify.com/v1/users/{0}/playlists/{1}/tracks", ownerId, playlistId);
 
             // call API synchronously once to get the total number of calls I need to do
-            var apiResult = CallSpotifyAPIPassingToken(access_token, url);
+            string apiResult;
+            using (mp.CustomTiming("http", url)){
+                apiResult = CallSpotifyAPIPassingToken(access_token, url);    
+            }
+            
             //PlaylistDetails playlistDetails = JsonConvert.DeserializeObject<PlaylistDetails>(apiResult);
             PlaylistTracks playlistTracks = JsonConvert.DeserializeObject<PlaylistTracks>(apiResult);
 
@@ -76,7 +87,7 @@ namespace DavesMusic.Controllers {
             int n = numberOfTimesToLoop;
             var tasks = new Task<string>[n];
             for (int i = 0; i < n; i++) {
-                tasks[i] = CallAPI(i, access_token, ownerId,playlistId);
+                tasks[i] = CallAPI(i, access_token, ownerId, playlistId);
             }
 
             await Task.WhenAll(tasks);
@@ -106,8 +117,8 @@ namespace DavesMusic.Controllers {
             var records = listOfTrackIDs.Count;
             int numberOfTimesToLoop = (records + recordsPerPage - 1) / recordsPerPage;
 
-            for (int i = 0; i < numberOfTimesToLoop; i++){
-                int offset = i*100;
+            for (int i = 0; i < numberOfTimesToLoop; i++) {
+                int offset = i * 100;
                 var trackIDs = listOfTrackIDs.Skip(offset).Take(100);
 
                 string csvOfUris = "";
@@ -117,7 +128,7 @@ namespace DavesMusic.Controllers {
                 csvOfUris = csvOfUris.TrimEnd(',');
 
                 // replace
-                if (i == 0){
+                if (i == 0) {
                     var url = String.Format("https://api.spotify.com/v1/users/{0}/playlists/{1}/tracks?uris={2}", userId,
                         currentPlaylistID, csvOfUris);
                     var client = new HttpClient();
@@ -125,7 +136,7 @@ namespace DavesMusic.Controllers {
                     var httpResponse = client.PutAsync(url, null);
                     var result = httpResponse.Result.Content.ReadAsStringAsync().Result;
                 }
-                else{
+                else {
                     // add
                     // https://api.spotify.com/v1/users/{user_id}/playlists/{playlist_id}/tracks?uris={uris}  
                     var url = String.Format("https://api.spotify.com/v1/users/{0}/playlists/{1}/tracks?uris={2}", userId, currentPlaylistID, csvOfUris);
@@ -135,7 +146,7 @@ namespace DavesMusic.Controllers {
                     var result = httpResponse.Result.Content.ReadAsStringAsync().Result;
                 }
             }
-           
+
             return null;
         }
 
@@ -188,7 +199,7 @@ namespace DavesMusic.Controllers {
             var text = CallAPI(null, url);
             return text;
         }
-        
+
 
 
         public string CallSpotifyAPISearchForPlaylist(string playlist) {
@@ -198,12 +209,10 @@ namespace DavesMusic.Controllers {
             return text;
         }
 
-        MiniProfiler mp = MiniProfiler.Current;
 
         public string CallSpotifyAPIArtist(string artistCode, StopWatchResult stopWatchResult) {
             var url = String.Format("https://api.spotify.com/v1/artists/{0}", artistCode);
 
-            //using (mp.Step("CallSpotifyAPIArtist"))
             using (mp.CustomTiming("http", url)) {
                 var json = CallAPI(stopWatchResult, url);
                 return json;
@@ -212,18 +221,20 @@ namespace DavesMusic.Controllers {
 
         public APIResult CallSpotifyAPIArtistTopTracks(StopWatchResult stopWatchResult, string artistCode) {
             var url = String.Format("https://api.spotify.com/v1/artists/{0}/top-tracks?country=GB", artistCode);
-            var json = CallAPI(stopWatchResult, url);
-            return new APIResult {
-                Json = json,
-                Url = url
-            };
+            using (mp.CustomTiming("http", url)) {
+                var json = CallAPI(stopWatchResult, url);
+                return new APIResult {
+                    Json = json,
+                    Url = url
+                };
+            }
         }
 
         public APIResult CallSpotifyAPIArtistAlbums(StopWatchResult stopWatchResult, string artistCode) {
             var url = String.Format("https://api.spotify.com/v1/artists/{0}/albums?country=GB&album_type=album&limit=50", artistCode);
-            using (mp.CustomTiming("http", url)){
+            using (mp.CustomTiming("http", url)) {
                 var json = CallAPI(stopWatchResult, url);
-                return new APIResult{
+                return new APIResult {
                     Json = json,
                     Url = url
                 };
@@ -232,13 +243,15 @@ namespace DavesMusic.Controllers {
 
         public APIResult CallSpotifyAPIArtistsSingles(string artistID) {
             var url = String.Format("https://api.spotify.com/v1/artists/{0}/albums?country=GB&album_type=single&limit=5", artistID);
-            var json = CallAPI(null, url);
-            return new APIResult {
-                Json = json,
-                Url = url
-            };
+            using (mp.CustomTiming("http", url)) {
+                var json = CallAPI(null, url);
+                return new APIResult {
+                    Json = json,
+                    Url = url
+                };
+            }
         }
-        
+
 
         public APIResult CallSpotifyAPIAlbumDetails(StopWatchResult stopWatchResult, string id) {
             var url = String.Format("https://api.spotify.com/v1/albums/{0}", id);
@@ -248,7 +261,7 @@ namespace DavesMusic.Controllers {
                 Url = url
             };
         }
-        public List<MultipleAlbums.Album> CallSpotifyAPIMultipleAlbumDetails2(StopWatchResult stopWatchResult,IEnumerable<ArtistAlbums.Item> albums = null) {
+        public List<MultipleAlbums.Album> CallSpotifyAPIMultipleAlbumDetails2(StopWatchResult stopWatchResult, IEnumerable<ArtistAlbums.Item> albums = null) {
             // can only send 20 at a time, so have to chunck if more
             //http://stackoverflow.com/a/17974/26086
             var recordsPerPage = 20;
@@ -277,32 +290,37 @@ namespace DavesMusic.Controllers {
 
         public APIResult CallSpotifyAPIMultipleAlbumDetails(StopWatchResult stopWatchResult, string csvListOfAlbums) {
             var url = String.Format("https://api.spotify.com/v1/albums/?ids={0}", csvListOfAlbums);
-            var json = CallAPI(stopWatchResult, url);
-            return new APIResult {
-                Json = json,
-                Url = url
-            };
+            using (mp.CustomTiming("http", url)) {
+                var json = CallAPI(stopWatchResult, url);
+                return new APIResult {
+                    Json = json,
+                    Url = url
+                };
+            }
         }
 
         public APIResult CallSpotifyAPIArtistRelated(StopWatchResult stopWatchResult, string id) {
             var url = String.Format("https://api.spotify.com/v1/artists/{0}/related-artists", id);
-            var json = CallAPI(stopWatchResult, url);
-            return new APIResult {
-                Json = json,
-                Url = url
-            };
+            using (mp.CustomTiming("http", url)) {
+                var json = CallAPI(stopWatchResult, url);
+                return new APIResult {
+                    Json = json,
+                    Url = url
+                };
+            }
         }
 
         public APIResult CallEchonestAPIArtistBiography(StopWatchResult stopWatchResult, string id) {
             var echonestAPIKey = "OMO6U4I5XEGVXYCCN ";
             //http://developer.echonest.com/api/v4/artist/biographies?api_key=FILDTEOIK2HBORODV&id=spotify:artist:4Z8W4fKeB5YxbusRsdQVPb
-            var url = String.Format("http://developer.echonest.com/api/v4/artist/biographies?api_key={0}&id=spotify:artist:{1}",
-                echonestAPIKey, id);
-            var json = CallAPI(stopWatchResult, url);
-            return new APIResult {
-                Json = json,
-                Url = url.Replace(echonestAPIKey, "SECRET")
-            };
+            var url = String.Format("http://developer.echonest.com/api/v4/artist/biographies?api_key={0}&id=spotify:artist:{1}", echonestAPIKey, id);
+            using (mp.CustomTiming("http", url)) {
+                var json = CallAPI(stopWatchResult, url);
+                return new APIResult {
+                    Json = json,
+                    Url = url.Replace(echonestAPIKey, "SECRET")
+                };
+            }
         }
 
         public static string CallAPI(StopWatchResult stopWatchResult = null, string url = "") {
@@ -312,6 +330,7 @@ namespace DavesMusic.Controllers {
             int errorCount = 0;
             string text = null;
             bool done = false;
+            //using (mps.CustomTiming("http", url)) {
             while (!done) {
                 try {
                     var request = (HttpWebRequest)WebRequest.Create(url);
@@ -330,10 +349,11 @@ namespace DavesMusic.Controllers {
                     //log.Debug("CallAPI trap2: " + url + ex.Message);
                     Thread.Sleep(200);
                     errorCount++;
-                    if (errorCount == 200) 
+                    if (errorCount == 200)
                         throw;
                 }
             }
+            //}
 
             stopWatch.Stop();
             TimeSpan ts = stopWatch.Elapsed;

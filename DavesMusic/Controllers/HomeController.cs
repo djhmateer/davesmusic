@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using Newtonsoft.Json;
+using StackExchange.Profiling;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -16,6 +17,7 @@ using System.Web.Mvc;
 namespace DavesMusic.Controllers {
     public class HomeController : Controller {
         string connectionString = ConfigurationManager.ConnectionStrings["DavesMusicConnection2"].ConnectionString;
+        MiniProfiler mp = MiniProfiler.Current;
 
         // Designed to find out what is happening on various servers
         public ActionResult SpeedTest() {
@@ -177,22 +179,26 @@ namespace DavesMusic.Controllers {
         public ActionResult TopTracks() {
             var vm = new List<TopTracksVM>();
             using (var db = DBHelper.GetOpenConnection()) {
-                vm = db.GetList<TopTracksVM>().ToList();
+                vm = db.GetList<TopTracksVM>("ORDER BY AlbumDate Desc").ToList();
             }
 
-            // It is possible to be on this page without logging in - user clicks via LoginRedirect to come back here
+            // If logged in 
             if (Session["AccessToken"] != null) {
                 ViewBag.access_token = Session["AccessToken"].ToString();
 
                 var access_token = Session["AccessToken"].ToString();
 
+                // User clicks via LoginRedirect to come back here
                 // If this is the first time back to this page after logging in, need to get the UserID
                 if (Session["UserID"] == null) {
-                    var url2 = "https://api.spotify.com/v1/me";
-                    var sh = new SpotifyHelper();
-                    var result2 = sh.CallSpotifyAPIPassingToken(access_token, url2);
+                    var url = "https://api.spotify.com/v1/me";
+                    string json;
+                    using (mp.CustomTiming("http", url)){
+                        var sh = new SpotifyHelper();
+                        json = sh.CallSpotifyAPIPassingToken(access_token, url);
+                    }
 
-                    var meReponse = JsonConvert.DeserializeObject<MeResponse>(result2);
+                    var meReponse = JsonConvert.DeserializeObject<MeResponse>(json);
                     meReponse.access_token = access_token;
 
                     Session["UserID"] = meReponse.id;
