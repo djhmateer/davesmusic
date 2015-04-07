@@ -20,8 +20,13 @@ namespace DavesMusic.Controllers {
             var result2 = sh.CallSpotifyAPIPassingToken(access_token, url2);
 
             var meReponse = JsonConvert.DeserializeObject<MeResponse>(result2);
+            // Holder UserId in session so can turn menu on and off for login
+            //Session["UserId"] = meReponse.id;
+
             meReponse.access_token = access_token;
-            return View(meReponse);
+            //return View(meReponse);
+            // Redirect to PlaylistShuffler page
+            return Redirect("/Users/Playlists/" + meReponse.id);
         }
 
         ///v1/users/{user_id} 

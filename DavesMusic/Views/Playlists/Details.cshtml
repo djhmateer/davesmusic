@@ -7,11 +7,11 @@
 }
 
 <p><a href="@Model.uri">direct</a></p>
-<p><a href="/Playlists/Follow/@Model.owner.id/@Model.id">Follow this playlist</a></p>
+@*<p><a href="/Playlists/Follow/@Model.owner.id/@Model.id">Follow this playlist</a></p>*@
 
-<p>Followers: @Model.followers.total</p>
+@*<p>Followers: @Model.followers.total</p>*@
 <p>Tracks: @Model.tracks.total</p>
-<p>Owner: <a href="/Profiles/User/@Model.owner.id">@Model.owner.id</a></p>
+@*<p>Owner: <a href="/Profiles/User/@Model.owner.id">@Model.owner.id</a></p>*@
 <h3>Tracks</h3>
 <table class="table">
     @foreach (var item in Model.tracks.items) {

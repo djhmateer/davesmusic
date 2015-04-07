@@ -8,7 +8,8 @@
             <span>Add/Remove Playlists to your Spotify - Shuffler</span>
         </button>
     </div>
-    <p>Currently showing first 50 of your playlists.</p>
+    <p>Select the playlists you want shuffled, press the button, then a new playlist will appear - Shuffler</p>
+    <p>If you can't see the playlists you expect - maybe Private vs Public.  You'll have to give this app permissions to view both. Change here</p>
     <table class="table">
         @for (int i = 0; i < Model.items.Count; i++) {
             @Html.HiddenFor(model => Model.items[i].id)

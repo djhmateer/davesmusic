@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using AutoMapper;
 using Newtonsoft.Json;
 using StackExchange.Profiling;
 
@@ -135,15 +136,34 @@ namespace DavesMusic.Controllers {
         private PlaylistSummaryViewModel GetPlaylistDetailsViewModel(string id) {
             var access_token = Session["AccessToken"].ToString();
 
-            // 50 at a time
-            var url2 = String.Format("https://api.spotify.com/v1/users/{0}/playlists?limit=50", id);
+            // Get first 50
+            //var url = String.Format("https://api.spotify.com/v1/users/{0}/playlists?limit=50", id);
+            var url = String.Format("https://api.spotify.com/v1/users/{0}/playlists", id);
+
             var sh = new SpotifyHelper();
             string json;
-            using (profiler.Step("Get Users Playlist Details (50 at the moment)")){
-                json = sh.CallSpotifyAPIPassingToken(access_token, url2);
+            // todo put this up to 50
+            using (profiler.Step("Get Users Playlists first 20")){
+                json = sh.CallSpotifyAPIPassingToken(access_token, url);
+            }
+            var vm = JsonConvert.DeserializeObject<PlaylistSummaryViewModel>(json);
+
+            if (vm.total > 20){
+                var recordsPerPage = 20;
+                var records = vm.total;
+                int numberOfTimesToLoop = (records + recordsPerPage - 1) / recordsPerPage;
+                for (int i = 1; i < numberOfTimesToLoop; i++){
+                    int offset = i*20;
+                    url = String.Format("https://api.spotify.com/v1/users/{0}/playlists?limit=20&offset={1}", id, offset);
+                    using (profiler.Step("Get Users Playlists - " + i)) {
+                        json = sh.CallSpotifyAPIPassingToken(access_token, url);
+                    }
+                    var vm2 = JsonConvert.DeserializeObject<PlaylistSummaryViewModel>(json);
+                    // merge with vm
+                    vm.items = vm.items.Union(vm2.items).ToList();
+                }
             }
 
-            var vm = JsonConvert.DeserializeObject<PlaylistSummaryViewModel>(json);
             vm.access_token = access_token;
             return vm;
         }

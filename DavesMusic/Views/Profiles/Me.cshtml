@@ -1,12 +1,12 @@
 ﻿@model DavesMusic.Controllers.MeResponse
 <br /><br />
-<p><a href="/Browse/FeaturedPlaylists">Featured Playlists</a></p>
+@*<p><a href="/Browse/FeaturedPlaylists">Featured Playlists</a></p>*@
 
-<h2>Me</h2>
+<h2>@Model.display_name</h2>
 @if (Model != null) {
     @*<p>Name: @Model.display_name</p>*@
-    <a href="/Users/Playlists/@Model.id">My Playlists</a>
-    <p>Email: @Model.email</p>
+    <a href="/Users/Playlists/@Model.id">Playlist Shuffler</a>
+    @*<p>Email: @Model.email</p>
     <p>Country: @Model.country</p>
     <p>External urls spotify: <a href="@Model.external_urls.spotify">@Model.external_urls.spotify</a></p>
     <p>Followers href: @Model.followers.href</p>
@@ -21,5 +21,5 @@
 
     <p>Product: @Model.product</p>
     <p>Type: @Model.type</p>
-    <p>Uri: @Model.uri</p>
+    <p>Uri: @Model.uri</p>*@
 }
