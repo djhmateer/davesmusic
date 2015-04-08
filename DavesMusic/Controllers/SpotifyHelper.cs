@@ -30,6 +30,17 @@ namespace DavesMusic.Controllers {
             }
         }
 
+        public async Task<string> CallSpotifyAPIPassingTokenAsync(string access_token, string url) {
+            using (mp.CustomTiming("http", url)) {
+                var client = new HttpClient();
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", access_token);
+                var response = await client.GetAsync(url).ConfigureAwait(false);
+                response.EnsureSuccessStatusCode();
+                var result = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                return result;
+            }
+        }
+
         string Actual(DateTime time) {
             return (DateTime.Now - time).TotalMilliseconds.ToString();
         }
@@ -39,10 +50,10 @@ namespace DavesMusic.Controllers {
             var url = String.Format("https://api.spotify.com/v1/users/{0}/playlists/{1}/tracks?offset={2}&limit=100&market=GB", ownerId, playlistId, offset);
 
             var time = DateTime.Now;
-            using (mp.CustomTiming("http", url)){
+            using (mp.CustomTiming("http", url)) {
 
                 string result;
-                using (var client = new HttpClient()){
+                using (var client = new HttpClient()) {
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", access_token);
                     // ConfigureAwat - do not capture the current ASP.NET request context
                     var response = await client.GetAsync(url).ConfigureAwait(false);
@@ -63,10 +74,10 @@ namespace DavesMusic.Controllers {
 
             // call API synchronously once to get the total number of calls I need to do
             string apiResult;
-            using (mp.CustomTiming("http", url)){
-                apiResult = CallSpotifyAPIPassingToken(access_token, url);    
+            using (mp.CustomTiming("http", url)) {
+                apiResult = CallSpotifyAPIPassingToken(access_token, url);
             }
-            
+
             //PlaylistDetails playlistDetails = JsonConvert.DeserializeObject<PlaylistDetails>(apiResult);
             PlaylistTracks playlistTracks = JsonConvert.DeserializeObject<PlaylistTracks>(apiResult);
 

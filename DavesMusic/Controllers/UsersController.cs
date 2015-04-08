@@ -120,50 +120,76 @@ namespace DavesMusic.Controllers {
 
     public class UsersController : Controller {
         string connectionString = ConfigurationManager.ConnectionStrings["DavesMusicConnection2"].ConnectionString;
-        MiniProfiler profiler = MiniProfiler.Current;
+        MiniProfiler mp = MiniProfiler.Current;
+        SpotifyHelper sh = new SpotifyHelper();
 
-        public ActionResult Playlists(string id) {
+        public async Task<ActionResult> Playlists(string id, bool doAsync = true) {
             var returnURL = "/Users/Playlists";
             var ah = new AuthHelper();
             var result = ah.DoAuth(returnURL, this);
             if (result != null)
                 return Redirect(result);
 
-            var vm = GetPlaylistDetailsViewModel(id);
+            var vm = await GetPlaylistDetailsViewModel(id, doAsync);
             return View(vm);
         }
 
-        private PlaylistSummaryViewModel GetPlaylistDetailsViewModel(string id) {
+        private async Task<PlaylistSummaryViewModel> GetPlaylistDetailsViewModel(string id, bool doAsync = true) {
+            ServicePointManager.DefaultConnectionLimit = 5;
             var access_token = Session["AccessToken"].ToString();
 
-            // Get first 50
-            //var url = String.Format("https://api.spotify.com/v1/users/{0}/playlists?limit=50", id);
-            var url = String.Format("https://api.spotify.com/v1/users/{0}/playlists", id);
-
-            var sh = new SpotifyHelper();
+            var url = String.Format("https://api.spotify.com/v1/users/{0}/playlists?limit=50", id);
             string json;
-            // todo put this up to 50
-            using (profiler.Step("Get Users Playlists first 20")){
+            using (mp.Step("Get Users Playlists first 50")) {
                 json = sh.CallSpotifyAPIPassingToken(access_token, url);
             }
             var vm = JsonConvert.DeserializeObject<PlaylistSummaryViewModel>(json);
 
-            if (vm.total > 20){
-                var recordsPerPage = 20;
-                var records = vm.total;
-                int numberOfTimesToLoop = (records + recordsPerPage - 1) / recordsPerPage;
-                for (int i = 1; i < numberOfTimesToLoop; i++){
-                    int offset = i*20;
-                    url = String.Format("https://api.spotify.com/v1/users/{0}/playlists?limit=20&offset={1}", id, offset);
-                    using (profiler.Step("Get Users Playlists - " + i)) {
-                        json = sh.CallSpotifyAPIPassingToken(access_token, url);
+            var recordsPerPage = 50;
+
+            if (vm.total > recordsPerPage) {
+                var totalRecords = vm.total;
+                int numberOfTimesToLoop = (totalRecords + recordsPerPage - 1) / recordsPerPage;
+
+                // we've already done the first query to get the total, do skip that
+                numberOfTimesToLoop -= 1;
+                if (doAsync) {
+                    using (mp.Step("Async " + numberOfTimesToLoop + " queries")) 
+                    using (mp.CustomTiming("http","overall")) {
+                        var tasks = new Task<string>[numberOfTimesToLoop];
+                        int offset = 0;
+                        for (int i = 0; i < numberOfTimesToLoop; i++) {
+                            // start offset at 50
+                            offset += recordsPerPage;
+                            url = String.Format("https://api.spotify.com/v1/users/{0}/playlists?limit={2}&offset={1}", id,
+                                offset, recordsPerPage);
+                            tasks[i] = sh.CallSpotifyAPIPassingTokenAsync(access_token, url);
+                        }
+                        // at this point all tasks will be running at the same time
+                        //using (mp.CustomTiming("http", url)) {
+                        await Task.WhenAll(tasks);
                     }
-                    var vm2 = JsonConvert.DeserializeObject<PlaylistSummaryViewModel>(json);
-                    // merge with vm
-                    vm.items = vm.items.Union(vm2.items).ToList();
+
+                    for (int i = 0; i < numberOfTimesToLoop - 1; i++) {
+                        var vm2 = JsonConvert.DeserializeObject<PlaylistSummaryViewModel>(json);
+                        // merge with vm
+                        vm.items = vm.items.Union(vm2.items).ToList();
+                    }
+                }
+                else {
+                    for (int i = 1; i < numberOfTimesToLoop; i++) {
+                        int offset = i * recordsPerPage;
+                        url = String.Format("https://api.spotify.com/v1/users/{0}/playlists?limit={2}&offset={1}", id, offset, recordsPerPage);
+                        using (mp.Step("Get Users Playlists - " + i)) {
+                            json = sh.CallSpotifyAPIPassingToken(access_token, url);
+                        }
+
+                        var vm2 = JsonConvert.DeserializeObject<PlaylistSummaryViewModel>(json);
+                        // merge with vm
+                        vm.items = vm.items.Union(vm2.items).ToList();
+                    }
                 }
             }
-
             vm.access_token = access_token;
             return vm;
         }
@@ -182,7 +208,7 @@ namespace DavesMusic.Controllers {
             // Does the playlist exist already for this user?
             var url4 = String.Format("https://api.spotify.com/v1/users/{0}/playlists", userId);
             string result4;
-            using (profiler.Step("POST - Does the Shuffler playlist exist already for this user")) {
+            using (mp.Step("POST - Does the Shuffler playlist exist already for this user")) {
                 result4 = sh.CallSpotifyAPIPassingToken(access_token, url4);
             }
             var meReponse = JsonConvert.DeserializeObject<PlaylistSummaryViewModel>(result4);
@@ -194,7 +220,7 @@ namespace DavesMusic.Controllers {
             if (currentPlaylistID == "") {
                 var url2 = String.Format("https://api.spotify.com/v1/users/{0}/playlists", userId);
                 string result2;
-                using (profiler.Step("POST - Creating Shuffler playlist")){
+                using (mp.Step("POST - Creating Shuffler playlist")) {
                     result2 = sh.CallSpotifyCreatePlaylistPostAPIPassingToken(access_token, url2, "Shuffler");
                 }
                 var playlistReturn = JsonConvert.DeserializeObject<CreatePlaylistReturn>(result2);
@@ -210,7 +236,7 @@ namespace DavesMusic.Controllers {
                 if (playlist.Checked) {
                     // Get the details of the playlist ie the tracks 
                     PlaylistTracks result22;
-                    using (profiler.Step("POST - Async.. Get details of the playlist ie the tracks.. 50 at a time")){
+                    using (mp.Step("POST - Async.. Get details of the playlist ie the tracks.. 50 at a time")) {
                         result22 = await sh.CallSpotifyAPIPassingTokenPlaylistsAsync(access_token, ownerId, playlistId);
                     }
                     // add tracks to list
@@ -236,7 +262,7 @@ namespace DavesMusic.Controllers {
 
 
             // Get data again as not saved, including Checked status
-            var vm2 = GetPlaylistDetailsViewModel(id);
+            var vm2 = await GetPlaylistDetailsViewModel(id);
             return View(vm2);
         }
 
