@@ -110,7 +110,8 @@ namespace DavesMusic.Controllers {
             for (int i = 0; i < n; i++) {
                 var playlistDetails2 = JsonConvert.DeserializeObject<PlaylistTracks>(tasks[i].Result);
                 foreach (var item in playlistDetails2.items) {
-                    items.Add(item);
+                    if (item != null)
+                        items.Add(item);
                 }
                 total2 = playlistDetails2.total;
             }
@@ -134,7 +135,8 @@ namespace DavesMusic.Controllers {
 
                 string csvOfUris = "";
                 foreach (var trackID in trackIDs) {
-                    csvOfUris += "spotify:track:" + trackID + ",";
+                    if (trackID != null)
+                        csvOfUris += "spotify:track:" + trackID + ",";
                 }
                 csvOfUris = csvOfUris.TrimEnd(',');
 

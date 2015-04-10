@@ -154,8 +154,8 @@ namespace DavesMusic.Controllers {
                 // we've already done the first query to get the total, do skip that
                 numberOfTimesToLoop -= 1;
                 if (doAsync) {
-                    using (mp.Step("Async " + numberOfTimesToLoop + " queries")) 
-                    using (mp.CustomTiming("http","overall")) {
+                    using (mp.Step("Async " + numberOfTimesToLoop + " queries"))
+                    using (mp.CustomTiming("http", "overall")) {
                         var tasks = new Task<string>[numberOfTimesToLoop];
                         int offset = 0;
                         for (int i = 0; i < numberOfTimesToLoop; i++) {
@@ -241,7 +241,9 @@ namespace DavesMusic.Controllers {
                     }
                     // add tracks to list
                     foreach (var item in result22.items) {
-                        listOfTrackIDs.Add(item.track.id);
+                        // catching a track in a playlist with no id
+                        if (item.track != null)
+                            listOfTrackIDs.Add(item.track.id);
                     }
                 }
             }

@@ -15,18 +15,20 @@
 <h3>Tracks</h3>
 <table class="table">
     @foreach (var item in Model.tracks.items) {
-        <tr>
-            <td>@item.track.name</td>
-            <td><a href="/Artists/Details/@item.track.artists[0].id">@item.track.artists[0].name</a></td>
-            <td>@item.track.popularity</td>
-            <td>
-                <audio controls="controls" style="width: 150px; display: block;" preload="none">
-                    <source src="@item.track.preview_url" type="audio/mpeg">
-                    <p>Ooops - please use a more up to date browser so you can preview songs</p>
-                </audio>
-            </td>
-            <td><a href="@item.track.uri">Direct</a></td>
-        </tr>
+        if (item.track != null){
+            <tr>
+                <td>@item.track.name</td>
+                <td><a href="/Artists/Details/@item.track.artists[0].id">@item.track.artists[0].name</a></td>
+                <td>@item.track.popularity</td>
+                <td>
+                    <audio controls="controls" style="width: 150px; display: block;" preload="none">
+                        <source src="@item.track.preview_url" type="audio/mpeg">
+                        <p>Ooops - please use a more up to date browser so you can preview songs</p>
+                    </audio>
+                </td>
+                <td><a href="@item.track.uri">Direct</a></td>
+            </tr>
+        }
     }
 </table>
 

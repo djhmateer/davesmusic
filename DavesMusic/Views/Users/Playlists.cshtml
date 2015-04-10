@@ -2,6 +2,18 @@
 
 <h2>My Playlists (@Model.total)</h2>
 
+<script type="text/javascript">
+    function SetAllCheckBoxes(obj) {
+        var c = new Array();
+        c = document.getElementsByTagName('input');
+        for (var i = 0; i < c.length; i++) {
+            if (c[i].type == 'checkbox') {
+                c[i].checked = obj.checked;
+            }
+        }
+    }
+</script>
+
 @using (Html.BeginForm()) {
     <div class="action">
         <button class="actionButton" type="submit">
@@ -9,14 +21,16 @@
         </button>
     </div>
     <p>Select the playlists you want shuffled, press the button, then a new playlist will appear - Shuffler</p>
-    <p>If you can't see the playlists you expect - maybe Private vs Public.  You'll have to give this app permissions to view both. Change here</p>
+    
+    <p><input type="checkbox" name="Test" onclick="SetAllCheckBoxes(this)" /> Toggle all</p>
+
     <table class="table">
         @for (int i = 0; i < Model.items.Count; i++) {
             @Html.HiddenFor(model => Model.items[i].id)
             @Html.HiddenFor(model => Model.items[i].name)
             @Html.HiddenFor(model => Model.items[i].owner.id)
             <tr>
-                <td><a href="/Playlists/Details/@Model.items[i].id/@Model.items[i].owner.id">@Model.items[i].name</a>  (@Model.items[i].tracks.total)</td>
+                <td><a href="/Playlists/Details/@Model.items[i].id/@Model.items[i].owner.id/">@Model.items[i].name</a>  (@Model.items[i].tracks.total)</td>
                 <td>@Html.EditorFor(model => @Model.items[i].Checked)</td>
 
                 @if (@Model.items[i].images != null) {
