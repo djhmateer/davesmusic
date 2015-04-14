@@ -55,7 +55,7 @@ namespace DavesMusic.Controllers {
             bool keepTrying = true;
             string resultContent = "";
             while (keepTrying) {
-                // Have now code authorization code (which can be exchanged for an access token)
+                // Have now got authorization code (which can be exchanged for an access token)
                 var client_id = "0fd1718f5ef14cb291ef114a13382d15";
                 var client_secret = "ea47c397921c42ffbd04c53d33685205";
 
@@ -91,6 +91,16 @@ namespace DavesMusic.Controllers {
 
             // Set access token in session
             Session["AccessToken"] = access_token;
+
+            // do a quick call to get the username of the currently logged in user so I can use it to hide or display if it is davemateer (admin)
+            var url2 = "https://api.spotify.com/v1/me";
+            var sh = new SpotifyHelper();
+            var result2 = sh.CallSpotifyAPIPassingToken(access_token, url2);
+
+            var meReponse = JsonConvert.DeserializeObject<MeResponse>(result2);
+
+            Session["SpotifyUserID"] = meReponse.id;
+
             // Get return URL from session state
             var returnURL = Session["ReturnURL"].ToString();
 

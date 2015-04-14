@@ -26,10 +26,9 @@
             <table>
                 <tr>
                     <td>
-                        @if (@Model.ArtistDetails.Images.Count > 1){
+                        @if (@Model.ArtistDetails.Images.Count > 1) {
                             <img src="@Model.ArtistDetails.Images[1].URL" width="300" />
-                        }
-                        else if (@Model.ArtistDetails.Images.Count == 1){
+                        } else if (@Model.ArtistDetails.Images.Count == 1) {
                             <img src="@Model.ArtistDetails.Images[0].URL" width="300" />
                         }
                     </td>
@@ -57,18 +56,17 @@
 
 @if (Model.ArtistBiography != null) {
     if (Model.ArtistBiography.response.biographies != null) {
-        if (Model.ArtistBiography.response.biographies.Count > 0){
-            foreach (var item in Model.ArtistBiography.response.biographies){
-                if (item != null){
+        if (Model.ArtistBiography.response.biographies.Count > 0) {
+            foreach (var item in Model.ArtistBiography.response.biographies) {
+                if (item != null) {
                     <button id="button" onclick=" toggle_visibility('idOfElement'); ">Toggle</button>
                     <div>
-                        @if (@item.text != null){
-                            if (item.url != null){
+                        @if (@item.text != null) {
+                            if (item.url != null) {
                                 <div id="idOfElement2" style="display: block; white-space: pre-line">
-                                    @if (@item.text.Length > 500){
+                                    @if (@item.text.Length > 500) {
                                         @item.text.Substring(0, 500)
-                                    }
-                                    else{
+                                    } else {
                                         @item.text
                                     }
                                 </div>
@@ -92,11 +90,15 @@
     @Model.ArtistDetails.Name
 
     <h3>Spotify Top Tracks</h3>
-    <div class="action">
-        <button class="actionButton" type="submit">
-            <span>Admin - Add/Remove to Top Tracks</span>
-        </button>
-    </div>
+    if (Session["SpotifyUserID"] != null) {
+        if (Session["SpotifyUserID"].ToString() == "davemateer") {
+            <div class="action">
+                <button class="actionButton" type="submit">
+                    <span>Admin - Add/Remove to Top Tracks</span>
+                </button>
+            </div>
+        }
+    }
     <table class="table">
         @for (int i = 0; i < Model.ArtistTopTracks.tracks.Count; i++) {
             @Html.HiddenFor(model => Model.ArtistTopTracks.tracks[i].id)
@@ -114,7 +116,11 @@
 
             <tr>
                 <td>@Model.ArtistTopTracks.tracks[i].name</td>
-                <td>@Html.EditorFor(model => Model.ArtistTopTracks.tracks[i].Checked)</td>
+                @if (Session["SpotifyUserID"] != null) {
+                    if (Session["SpotifyUserID"].ToString() == "davemateer") {
+                        <td>@Html.EditorFor(model => Model.ArtistTopTracks.tracks[i].Checked)</td>
+                    }
+                }
                 <td>
                     <audio controls style="width: 150px; display: block;" preload="none">
                         <source src="@Model.ArtistTopTracks.tracks[i].preview_url" type="audio/mpeg">
@@ -129,8 +135,7 @@
                     <a href="/Albums/Details/@Model.ArtistTopTracks.tracks[i].album.id">
                         @if (Model.ArtistTopTracks.tracks[i].album.images.Count == 3) {
                             <img src="@Model.ArtistTopTracks.tracks[i].album.images[2].url" />
-                        }
-                        else {
+                        } else {
                             @Model.ArtistTopTracks.tracks[i].album.name
                         }
                     </a>
@@ -167,11 +172,15 @@
 
     <!-- Singles -->
     <h3>Singles</h3>
-    <div class="action">
-        <button class="actionButton" type="submit">
-            <span>Admin - Add/Remove Singles</span>
-        </button>
-    </div>
+    if (Session["SpotifyUserID"] != null) {
+        if (Session["SpotifyUserID"].ToString() == "davemateer") {
+            <div class="action">
+                <button class="actionButton" type="submit">
+                    <span>Admin - Add/Remove Singles</span>
+                </button>
+            </div>
+        }
+    }
     <table class="table">
         @if (Model.ArtistSingles != null) {
             for (int i = 0; i < Model.ArtistSingles.items.Count; i++) {
@@ -186,7 +195,11 @@
 
                 <tr>
                     <td>@Model.ArtistSingles.items[i].name</td>
-                    <td>@Html.EditorFor(model => Model.ArtistSingles.items[i].Checked)</td>
+                    @if (Session["SpotifyUserID"] != null) {
+                        if (Session["SpotifyUserID"].ToString() == "davemateer") {
+                            <td>@Html.EditorFor(model => Model.ArtistSingles.items[i].Checked)</td>
+                        }
+                    }
                     <td><a href="@Model.ArtistSingles.items[i].uri">Direct</a></td>
                     <td>
                         <a href="/Albums/Details/@Model.ArtistSingles.items[i].id">
