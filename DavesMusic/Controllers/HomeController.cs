@@ -19,6 +19,9 @@ namespace DavesMusic.Controllers {
         string connectionString = ConfigurationManager.ConnectionStrings["DavesMusicConnection2"].ConnectionString;
         MiniProfiler mp = MiniProfiler.Current;
 
+        public ActionResult SpotifyTest(){
+            return View();
+        }
         // Designed to find out what is happening on various servers
         public ActionResult SpeedTest() {
             var stopWatch = new Stopwatch();
