@@ -1,15 +1,12 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using StackExchange.Profiling;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Data;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using AutoMapper;
-using Newtonsoft.Json;
-using StackExchange.Profiling;
 
 namespace DavesMusic.Controllers {
 
