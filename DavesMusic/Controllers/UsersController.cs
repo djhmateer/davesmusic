@@ -166,7 +166,6 @@ namespace DavesMusic.Controllers {
                             tasks[i] = sh.CallSpotifyAPIPassingTokenAsync(access_token, url);
                         }
                         // at this point all tasks will be running at the same time
-                        //using (mp.CustomTiming("http", url)) {
                         await Task.WhenAll(tasks);
                     }
 
