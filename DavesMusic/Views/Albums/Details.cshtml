@@ -6,22 +6,24 @@
 
 <h2>@Model.AlbumDetails.name</h2>
 <table>
-    <td>
-        @if (@Model.AlbumDetails.images.Count > 1) {
-            <img src="@Model.AlbumDetails.images[1].url" />
-        } else if (@Model.AlbumDetails.images.Count == 1) {
-            <img src="@Model.AlbumDetails.images[0].url" />
-        }
-    </td>
-    <td>
-        <p><a href="/Artists/Details/@Model.AlbumDetails.artists[0].id">@Model.AlbumDetails.artists[0].name</a></p>
+    <tr>
+        <td>
+            @if (@Model.AlbumDetails.images.Count > 1) {
+                <img src="@Model.AlbumDetails.images[1].url" />
+            } else if (@Model.AlbumDetails.images.Count == 1) {
+                <img src="@Model.AlbumDetails.images[0].url" />
+            }
+        </td>
+        <td>
+            <p><a href="/Artists/Details/@Model.AlbumDetails.artists[0].id">@Model.AlbumDetails.artists[0].name</a></p>
 
-        <a href="/Home/Search">Search</a>
+            <a href="/Home/Search">Search</a>
 
-        <p><a href="@Model.AlbumDetails.uri">Open direct</a></p>
-        <p>Popularity: @Model.AlbumDetails.popularity</p>
-        <p>Release: @Model.AlbumDetails.release_date</p>
-    </td>
+            <p><a href="@Model.AlbumDetails.uri">Open direct</a></p>
+            <p>Popularity: @Model.AlbumDetails.popularity</p>
+            <p>Release: @Model.AlbumDetails.release_date</p>
+        </td>
+    </tr>
 </table>
 
 @using (Html.BeginForm()) {
