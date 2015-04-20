@@ -1,6 +1,6 @@
-﻿using System.Threading;
-using Dapper;
+﻿using Dapper;
 using Newtonsoft.Json;
+using StackExchange.Profiling;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -12,7 +12,6 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using StackExchange.Profiling;
 
 namespace DavesMusic.Controllers {
     public class ArtistsController : Controller {
@@ -85,6 +84,7 @@ namespace DavesMusic.Controllers {
 
 
                 // Singles
+                if (vm.ArtistSingles != null)
                 foreach (var t in vm.ArtistSingles.items) {
                     if (t.Checked) {
                         // Is it already there in the database?

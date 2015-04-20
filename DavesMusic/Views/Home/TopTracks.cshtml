@@ -42,10 +42,14 @@
     }
 </script>
 
-<h2>Top Tracks!!!</h2>
+@*<h2></h2>*@
 
+<p></p>
 @if (ViewBag.user_id == null) {
-    <p>Please <a href="/Home/LoginRedirect/">login</a> to Spotify so I know where to send your awesome musical choices!</p>
+   
+    <p>1. Explore bands.</p>
+    <p>2. <a href="/Home/LoginRedirect/">login</a> and add the awesome tracks from this page to your playlist</p>
+    <p>3. Create a massive playlist shuffler from all your playlists</p>
 } else {
     <p><a href="/Playlists/Create/">Create/Update this playlist in Spotify</a></p>
 }
