@@ -1,9 +1,6 @@
 ﻿@model DavesMusic.Controllers.SearchViewModel
 
-@{
-    ViewBag.Title = "Search Results";
-}
-
+@{ViewBag.Title = "Search Results";}
 
 @if (Model != null) {
     <h2>@Model.ArtistsResponse2.term</h2>
@@ -38,7 +35,6 @@
         </table>
     }
 
-
     if (Model.ArtistsResponse2 != null) {
         <h3>Artists</h3>
         <table class="table">
@@ -71,7 +67,4 @@
             }
         </table>
     }
-
 }
-
-

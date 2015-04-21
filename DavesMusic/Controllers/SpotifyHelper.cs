@@ -184,7 +184,7 @@ namespace DavesMusic.Controllers {
             public string name { get; set; }
         }
 
-        public string CallSpotifyCreatePlaylistPostAPIPassingToken(string access_token, string url, string playlistName = "A New Playlist") {
+        public string CallSpotifyCreatePlaylistPostAPIPassingToken(string access_token, string url, string playlistName = "DTM - Playlist") {
             var client = new HttpClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", access_token);
             var p = new Thing { name = playlistName };

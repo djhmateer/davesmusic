@@ -42,18 +42,33 @@
     }
 </script>
 
-@*<h2></h2>*@
-
 <p></p>
+<p>1. Explore bands.</p>
+<p>2. Create a Playlist Shuffler from all your Spotify playlists</p>
 @if (ViewBag.user_id == null) {
-   
-    <p>1. Explore bands.</p>
-    <p>2. <a href="/Home/LoginRedirect/">login</a> and add the awesome tracks from this page to your playlist</p>
-    <p>3. Create a massive playlist shuffler from all your playlists</p>
-} else {
-    <p>1. Explore bands.</p>
-    <p>2.<a href="/Playlists/Create/">Create/Update this playlist in Spotify</a> - add tracks below from Daves Top Music to your <b>A New Playlist</b> using the add button</p>
-    <p>3. Create a massive playlist shuffler from all your playlists</p>
+    <p>3. <a href="/Home/LoginRedirect/">Login</a> and add awesome tracks below to your DTM - Playlist using the add buttons</p>
+}
+else {
+    <p>3. <a href="/Playlists/Create/">Create/Update this playlist in Spotify</a> - add awesome tracks below to your DTM - Playlist using the add button</p>
+}
+
+<!-- add all-->
+@using (Html.BeginForm()) {
+    if (ViewBag.user_id != null) {
+        <table class="table">
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td><button name="buttonAction" value="addAll" type="submit">Add All</button></td>
+                <td><button name="buttonAction" value="delAll" type="submit">Del All</button></td>
+            </tr>
+        </table>
+    }
 }
 
 <table class="table">
@@ -76,7 +91,8 @@
                 if (Session["SpotifyUserID"].ToString() == "davemateer") {
                     if (@Model[i].AddedInUserPlaylist) {
                         <td><button id="@Model[i].TrackID" style="margin-left: 50px" onclick="addTrack('@Model[i].TrackID')">Delete</button></td>
-                    } else {
+                    }
+                    else {
                         <td><button id="@Model[i].TrackID" onclick="addTrack('@Model[i].TrackID')">Add</button></td>
                     }
                 }
@@ -86,12 +102,4 @@
         </tr>
     }
 </table>
-
-
-
-@*<div id="le-alert" class="alert alert-success" hidden="hidden">
-        <button href="#" type="button" class="close" data-hide="alert">&times;</button>
-        <div id="message"></div>
-    </div>*@
-
 

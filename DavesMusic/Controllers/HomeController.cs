@@ -19,7 +19,7 @@ namespace DavesMusic.Controllers {
         string connectionString = ConfigurationManager.ConnectionStrings["DavesMusicConnection2"].ConnectionString;
         MiniProfiler mp = MiniProfiler.Current;
 
-        public ActionResult SpotifyTest(){
+        public ActionResult SpotifyTest() {
             return View();
         }
         // Designed to find out what is happening on various servers
@@ -174,12 +174,17 @@ namespace DavesMusic.Controllers {
             return View(a);
         }
 
-        public ActionResult Error(){
+        public ActionResult Error() {
             return View();
         }
 
         // The homepage
         public ActionResult TopTracks() {
+            var vm = GetTopTracks();
+            return View(vm);
+        }
+
+        private List<TopTracksVM> GetTopTracks() {
             var vm = new List<TopTracksVM>();
             using (var db = DBHelper.GetOpenConnection()) {
                 vm = db.GetList<TopTracksVM>("ORDER BY AlbumDate Desc").ToList();
@@ -196,7 +201,7 @@ namespace DavesMusic.Controllers {
                 if (Session["UserID"] == null) {
                     var url = "https://api.spotify.com/v1/me";
                     string json;
-                    using (mp.CustomTiming("http", url)){
+                    using (mp.CustomTiming("http", url)) {
                         var sh = new SpotifyHelper();
                         json = sh.CallSpotifyAPIPassingToken(access_token, url);
                     }
@@ -212,8 +217,10 @@ namespace DavesMusic.Controllers {
                 // Find out what the user has already added to their playlist
                 List<string> listTracksAlreadyAdded;
                 var userID = Session["UserID"];
-                using (IDbConnection db = DBHelper.GetOpenConnection()){
-                    listTracksAlreadyAdded = db.Query<string>("SELECT TrackID FROM UserPlaylists WHERE UserID = @UserID", new {@UserID = userID}).ToList();
+                using (IDbConnection db = DBHelper.GetOpenConnection()) {
+                    listTracksAlreadyAdded =
+                        db.Query<string>("SELECT TrackID FROM UserPlaylists WHERE UserID = @UserID", new { @UserID = userID })
+                            .ToList();
                 }
 
                 foreach (var track in vm) {
@@ -222,10 +229,43 @@ namespace DavesMusic.Controllers {
                     }
                 }
             }
-            return View(vm);
+            return vm;
         }
 
-        public ActionResult About(){
+        // Add all from homepage
+        [HttpPost]
+        public ActionResult TopTracks(TopTracksVM vm, string buttonAction) {
+            var userID = Session["UserID"];
+
+            if (buttonAction == "delAll"){
+                using (var db = DBHelper.GetOpenConnection()){
+                    db.Query("DELETE FROM UserPlaylists WHERE UserID = @UserID", new { userID});
+                }
+            }
+
+            if (buttonAction == "addAll"){
+                // Get all current DTM tracks
+                var vm3 = new List<TopTracksVM>();
+                using (var db = DBHelper.GetOpenConnection()){
+                    vm3 = db.GetList<TopTracksVM>().ToList();
+
+                    // Insert these tracks into the users's playlist
+                    foreach (var track in vm3){
+                        var userPlaylist = new UserPlaylist{
+                            TrackID = track.TrackID,
+                            UserID = userID.ToString()
+                        };
+                        var id = db.Insert(userPlaylist);
+                    }
+                }
+            }
+
+            // reload
+            var vm2 = GetTopTracks();
+            return View(vm2);
+        }
+
+        public ActionResult About() {
             return View();
         }
 
@@ -242,7 +282,6 @@ namespace DavesMusic.Controllers {
         public String AddOrRemoveTrack(string trackId) {
             // Insert into the database 
             var userID = Session["UserID"];
-            // give illusion interface is working if not logged in
             if (userID != null) {
                 using (var connection = new SqlConnection(connectionString))
                 using (var command = new SqlCommand(null, connection)) {
@@ -274,6 +313,15 @@ namespace DavesMusic.Controllers {
     }
 
     // used for SimpleCRUD
+    [Table("UserPlaylists")]
+    public class UserPlaylist{
+        public int Id { get; set; }
+        public string UserID { get; set; }
+        public string TrackID { get; set; }
+        
+    }
+
+
     [Table("Tracks")]
     public class TopTracksVM {
         public int Id { get; set; }

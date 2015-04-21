@@ -68,7 +68,7 @@ namespace DavesMusic.Controllers {
             var meReponse = JsonConvert.DeserializeObject<PlaylistSummaryViewModel>(result4);
             var currentPlaylistID = "";
             foreach (var thing in meReponse.items) {
-                if (thing.name == "A New Playlist") {
+                if (thing.name == "DTM - Playlist") {
                     currentPlaylistID = thing.id;
                 }
             }
@@ -115,16 +115,24 @@ namespace DavesMusic.Controllers {
                 // this will replace
                 var result3 = sh.CallSpotifyPutAPIPassingToken(access_token, url3);
 
-                // Get 101-201
-                var stuff = listOfTrackIDs.Skip(100).Take(100);
-                csvOfUris = "";
-                foreach (var trackID in stuff) {
-                    csvOfUris += "spotify:track:" + trackID + ",";
-                }
-                csvOfUris = csvOfUris.TrimEnd(',');
+                var recordsPerPage = 100;
+                var records = listOfTrackIDs.Count;
+                int numberOfTimesToLoop = (records + recordsPerPage - 1) / recordsPerPage;
 
-                // this will add
-                var result5 = sh.CallSpotifyPostAPIPassingToken(access_token, url3);
+                // 1 as we've already done the first loop (0 based)
+                for (int i = 1; i < numberOfTimesToLoop; i++) {
+                    var stuff = listOfTrackIDs.Skip(100 * i).Take(100);
+                    csvOfUris = "";
+                    foreach (var trackID in stuff) {
+                        csvOfUris += "spotify:track:" + trackID + ",";
+                    }
+                    csvOfUris = csvOfUris.TrimEnd(',');
+
+                    // this will add
+                    var result5 = sh.CallSpotifyPostAPIPassingToken(access_token, url3);
+                }
+
+               
             }
             else {
                 string csvOfUris = "";

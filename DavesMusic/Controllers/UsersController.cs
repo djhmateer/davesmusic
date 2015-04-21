@@ -204,20 +204,20 @@ namespace DavesMusic.Controllers {
             // Does the playlist exist already for this user?
             var url4 = String.Format("https://api.spotify.com/v1/users/{0}/playlists", userId);
             string result4;
-            using (mp.Step("POST - Does the Shuffler playlist exist already for this user")) {
+            using (mp.Step("POST - Does the DTM Shuffler playlist exist already for this user")) {
                 result4 = sh.CallSpotifyAPIPassingToken(access_token, url4);
             }
             var meReponse = JsonConvert.DeserializeObject<PlaylistSummaryViewModel>(result4);
             var currentPlaylistID = "";
-            var shuffler = meReponse.items.FirstOrDefault(x => x.name == "Shuffler");
+            var shuffler = meReponse.items.FirstOrDefault(x => x.name == "DTM - Shuffler");
             if (shuffler != null) currentPlaylistID = shuffler.id;
 
             // If not playlist create one
             if (currentPlaylistID == "") {
                 var url2 = String.Format("https://api.spotify.com/v1/users/{0}/playlists", userId);
                 string result2;
-                using (mp.Step("POST - Creating Shuffler playlist")) {
-                    result2 = sh.CallSpotifyCreatePlaylistPostAPIPassingToken(access_token, url2, "Shuffler");
+                using (mp.Step("POST - Creating DTM - Shuffler playlist")) {
+                    result2 = sh.CallSpotifyCreatePlaylistPostAPIPassingToken(access_token, url2, "DTM - Shuffler");
                 }
                 var playlistReturn = JsonConvert.DeserializeObject<CreatePlaylistReturn>(result2);
                 currentPlaylistID = playlistReturn.id;
@@ -243,21 +243,8 @@ namespace DavesMusic.Controllers {
                     }
                 }
             }
-
-            // Get first 100 tracks and put into a csv string
-            //string csvOfUris = "";
-            //var first100 = listOfTrackIDs.Take(100);
-            //foreach (var trackID in listOfTrackIDs) {
-            //    csvOfUris += "spotify:track:" + trackID + ",";
-            //}
-            //csvOfUris = csvOfUris.TrimEnd(',');
-
-            //var url3 = String.Format("https://api.spotify.com/v1/users/{0}/playlists/{1}/tracks?uris={2}", userId, currentPlaylistID, csvOfUris);
-
-            // this will replace
-            //var result3 = sh.CallSpotifyPutAPIPassingToken(access_token, url3);
+            
             var result3 = await sh.CallSpotifyPutAPIPassingTokenSendTracksAsync(access_token, userId, currentPlaylistID, listOfTrackIDs);
-
 
             // Get data again as not saved, including Checked status
             var vm2 = await GetPlaylistDetailsViewModel(id);
