@@ -109,8 +109,7 @@ namespace DavesMusic.Controllers {
                 }
                 csvOfUris = csvOfUris.TrimEnd(',');
 
-                var url3 = String.Format("https://api.spotify.com/v1/users/{0}/playlists/{1}/tracks?uris={2}", userId,
-                    currentPlaylistID, csvOfUris);
+                var url3 = String.Format("https://api.spotify.com/v1/users/{0}/playlists/{1}/tracks?uris={2}", userId,currentPlaylistID, csvOfUris);
 
                 // this will replace
                 var result3 = sh.CallSpotifyPutAPIPassingToken(access_token, url3);
@@ -129,6 +128,7 @@ namespace DavesMusic.Controllers {
                     csvOfUris = csvOfUris.TrimEnd(',');
 
                     // this will add
+                    url3 = String.Format("https://api.spotify.com/v1/users/{0}/playlists/{1}/tracks?uris={2}", userId, currentPlaylistID, csvOfUris);
                     var result5 = sh.CallSpotifyPostAPIPassingToken(access_token, url3);
                 }
 

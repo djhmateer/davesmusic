@@ -47,59 +47,55 @@
 <p>2. Create a Playlist Shuffler from all your Spotify playlists</p>
 @if (ViewBag.user_id == null) {
     <p>3. <a href="/Home/LoginRedirect/">Login</a> and add awesome tracks below to your DTM - Playlist using the add buttons</p>
-}
-else {
+} else {
     <p>3. <a href="/Playlists/Create/">Create/Update this playlist in Spotify</a> - add awesome tracks below to your DTM - Playlist using the add button</p>
 }
 
-<!-- add all-->
-@using (Html.BeginForm()) {
-    if (ViewBag.user_id != null) {
-        <table class="table">
+
+    <table class="table">
+        <!-- add all-->
+        @if (ViewBag.user_id != null) {
+            using (Html.BeginForm())
+             {
+                 <tr>
+                     <td></td>
+                     <td></td>
+                     <td></td>
+                     <td></td>
+                     <td colspan="2"><button name="buttonAction" value="addAll" type="submit">Add All</button> <button name="buttonAction" value="delAll" type="submit">Del All</button></td>
+                 </tr>
+             }
+        }
+
+        @for (int i = 0; i < Model.Count; i++) {
+            @Html.HiddenFor(model => Model[i].TrackID)
+            @Html.HiddenFor(model => Model[i].TrackName)
+
             <tr>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td><button name="buttonAction" value="addAll" type="submit">Add All</button></td>
-                <td><button name="buttonAction" value="delAll" type="submit">Del All</button></td>
-            </tr>
-        </table>
-    }
-}
+                <td><a href="/Artists/Details/@Model[i].ArtistID">@Model[i].ArtistName</a></td>
+                <td>@Model[i].TrackName</td>
+                <td>@Model[i].AlbumDate.ToString("yyyy")</td>
+                <td>
+                    <audio controls style="width: 150px; display: block;" preload="none">
+                        <source src="@Model[i].TrackPreviewURL" type="audio/mpeg">
+                        <p>Ooops - please use a more up to date browser so you can preview songs</p>
+                    </audio>
+                </td>
 
-<table class="table">
-    @for (int i = 0; i < Model.Count; i++) {
-        @Html.HiddenFor(model => Model[i].TrackID)
-        @Html.HiddenFor(model => Model[i].TrackName)
-        <tr>
-            <td><a href="/Artists/Details/@Model[i].ArtistID">@Model[i].ArtistName</a></td>
-            <td>@Model[i].TrackName</td>
-            <td>@Model[i].AlbumDate.ToString("yyyy")</td>
-            <td>
-                <audio controls style="width: 150px; display: block;" preload="none">
-                    <source src="@Model[i].TrackPreviewURL" type="audio/mpeg">
-                    <p>Ooops - please use a more up to date browser so you can preview songs</p>
-                </audio>
-            </td>
-
-            @*The buttons*@
-            @if (Session["SpotifyUserID"] != null) {
-                if (Session["SpotifyUserID"].ToString() == "davemateer") {
-                    if (@Model[i].AddedInUserPlaylist) {
-                        <td><button id="@Model[i].TrackID" style="margin-left: 50px" onclick="addTrack('@Model[i].TrackID')">Delete</button></td>
-                    }
-                    else {
-                        <td><button id="@Model[i].TrackID" onclick="addTrack('@Model[i].TrackID')">Add</button></td>
+                @*The buttons*@
+                @if (Session["SpotifyUserID"] != null) {
+                    if (Session["SpotifyUserID"].ToString() == "davemateer") {
+                        if (@Model[i].AddedInUserPlaylist) {
+                            <td><button id="@Model[i].TrackID" style="margin-left: 50px" onclick="addTrack('@Model[i].TrackID')">Delete</button></td>
+                        } else {
+                            <td><button id="@Model[i].TrackID" onclick="addTrack('@Model[i].TrackID')">Add</button></td>
+                        }
                     }
                 }
-            }
-            <td>@Model[i].AlbumName</td>
-            <td><a href="/Albums/Details/@Model[i].AlbumID"><img src="@Model[i].AlbumImageURL" /></a></td>
-        </tr>
-    }
-</table>
+                <td>@Model[i].AlbumName</td>
+                <td><a href="/Albums/Details/@Model[i].AlbumID"><img src="@Model[i].AlbumImageURL" /></a></td>
+            </tr>
+        }
+    </table>
+
 

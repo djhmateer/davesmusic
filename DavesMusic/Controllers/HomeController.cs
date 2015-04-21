@@ -247,6 +247,9 @@ namespace DavesMusic.Controllers {
                 // Get all current DTM tracks
                 var vm3 = new List<TopTracksVM>();
                 using (var db = DBHelper.GetOpenConnection()){
+                    // Firstly delete any current tracks in the users playlist
+                    db.Query("DELETE FROM UserPlaylists WHERE UserID = @UserID", new { userID });
+
                     vm3 = db.GetList<TopTracksVM>().ToList();
 
                     // Insert these tracks into the users's playlist
