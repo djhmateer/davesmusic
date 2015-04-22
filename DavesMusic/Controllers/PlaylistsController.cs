@@ -55,7 +55,7 @@ namespace DavesMusic.Controllers {
             var sh = new SpotifyHelper();
             var access_token = Session["AccessToken"].ToString();
 
-            // need to get the current users id eg davemateer
+            // Get the current users id eg davemateer
             var url7 = "https://api.spotify.com/v1/me";
             var result7 = sh.CallSpotifyAPIPassingToken(access_token, url7);
 
@@ -81,9 +81,7 @@ namespace DavesMusic.Controllers {
                 currentPlaylistID = playlistReturn.id;
             }
 
-            // Replace all tracks in playlist - get trackID's from database
-            //var csvOfUris = "spotify:track:4iV5W9uYEdYUVa79Axb7Rh,spotify:track:1301WleyT98MSxVHPZCA6M";
-            //var csvOfUris = "";
+            // Get trackID's from database to add to Spotify (the app saves the trackID's to the db before we send to spotify)
             var listOfTrackIDs = new List<String>();
             using (var connection = new SqlConnection(connectionString))
             using (var command = new SqlCommand(null, connection)) {
