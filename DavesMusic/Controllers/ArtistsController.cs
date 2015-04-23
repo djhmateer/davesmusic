@@ -313,7 +313,6 @@ namespace DavesMusic.Controllers {
             // problem is that some tracks are related to their "Greatest Hits compilation" / not original album
             // eg Black Crowes - Twice as Hard (#2) related to Greatest Hits 1990-1999
             // take the track name, and find the earliest album it is on..
-
             IList<string> top10trackNames = top10.Select(x => x.name).ToList();
             var top10trackNamesDistinct = top10trackNames.Distinct(StringComparer.CurrentCultureIgnoreCase);
 
@@ -438,6 +437,7 @@ namespace DavesMusic.Controllers {
             artistRelated.artists = y;
 
 
+            // 6. Biography from Wikipedia via Echonest
             using (profiler.Step("6. Biography (Echonest)")) {
                 apiResult = sh.CallEchonestAPIArtistBiography(null, artistID);
             }
@@ -457,25 +457,6 @@ namespace DavesMusic.Controllers {
             }
             var artistSingles = JsonConvert.DeserializeObject<ArtistAlbums>(apiResult.Json);
 
-            // Iterate through records in db, setting vm checked property for Admin - add to playlist
-            //using (IDbConnection db = DBHelper.GetOpenConnection()) {
-            //    listTracksAlreadyAdded = db.Query<string>("SELECT TrackID FROM UserPlaylists WHERE UserID = @UserID", new { @UserID = userID }).ToList();
-            //}
-
-            //using (var connection = new SqlConnection(connectionString))
-            //using (var command = new SqlCommand(null, connection)) {
-            //    connection.Open();
-            //    command.CommandText = String.Format("SELECT TrackID FROM Tracks");
-            //    command.CommandType = CommandType.Text;
-
-            //    var trackIDs = new List<string>();
-            //    using (var reader = command.ExecuteReader()) {
-            //        while (reader.Read()) {
-            //            var trackID = reader.GetString(reader.GetOrdinal("TrackID"));
-            //            trackIDs.Add(trackID);
-            //        }
-            //    }
-
             // use the query I did above
             foreach (var trackID in trackIDsTemp) {
                 // Is this track in the current artist Singles list?
@@ -484,7 +465,6 @@ namespace DavesMusic.Controllers {
                     track.Checked = true;
                 }
             }
-            //}
 
             var vm = new ArtistDetailsViewModel {
                 ArtistDetails = artistDetails,
