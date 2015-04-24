@@ -225,7 +225,6 @@ namespace DavesMusic.Controllers {
 
         public string CallSpotifyAPIArtist(string artistCode, StopWatchResult stopWatchResult) {
             var url = String.Format("https://api.spotify.com/v1/artists/{0}", artistCode);
-
             using (mp.CustomTiming("http", url)) {
                 var json = CallAPI(stopWatchResult, url);
                 return json;
@@ -343,7 +342,6 @@ namespace DavesMusic.Controllers {
             int errorCount = 0;
             string text = null;
             bool done = false;
-            //using (mps.CustomTiming("http", url)) {
             while (!done) {
                 try {
                     var request = (HttpWebRequest)WebRequest.Create(url);
@@ -357,16 +355,13 @@ namespace DavesMusic.Controllers {
 
                     done = true;
                 }
-                catch (WebException ex) {
-                    //ILog log = LogManager.GetLogger(typeof(MvcApplication));
-                    //log.Debug("CallAPI trap2: " + url + ex.Message);
+                catch (WebException) {
                     Thread.Sleep(200);
                     errorCount++;
                     if (errorCount == 200)
                         throw;
                 }
             }
-            //}
 
             stopWatch.Stop();
             TimeSpan ts = stopWatch.Elapsed;
