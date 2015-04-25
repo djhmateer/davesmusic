@@ -1,19 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using log4net;
+using StackExchange.Profiling;
+using System;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
-using log4net;
-using StackExchange.Profiling;
 
-namespace DavesMusic
-{
-    public class MvcApplication : System.Web.HttpApplication
-    {
-        protected void Application_Start()
-        {
+namespace DavesMusic {
+    public class MvcApplication : System.Web.HttpApplication {
+        protected void Application_Start() {
             log4net.Config.XmlConfigurator.Configure();
 
             AreaRegistration.RegisterAllAreas();
@@ -24,7 +18,7 @@ namespace DavesMusic
 
         protected void Application_BeginRequest() {
             //if (Request.IsLocal) {
-                MiniProfiler.Start();
+            MiniProfiler.Start();
             //}
         }
 
@@ -33,13 +27,14 @@ namespace DavesMusic
         }
 
         void Application_Error(Object sender, EventArgs e) {
-#if DEBUG
-            Console.WriteLine("Error not handled as in Debug");
-#else
-   var exception = Server.GetLastError();
+            //#if DEBUG
+            //Console.WriteLine("Error not handled as in Debug");
+            //#else
+            var exception = Server.GetLastError();
 
-            if (exception == null)
+            if (exception == null) {
                 return;
+            }
             ILog log = LogManager.GetLogger(typeof(MvcApplication));
             log.Error(exception.Message);
             log.Error(Request.RawUrl);
@@ -50,7 +45,7 @@ namespace DavesMusic
 
             // Redirect to a landing page
             Response.Redirect("/home/error");
-#endif
+            //#endif
         }
     }
 }
