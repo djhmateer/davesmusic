@@ -3,10 +3,12 @@
 ![Test status](http://teststatusbadge.azurewebsites.net/api/status/djhmateer/davesmusic)]
 (https://ci.appveyor.com/project/djhmateer/davesmusic)
 
-Live website http://www.davestopmusic.com or
- http://dmusic.azurewebsites.net/
+Live website http://www.davestopmusic.com (EC2) or
+ http://dmusic.azurewebsites.net/ (Azure!)
 
-and upcoming talks on
+Look inside the Documents folder in this repo for videos (the 1024 resolution ones are newer)
+
+https://github.com/djhmateer/githubscratch for small demo code samples I used in this talk
 
 - Spotify Web API
 - Json deserialisation in .NET
