@@ -1,2 +1,2 @@
-﻿User-agent: *
-Disallow: /mini-profiler-resources/
+user-agent: *
+disallow: /mini-profiler-resources/
