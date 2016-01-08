@@ -19,6 +19,70 @@ namespace DavesMusic.Controllers {
         string connectionString = ConfigurationManager.ConnectionStrings["DavesMusicConnection2"].ConnectionString;
         MiniProfiler mp = MiniProfiler.Current;
 
+
+        // The homepage
+        public ActionResult TopTracks()
+        {
+            var vm = GetTopTracks();
+            return View(vm);
+        }
+
+        private List<TopTracksVM> GetTopTracks()
+        {
+            var vm = new List<TopTracksVM>();
+            using (var db = DBHelper.GetOpenConnection())
+            {
+                vm = db.GetList<TopTracksVM>("ORDER BY AlbumDate Desc").ToList();
+            }
+
+            // If logged in 
+            if (Session["AccessToken"] != null)
+            {
+                ViewBag.access_token = Session["AccessToken"].ToString();
+
+                var access_token = Session["AccessToken"].ToString();
+
+                // User clicks via LoginRedirect to come back here
+                // If this is the first time back to this page after logging in, need to get the UserID
+                if (Session["UserID"] == null)
+                {
+                    var url = "https://api.spotify.com/v1/me";
+                    string json;
+                    using (mp.CustomTiming("http", url))
+                    {
+                        var sh = new SpotifyHelper();
+                        json = sh.CallSpotifyAPIPassingToken(access_token, url);
+                    }
+
+                    var meReponse = JsonConvert.DeserializeObject<MeResponse>(json);
+                    meReponse.access_token = access_token;
+
+                    Session["UserID"] = meReponse.id;
+                }
+                // Grab the userID as we'll use that in our database to remember what a user has selected
+                ViewBag.user_id = Session["UserID"];
+
+                // Find out what the user has already added to their playlist
+                List<string> listTracksAlreadyAdded;
+                var userID = Session["UserID"];
+                using (IDbConnection db = DBHelper.GetOpenConnection())
+                {
+                    listTracksAlreadyAdded =
+                        db.Query<string>("SELECT TrackID FROM UserPlaylists WHERE UserID = @UserID", new { @UserID = userID })
+                            .ToList();
+                }
+
+                foreach (var track in vm)
+                {
+                    if (listTracksAlreadyAdded.Contains(track.TrackID))
+                    {
+                        track.AddedInUserPlaylist = true;
+                    }
+                }
+            }
+            return vm;
+        }
+
         public ActionResult SpotifyTest() {
             return View();
         }
@@ -49,7 +113,7 @@ namespace DavesMusic.Controllers {
 
             stopWatch.Stop();
             TimeSpan ts = stopWatch.Elapsed;
-            string elapsedTime = String.Format("{0:0}", ts.TotalMilliseconds);
+            string elapsedTime = string.Format("{0}",ts.TotalMilliseconds);
             ViewBag.totalTime = elapsedTime;
 
             return View();
@@ -178,59 +242,7 @@ namespace DavesMusic.Controllers {
             return View();
         }
 
-        // The homepage
-        public ActionResult TopTracks() {
-            var vm = GetTopTracks();
-            return View(vm);
-        }
-
-        private List<TopTracksVM> GetTopTracks() {
-            var vm = new List<TopTracksVM>();
-            using (var db = DBHelper.GetOpenConnection()) {
-                vm = db.GetList<TopTracksVM>("ORDER BY AlbumDate Desc").ToList();
-            }
-
-            // If logged in 
-            if (Session["AccessToken"] != null) {
-                ViewBag.access_token = Session["AccessToken"].ToString();
-
-                var access_token = Session["AccessToken"].ToString();
-
-                // User clicks via LoginRedirect to come back here
-                // If this is the first time back to this page after logging in, need to get the UserID
-                if (Session["UserID"] == null) {
-                    var url = "https://api.spotify.com/v1/me";
-                    string json;
-                    using (mp.CustomTiming("http", url)) {
-                        var sh = new SpotifyHelper();
-                        json = sh.CallSpotifyAPIPassingToken(access_token, url);
-                    }
-
-                    var meReponse = JsonConvert.DeserializeObject<MeResponse>(json);
-                    meReponse.access_token = access_token;
-
-                    Session["UserID"] = meReponse.id;
-                }
-                // Grab the userID as we'll use that in our database to remember what a user has selected
-                ViewBag.user_id = Session["UserID"];
-
-                // Find out what the user has already added to their playlist
-                List<string> listTracksAlreadyAdded;
-                var userID = Session["UserID"];
-                using (IDbConnection db = DBHelper.GetOpenConnection()) {
-                    listTracksAlreadyAdded =
-                        db.Query<string>("SELECT TrackID FROM UserPlaylists WHERE UserID = @UserID", new { @UserID = userID })
-                            .ToList();
-                }
-
-                foreach (var track in vm) {
-                    if (listTracksAlreadyAdded.Contains(track.TrackID)) {
-                        track.AddedInUserPlaylist = true;
-                    }
-                }
-            }
-            return vm;
-        }
+       
 
         // Add all from homepage
         [HttpPost]
@@ -282,7 +294,7 @@ namespace DavesMusic.Controllers {
             return Redirect(returnURL);
         }
 
-        public String AddOrRemoveTrack(string trackId) {
+        public string AddOrRemoveTrack(string trackId) {
             // Insert into the database 
             var userID = Session["UserID"];
             if (userID != null) {
