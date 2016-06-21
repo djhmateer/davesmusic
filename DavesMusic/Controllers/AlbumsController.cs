@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Web.Mvc;
 
+// test
 namespace DavesMusic.Controllers {
     public class AlbumsController : Controller {
         string connectionString = ConfigurationManager.ConnectionStrings["DavesMusicConnection2"].ConnectionString;
