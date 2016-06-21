@@ -44,7 +44,7 @@ namespace DavesMusic {
             Server.ClearError();
 
             // Redirect to a landing page
-            Response.Redirect("/home/error");
+            //Response.Redirect("/home/error");
             //#endif
         }
     }
