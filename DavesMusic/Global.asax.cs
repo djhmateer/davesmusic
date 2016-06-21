@@ -41,7 +41,7 @@ namespace DavesMusic {
             log.Error(exception.StackTrace);
 
             // Clear the error
-            Server.ClearError();
+            //Server.ClearError();
 
             // Redirect to a landing page
             //Response.Redirect("/home/error");
