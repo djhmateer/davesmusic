@@ -437,19 +437,19 @@ namespace DavesMusic.Controllers {
             artistRelated.artists = y;
 
 
-            // 6. Biography from Wikipedia via Echonest
-            using (profiler.Step("6. Biography (Echonest)")) {
-                apiResult = sh.CallEchonestAPIArtistBiography(null, artistID);
-            }
-            var artistBiography = JsonConvert.DeserializeObject<ArtistBiography>(apiResult.Json);
-            if (artistBiography != null) {
-                // Just get last.fm and Wikipedia entries
-                if (artistBiography.response.biographies != null) {
-                    var a = artistBiography.response.biographies.SingleOrDefault(x => x.url.Contains("wikipedia"));
-                    artistBiography.response.biographies.Clear();
-                    artistBiography.response.biographies.Add(a);
-                }
-            }
+            // 6. Biography from Wikipedia via Echonest - deprecated!
+            //using (profiler.Step("6. Biography (Echonest)")) {
+            //    apiResult = sh.CallEchonestAPIArtistBiography(null, artistID);
+            //}
+            //var artistBiography = JsonConvert.DeserializeObject<ArtistBiography>(apiResult.Json);
+            //if (artistBiography != null) {
+            //    // Just get last.fm and Wikipedia entries
+            //    if (artistBiography.response.biographies != null) {
+            //        var a = artistBiography.response.biographies.SingleOrDefault(x => x.url.Contains("wikipedia"));
+            //        artistBiography.response.biographies.Clear();
+            //        artistBiography.response.biographies.Add(a);
+            //    }
+            //}
 
             // 7. Artists singles
             using (profiler.Step("7. Artists singles")) {
@@ -472,7 +472,7 @@ namespace DavesMusic.Controllers {
                 ArtistAlbums = multiAlbumDetails3,
 
                 ArtistRelated = artistRelated,
-                ArtistBiography = artistBiography,
+                //ArtistBiography = artistBiography,
                 ArtistSingles = artistSingles
             };
             return vm;

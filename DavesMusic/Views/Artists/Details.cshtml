@@ -52,7 +52,7 @@
         </td>
     </tr>
 </table>
-<h3>Biography</h3>
+@*<h3>Biography</h3>
 
 @if (Model.ArtistBiography != null) {
     if (Model.ArtistBiography.response.biographies != null) {
@@ -81,7 +81,7 @@
             }
         }
     }
-}
+}*@
 
 @using (Html.BeginForm()) {
     @Html.HiddenFor(model => Model.ArtistDetails.Name)

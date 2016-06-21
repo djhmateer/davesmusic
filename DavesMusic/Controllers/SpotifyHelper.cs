@@ -322,18 +322,18 @@ namespace DavesMusic.Controllers {
             }
         }
 
-        public APIResult CallEchonestAPIArtistBiography(StopWatchResult stopWatchResult, string id) {
-            var echonestAPIKey = "OMO6U4I5XEGVXYCCN ";
-            //http://developer.echonest.com/api/v4/artist/biographies?api_key=FILDTEOIK2HBORODV&id=spotify:artist:4Z8W4fKeB5YxbusRsdQVPb
-            var url = String.Format("http://developer.echonest.com/api/v4/artist/biographies?api_key={0}&id=spotify:artist:{1}", echonestAPIKey, id);
-            using (mp.CustomTiming("http", url)) {
-                var json = CallAPI(stopWatchResult, url);
-                return new APIResult {
-                    Json = json,
-                    Url = url.Replace(echonestAPIKey, "SECRET")
-                };
-            }
-        }
+        //public APIResult CallEchonestAPIArtistBiography(StopWatchResult stopWatchResult, string id) {
+        //    var echonestAPIKey = "OMO6U4I5XEGVXYCCN ";
+        //    //http://developer.echonest.com/api/v4/artist/biographies?api_key=FILDTEOIK2HBORODV&id=spotify:artist:4Z8W4fKeB5YxbusRsdQVPb
+        //    var url = String.Format("http://developer.echonest.com/api/v4/artist/biographies?api_key={0}&id=spotify:artist:{1}", echonestAPIKey, id);
+        //    using (mp.CustomTiming("http", url)) {
+        //        var json = CallAPI(stopWatchResult, url);
+        //        return new APIResult {
+        //            Json = json,
+        //            Url = url.Replace(echonestAPIKey, "SECRET")
+        //        };
+        //    }
+        //}
 
         public static string CallAPI(StopWatchResult stopWatchResult = null, string url = "") {
             var stopWatch = new Stopwatch();
