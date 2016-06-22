@@ -40,16 +40,12 @@
     </div>
 <div class="container body-content">
     @RenderBody()
-    <hr/>
-    <footer>
-        <p>&copy; @DateTime.Now.Year - Daves Music (North Europe hosting)</p>
-        @Html.ActionLink("About", "About", "Home")
-    </footer>
 </div>
     <br />
     <div id="footer">
         <div class="container text-center">
             <p class="text-muted credit">&copy; @DateTime.Now.Year Daves Music (North Europe) Version: @Assembly.GetExecutingAssembly().GetLinkerTime() (UK Time)</p>
+            <p class="text-muted credit"><a href="http://www.davesjokes.co.uk">davesjokes.co.uk</a> <a href="https://twitter.com/dave_mateer">https://twitter.com/dave_mateer</a> <a href="https://github.com/djhmateer">https://github.com/djhmateer</a> davemateer@gmail.com</p>
         </div>
     </div>
 
