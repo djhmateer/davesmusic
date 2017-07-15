@@ -57,7 +57,7 @@ namespace DavesMusic.Controllers {
             while (keepTrying) {
                 // Have now got authorization code (which can be exchanged for an access token)
                 var client_id = "0fd1718f5ef14cb291ef114a13382d15";
-                var client_secret = "ea47c397921c42ffbd04c53d33685205";
+                var client_secret = "964e8a4a50de4dfd8247d061a8517920";
 
                 var url = "https://accounts.spotify.com/api/token";
 
