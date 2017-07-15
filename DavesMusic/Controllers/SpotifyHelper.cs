@@ -222,7 +222,7 @@ namespace DavesMusic.Controllers {
             return text;
         }
 
-
+        //https://api.spotify.com/v1/artists/{id}
         public string CallSpotifyAPIArtist(string artistCode, StopWatchResult stopWatchResult) {
             var url = String.Format("https://api.spotify.com/v1/artists/{0}", artistCode);
             using (mp.CustomTiming("http", url)) {
@@ -355,7 +355,7 @@ namespace DavesMusic.Controllers {
 
                     done = true;
                 }
-                catch (WebException) {
+                catch (WebException ex) {
                     Thread.Sleep(200);
                     errorCount++;
                     if (errorCount == 200)

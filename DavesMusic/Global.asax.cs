@@ -27,9 +27,9 @@ namespace DavesMusic {
         }
 
         void Application_Error(Object sender, EventArgs e) {
-            //#if DEBUG
-            //Console.WriteLine("Error not handled as in Debug");
-            //#else
+            #if DEBUG
+            Console.WriteLine("Error not handled as in Debug");
+            #else
             var exception = Server.GetLastError();
 
             if (exception == null) {
@@ -41,11 +41,11 @@ namespace DavesMusic {
             log.Error(exception.StackTrace);
 
             // Clear the error
-            //Server.ClearError();
+            Server.ClearError();
 
             // Redirect to a landing page
-            //Response.Redirect("/home/error");
-            //#endif
+            Response.Redirect("/home/error");
+            #endif
         }
     }
 }
